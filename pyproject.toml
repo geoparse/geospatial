@@ -1,0 +1,14 @@
+[tool.ruff]
+line-length = 128  # Set the maximum line length to 128.
+show-fixes = true
+unsafe-fixes = true
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "N"]
+ignore = ["E203", "E501"]   # Ignore rules that conflict with Black
+#ignore = ["E203", "W503"]   # Example of ignoring specific rules, similar to Flake8
+extend-select = ["I001"]    # Ensure Ruff enforces isort rules
+
+[tool.ruff.format]
+docstring-code-format = true
+
