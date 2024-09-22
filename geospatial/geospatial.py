@@ -7,25 +7,18 @@ from math import atan2, cos, radians, sin, sqrt
 from multiprocessing import Pool, cpu_count
 from time import time
 
-import folium  # Folium is a Python library used for visualising geospatial data. Actually, it's a Python wrapper
+import folium  # Folium is a Python library used for visualising geospatial data. Actually, it's a Python wrapper for Leaflet which is a leading open-source JavaScript library for plotting interactive maps.
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pyproj
-import requests  # used in geocoding()
-from folium import plugins  # for Leaflet which is a leading open-source JavaScript library for plotting interactive maps.
+import requests
+from folium import plugins
 from h3 import h3
 from polygon_geohasher.polygon_geohasher import geohash_to_polygon, polygon_to_geohashes
 from s2 import s2
-
-# from keplergl import KeplerGl    # keplergl visuslises data on the map
-from shapely.geometry import (  # mapping converts Shapely object to a dict object (GeoJson)
-    LineString,
-    MultiPolygon,
-    Point,
-    Polygon,
-)
-from shapely.ops import transform  # shape converts a dict object (GeoJson) to Shapely object
+from shapely.geometry import LineString, MultiPolygon, Point, Polygon
+from shapely.ops import transform
 
 pd.options.mode.chained_assignment = None  # default='warn'
 

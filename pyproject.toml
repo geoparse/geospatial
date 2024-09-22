@@ -1,3 +1,35 @@
+[tool.poetry]
+name = "geospatial"
+version = "0.0.1"
+description = "A collection of Python functions for performing geospatial analysis and creating visualisations. "
+authors = ["Abbas Kiasari <kiasari@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/geoparse/geospatial/"
+keywords = [
+    "Geospatial",
+    "GIS",
+    "cartography",
+    "visualization",
+    "pandas",
+    "geopandas",
+    "shapely",
+    "folium"
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"  # Specify the Python version you are using
+numpy = "1.26.4"
+geopandas = "1.0.1"
+folium = "0.17.0"
+polygon_geohasher = "0.0.1"
+s2 = "0.1.9"
+h3 = "3.7.7"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.ruff]
 line-length = 128  # Set the maximum line length to 128.
 show-fixes = true
@@ -6,7 +38,6 @@ unsafe-fixes = true
 [tool.ruff.lint]
 select = ["E", "F", "W", "B", "N"]
 ignore = ["E203", "E501"]   # Ignore rules that conflict with Black
-#ignore = ["E203", "W503"]   # Example of ignoring specific rules, similar to Flake8
 extend-select = ["I001"]    # Ensure Ruff enforces isort rules
 
 [tool.ruff.format]
