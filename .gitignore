@@ -1,3 +1,6 @@
+# So that notebooks are only included _intentionally_
+*.ipynb
+.cache
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -26,6 +29,9 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+.ruff_cache
+.DS_Store
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
