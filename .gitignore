@@ -8,6 +8,8 @@ __pycache__/
 
 # C extensions
 *.so
+# Backup files
+*.bak
 
 # Distribution / packaging
 .Python
