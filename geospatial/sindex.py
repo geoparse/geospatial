@@ -7,7 +7,6 @@ from time import time
 
 import geopandas as gpd
 import numpy as np
-import pandas as pd
 from h3 import h3
 from polygon_geohasher.polygon_geohasher import geohash_to_polygon, polygon_to_geohashes
 from s2 import s2

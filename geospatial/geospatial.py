@@ -1,5 +1,4 @@
 import math
-from datetime import timedelta
 from math import atan2, cos, radians, sin, sqrt
 from multiprocessing import Pool, cpu_count
 
@@ -59,7 +58,7 @@ def overlay_parallel(gdf1, gdf2, how="intersection", keep_geom_type=False):
 
     with Pool(n_cores) as pool:  # Create a multiprocessing pool and apply the overlay function in parallel on each chunk
         df = pd.concat(pool.starmap(gpd.overlay, inputs))
-     return gpd.GeoDataFrame(df, crs=gdf1.crs)
+    return gpd.GeoDataFrame(df, crs=gdf1.crs)
 
 
 def flatten_3d(geom):

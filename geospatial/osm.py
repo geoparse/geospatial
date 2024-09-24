@@ -1,4 +1,3 @@
-import pandas as pd
 import requests
 from shapely.geometry import LineString, Polygon
 
