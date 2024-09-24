@@ -72,11 +72,6 @@ def flatten_3d(geom):
     return new_geo
 
 
-def drange(start_date, end_date):
-    for n in range(int((end_date - start_date).days)):
-        yield start_date + timedelta(n)
-
-
 def find_proj(geom):  # find projection (the UTM zone)
     """
     The Universal Transverse Mercator (UTM) is a map projection system
