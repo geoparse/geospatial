@@ -11,7 +11,7 @@ import requests
 from shapely.geometry import MultiPolygon, Point, Polygon
 from shapely.ops import transform
 
-pd.options.mode.chained_assignment = None  # default='warn'
+#pd.options.mode.chained_assignment = None  # default='warn'
 
 
 def intersection(gdf1, gdf2, poly_id=None):
