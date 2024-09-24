@@ -12,7 +12,7 @@ from polygon_geohasher.polygon_geohasher import geohash_to_polygon, polygon_to_g
 from s2 import s2
 from shapely.geometry import Polygon
 
-#pd.options.mode.chained_assignment = None  # default='warn'
+# pd.options.mode.chained_assignment = None  # default='warn'
 
 
 # s2.polyfill() function covers the hole in a polygon too (which is not correct).

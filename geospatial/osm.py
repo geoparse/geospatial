@@ -1,7 +1,7 @@
 import requests
 from shapely.geometry import LineString, Polygon
 
-#pd.options.mode.chained_assignment = None  # default='warn'
+# pd.options.mode.chained_assignment = None  # default='warn'
 
 
 def ways_to_geom(ids, url):

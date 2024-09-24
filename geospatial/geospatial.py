@@ -10,7 +10,7 @@ import requests
 from shapely.geometry import MultiPolygon, Point, Polygon
 from shapely.ops import transform
 
-#pd.options.mode.chained_assignment = None  # default='warn'
+# pd.options.mode.chained_assignment = None  # default='warn'
 
 
 def intersection(gdf1, gdf2, poly_id=None):
@@ -300,5 +300,3 @@ def explode_line_to_points(row):
     gdf.loc[:, "geometry"] = points
     gdf.loc[:, row.index.drop("geometry")] = row[row.index.drop("geometry")].values
     return gdf
-
-
