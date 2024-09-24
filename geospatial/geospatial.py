@@ -51,6 +51,17 @@ def quick_intersection(gdf1, gdf2, poly_id=None):
     return int_gdf
 
 
+def overlay_parallel(gdf1, gdf2, how="intersection", keep_geom_type=False):
+    n_cores = cpu_count()
+    gdf1_chunks = np.array_split(gdf1, n_cores)
+    gdf2_chunks = [gdf2] * n_cores
+    inputs = zip(gdf1_chunks, gdf2_chunks, [how] * n_cores, [keep_geom_type] * n_cores)
+
+    with Pool(n_cores) as pool:  # Create a multiprocessing pool and apply the overlay function in parallel on each chunk
+        df = pd.concat(pool.starmap(gpd.overlay, inputs))
+     return gpd.GeoDataFrame(df, crs=gdf1.crs)
+
+
 def flatten_3d(geom):
     """
     Takes a GeoSeries of 3D Multi/Polygons (has_z) and returns a list of 2D Multi/Polygons
@@ -292,12 +303,3 @@ def explode_line_to_points(row):
     return gdf
 
 
-def overlay_parallel(gdf1, gdf2, how="intersection", keep_geom_type=False):
-    n_cores = cpu_count()
-    gdf1_chunks = np.array_split(gdf1, n_cores)
-    gdf2_chunks = [gdf2] * n_cores
-    inputs = zip(gdf1_chunks, gdf2_chunks, [how] * n_cores, [keep_geom_type] * n_cores)
-
-    with Pool(n_cores) as pool:  # Create a multiprocessing pool and apply the overlay function in parallel on each chunk
-        df = pd.concat(pool.starmap(gpd.overlay, inputs))
-    return gpd.GeoDataFrame(df, crs=gdf1.crs)
