@@ -185,7 +185,7 @@ def google_reverse_geocoding(lat: float, lon: float, api_key: str) -> str:
     return None
 
 
-def haversine(lat1, lon1, lat2, lon2):
+def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """
     https://en.wikipedia.org/wiki/Haversine_formula
     The haversine formula determines the great-circle distance between two points on a sphere given their longitudes and latitudes.
@@ -205,7 +205,7 @@ def haversine(lat1, lon1, lat2, lon2):
     return r * c  # distance in meters
 
 
-def vincenty(lat1, lon1, lat2, lon2):
+def vincenty(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """
     Calculates the geodesic distance between two points on the Earth's surface
     using the Vincenty formula, which accounts for the Earth's ellipsoidal shape.
