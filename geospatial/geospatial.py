@@ -160,11 +160,10 @@ def google_geocoding(address_or_zipcode, api_key):
 
 
 def google_reverse_geocoding(lat: float, lon: float, api_key: str) -> str:
- 
     """
     This function takes a coordinate (lat, lon) and returns the postcode.
 
-    df['postcode'] = df.apply(lambda row : gsp.geocoding(row.lat, row.lon), axis=1)
+    df['postcode'] = df.apply(lambda row : gsp.google_reverse_geocoding(row.lat, row.lon), axis=1)
     """
     lat = (
         0 if abs(lat) < 0.0001 else lat
