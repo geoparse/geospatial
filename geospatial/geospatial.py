@@ -159,7 +159,8 @@ def google_geocoding(address_or_zipcode, api_key):
     return pd.Series([lat, lon])
 
 
-def google_reverse_geocoding(lat, lon, api_key):
+def google_reverse_geocoding(lat: float, lon: float, api_key: str) -> str:
+ 
     """
     This function takes a coordinate (lat, lon) and returns the postcode.
 
