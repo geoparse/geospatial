@@ -63,7 +63,7 @@ def overlay_parallel(gdf1, gdf2, how="intersection", keep_geom_type=False):
 
 def flatten_3d(geom: gpd.GeoSeries) -> List[Union[Polygon, MultiPolygon]]:
     """
-    Converts a GeoSeries of 3D Polygons (Polygon Z) or MultiPolygons into a list of 2D Polygons or MultiPolygons 
+    Converts a GeoSeries of 3D Polygons (Polygon Z) or MultiPolygons into a list of 2D Polygons or MultiPolygons
     by removing the z-coordinate from each geometry.
 
     Args:
@@ -316,7 +316,7 @@ def vincenty(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 def explode_line_to_points(row: gpd.GeoSeries) -> gpd.GeoDataFrame:
     """
-    Splits a LineString geometry from a GeoSeries row into individual Point geometries and returns a new 
+    Splits a LineString geometry from a GeoSeries row into individual Point geometries and returns a new
     GeoDataFrame with each Point as a separate row while preserving the original attributes.
 
     Args:
@@ -324,7 +324,7 @@ def explode_line_to_points(row: gpd.GeoSeries) -> gpd.GeoDataFrame:
                              It must include a 'geometry' column of type LineString.
 
     Returns:
-        gpd.GeoDataFrame: A new GeoDataFrame where each row corresponds to a Point geometry derived 
+        gpd.GeoDataFrame: A new GeoDataFrame where each row corresponds to a Point geometry derived
                           from the coordinates of the LineString. All other columns from the original row are preserved.
     """
     points = [Point(x) for x in list(row["geometry"].coords)]  # create list of Point objects
