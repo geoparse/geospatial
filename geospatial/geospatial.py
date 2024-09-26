@@ -61,11 +61,6 @@ def overlay_parallel(gdf1, gdf2, how="intersection", keep_geom_type=False):
     return gpd.GeoDataFrame(df, crs=gdf1.crs)
 
 
-def flatten_3d(geom):
-    """
-    Takes a GeoSeries of 3D Multi/Polygons (has_z) and returns a list of 2D Multi/Polygons
-    """
-
 def flatten_3d(geom: gpd.GeoSeries) -> List[Union[Polygon, MultiPolygon]]:
     """
     Converts a GeoSeries of 3D Polygons (Polygon Z) or MultiPolygons into a list of 2D Polygons or MultiPolygons 
