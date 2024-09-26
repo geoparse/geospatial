@@ -304,7 +304,19 @@ def vincenty(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return s
 
 
-def explode_line_to_points(row):
+def explode_line_to_points(row: gpd.GeoSeries) -> gpd.GeoDataFrame:
+    """
+    Splits a LineString geometry from a GeoSeries row into individual Point geometries and returns a new 
+    GeoDataFrame with each Point as a separate row while preserving the original attributes.
+
+    Args:
+        row (gpd.GeoSeries): A GeoSeries representing a single row of a GeoDataFrame.
+                             It must include a 'geometry' column of type LineString.
+
+    Returns:
+        gpd.GeoDataFrame: A new GeoDataFrame where each row corresponds to a Point geometry derived 
+                          from the coordinates of the LineString. All other columns from the original row are preserved.
+    """
     points = [Point(x) for x in list(row["geometry"].coords)]  # create list of Point objects
     gdf = gpd.GeoDataFrame(
         index=range(len(points)), columns=row.index
