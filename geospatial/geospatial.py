@@ -65,21 +65,36 @@ def flatten_3d(geom):
     """
     Takes a GeoSeries of 3D Multi/Polygons (has_z) and returns a list of 2D Multi/Polygons
     """
-    new_geo = []
+
+def flatten_3d(geom: gpd.GeoSeries) -> List[Union[Polygon, MultiPolygon]]:
+    """
+    Converts a GeoSeries of 3D Polygons (Polygon Z) or MultiPolygons into a list of 2D Polygons or MultiPolygons 
+    by removing the z-coordinate from each geometry.
+
+    Args:
+        geom (gpd.GeoSeries): A GeoSeries containing 3D Polygons or MultiPolygons (geometries with z-coordinates).
+
+    Returns:
+        List[Union[Polygon, MultiPolygon]]: A list of 2D Polygons or MultiPolygons with z-coordinates removed.
+
+    Example:
+        >>> gdf.geometry = gsp.flatten_3d(gdf.geometry)
+    """
+    new_geom = []
     for p in geom:
         if p.has_z:
             if p.geom_type == "Polygon":
                 lines = [xy[:2] for xy in list(p.exterior.coords)]
                 new_p = Polygon(lines)
-                new_geo.append(new_p)
+                new_geom.append(new_p)
             elif p.geom_type == "MultiPolygon":
                 new_multi_p = []
                 for ap in p:
                     lines = [xy[:2] for xy in list(ap.exterior.coords)]
                     new_p = Polygon(lines)
                     new_multi_p.append(new_p)
-                new_geo.append(MultiPolygon(new_multi_p))
-    return new_geo
+                new_geom.append(MultiPolygon(new_multi_p))
+    return new_geom
 
 
 def find_proj(geom):  # find projection (the UTM zone)
