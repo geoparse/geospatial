@@ -1,6 +1,7 @@
 import math
 from math import atan2, cos, radians, sin, sqrt
 from multiprocessing import Pool, cpu_count
+from typing import List, Union
 
 import geopandas as gpd
 import numpy as np
@@ -92,20 +93,42 @@ def flatten_3d(geom: gpd.GeoSeries) -> List[Union[Polygon, MultiPolygon]]:
     return new_geom
 
 
-def find_proj(geom):  # find projection (the UTM zone)
+def find_proj(geom: Union[Point, Polygon, MultiPolygon]) -> str:
     """
-    The Universal Transverse Mercator (UTM) is a map projection system
-    for assigning coordinates to locations on the surface of the Earth.
+    Determines the appropriate Universal Transverse Mercator (UTM) zone projection
+    based on the input geometry's centroid coordinates.
+
+    The UTM is a map projection system that divides the Earth into multiple zones,
+    each with a specific coordinate reference system (CRS). The function returns
+    the EPSG code corresponding to the UTM zone of the geometry.
+
+    Args:
+        geom (Union[Point, Polygon, MultiPolygon]): A Shapely geometry object, which
+                                                    can be a Point, Polygon, or MultiPolygon.
+
+    Returns:
+        str: The EPSG code representing the UTM projection for the geometry's location.
+             For northern hemisphere, it returns codes in the format 'EPSG:326XX', and for
+             southern hemisphere, it returns 'EPSG:327XX', where 'XX' is the UTM zone number.
     """
     if geom.geom_type != "Point":
+        # If the geometry is not a Point, use its centroid
         geom = geom.centroid
+
+    # Extract latitude and longitude from the geometry
     lat = geom.y
     lon = geom.x
+
+    # Determine the base EPSG code depending on the hemisphere
     if lat >= 0:
-        proj = "EPSG:326"
+        proj = "EPSG:326"  # Northern Hemisphere
     else:
-        proj = "EPSG:327"
+        proj = "EPSG:327"  # Southern Hemisphere
+
+    # Calculate the UTM zone number based on longitude
     utm = math.ceil(30 + lon / 6)
+
+    # Return the complete EPSG code for the UTM projection
     return proj + str(utm)
 
 
