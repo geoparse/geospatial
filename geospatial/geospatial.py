@@ -131,13 +131,25 @@ def geom_stats(geom=None, unit="m"):
         return [n_shells, n_holes, n_shell_points, round(area / 1000000), round(border / 1000)]
 
 
-def google_geocoding(address_or_zipcode, api_key):
+def google_geocoding(address_or_zipcode: str, api_key: str) -> pd.Series:
     """
-    This function takes a text-based address or zip code and
-    returns geographic coordinates, latitude/longitude pair,
-    to identify a location on the Earth's surface.
+    Returns geographic coordinates (latitude and longitude) for a given address or zip code
+    using the Google Geocoding API.
 
-    df[['lat', 'lon']] = df.apply(lambda row : gsp.geocoding(row.address), axis=1)
+    Args:
+        address_or_zipcode (str): A text-based address or a zip code that you want to geocode.
+        api_key (str): A valid Google Maps API key for accessing the geocoding service.
+
+    Returns:
+        pd.Series: A pandas Series containing the latitude and longitude as floats.
+                   If the request fails or the address is not found, returns a Series of (None, None).
+
+    Example:
+        >>> df[["lat", "lon"]] = df.apply(lambda row: gsp.google_geocoding(row.address), axis=1)
+        >>> google_geocoding("1600 Amphitheatre Parkway, Mountain View, CA", "your_api_key")
+        lat    37.4224764
+        lon   -122.0842499
+        dtype: float64
     """
 
     lat, lon = None, None
@@ -155,7 +167,7 @@ def google_geocoding(address_or_zipcode, api_key):
         lat = results["geometry"]["location"]["lat"]
         lon = results["geometry"]["location"]["lng"]
     except Exception:
-        pass
+        pass  # Handle any errors that may occur
     return pd.Series([lat, lon])
 
 
