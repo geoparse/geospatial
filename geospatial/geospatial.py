@@ -1,7 +1,7 @@
 import math
 from math import atan2, cos, radians, sin, sqrt
 from multiprocessing import Pool, cpu_count
-from typing import List, Union
+from typing import List, Union, Optional
 
 import geopandas as gpd
 import numpy as np
@@ -137,31 +137,64 @@ def trans_proj(geom, proj1, proj2):  # transform projection
     return transform(project, geom)
 
 
-def geom_stats(geom=None, unit="m"):
-    if not geom:  # print help if geom is None
+
+def geom_stats(geom: Optional[Union[Polygon, MultiPolygon]] = None, unit: str = "m") -> Optional[List[Union[int, float]]]:
+    """
+    Computes various geometric statistics for a given Polygon or MultiPolygon geometry, including the number of 
+    shells (outer boundaries), number of holes, number of shell points, total area, and total border length.
+
+    If no geometry is provided, the function prints a usage example.
+
+    Args:
+        geom (Optional[Union[Polygon, MultiPolygon]]): A Shapely geometry object (Polygon or MultiPolygon) 
+                                                       for which to compute the statistics. Defaults to None.
+        unit (str): The unit for area and length calculations. Accepts "m" for meters and "km" for kilometers. 
+                    Defaults to "m".
+
+    Returns:
+        Optional[List[Union[int, float]]]: A list containing the following statistics in order:
+                                           - Number of shells (int)
+                                           - Number of holes (int)
+                                           - Number of shell points (int)
+                                           - Total area (float, rounded to nearest integer in specified unit)
+                                           - Total border length (float, rounded to nearest integer in specified unit)
+
+        Returns None if no geometry is provided.
+    """
+    if not geom:  # Print usage help if geom is None
         print(
-            "mdf[['nshells', 'nholes', 'nshell_points',  'area', 'border']] = [gsp.geom_stats(geom, unit='km') for geom in mdf.geometry]"
+            "mdf[['nshells', 'nholes', 'nshell_points', 'area', 'border']] = [gsp.geom_stats(geom, unit='km') for geom in mdf.geometry]"
         )
         return
 
+    # Determine the appropriate UTM zone for the given geometry
     utm_zone = find_proj(geom)
 
+    # Handle different geometry types
     if geom.geom_type == "Polygon":
         polylist = [geom]
     elif geom.geom_type == "MultiPolygon":
         polylist = list(geom.geoms)
+    else:
+        raise ValueError("The input geometry must be a Polygon or MultiPolygon.")
 
+    # Initialize variables for calculating statistics
     n_shells = len(polylist)
     n_holes = n_shell_points = border = area = 0
+
+    # Iterate through each Polygon in the list to calculate statistics
     for poly in polylist:
-        n_holes += len(poly.interiors)
-        n_shell_points += len(poly.exterior.coords)
+        n_holes += len(poly.interiors)  # Count the number of holes
+        n_shell_points += len(poly.exterior.coords)  # Count the number of shell points
+        # Transform geometry to the appropriate UTM zone and calculate length/area
         border += trans_proj(poly, "EPSG:4326", utm_zone).exterior.length
         area += trans_proj(poly, "EPSG:4326", utm_zone).area
-    if unit == "m":  # unit in meters
+
+    # Return statistics based on the specified unit
+    if unit == "m":  # If unit is meters
         return [n_shells, n_holes, n_shell_points, round(area), round(border)]
-    else:  # unit in km
-        return [n_shells, n_holes, n_shell_points, round(area / 1000000), round(border / 1000)]
+    else:  # If unit is kilometers
+        return [n_shells, n_holes, n_shell_points, round(area / 1_000_000), round(border / 1000)]
 
 
 def google_geocoding(address_or_zipcode: str, api_key: str) -> pd.Series:
