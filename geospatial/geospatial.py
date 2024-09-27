@@ -1,7 +1,7 @@
 import math
 from math import atan2, cos, radians, sin, sqrt
 from multiprocessing import Pool, cpu_count
-from typing import List, Union, Optional
+from typing import List, Optional, Union
 
 import geopandas as gpd
 import numpy as np
@@ -14,141 +14,17 @@ from shapely.ops import transform
 # pd.options.mode.chained_assignment = None  # default='warn'
 
 
-def intersection(gdf1, gdf2, poly_id=None):
-    #    """
-    #    Returns a subset of gdf1 intersecting with any object in gdf2.
-    #    The function adds a new column to gdf2 showing the number of intersecting
-    #    objects for all geometries in gdf2. It also adds the geometry id (poly_id in gdf2)
-    #    to the intersected gdf.
-    #    """
-    int_gdf = pd.DataFrame()  # intersected gdf which is a subset of gdf1
-    counts = []
-    for geom in gdf2.geometry:
-        gdf = gdf1[gdf1.intersects(geom)]  # intersected points
-        if poly_id is not None and len(gdf) > 0:
-            gid = gdf2[gdf2.geometry == geom][poly_id].iloc[0]  # gid: geometry id
-            gdf["geom_id"] = gid
-        int_gdf = pd.concat([int_gdf, gdf])  # selected pdf
-        counts.append(len(gdf))
-    gdf2["counts"] = counts
-    return int_gdf
-
-
-def quick_intersection(gdf1, gdf2, poly_id=None):
-    int_gdf = pd.DataFrame()  # intersected gdf which is a subset of gdf1
-    counts = []
-    for geom in gdf2.geometry:
-        # Get the indices of the objects that are likely to be inside the bounding box of the given Polygon
-        pos_idx = list(gdf1.sindex.intersection(geom.bounds))
-        pos_gdf = gdf1.iloc[pos_idx]  # possible gdf
-        pre_gdf = pos_gdf[pos_gdf.intersects(geom)]  # precise gdf
-        if poly_id is not None and len(pre_gdf) > 0:
-            gid = gdf2[gdf2.geometry == geom][poly_id].iloc[0]  # gid: geometry id
-            pre_gdf["geom_id"] = gid
-        int_gdf = pd.concat([int_gdf, pre_gdf])  # intersected gdf
-        counts.append(len(pre_gdf))
-    gdf2["counts"] = counts
-    return int_gdf
-
-
-def overlay_parallel(gdf1, gdf2, how="intersection", keep_geom_type=False):
-    n_cores = cpu_count()
-    gdf1_chunks = np.array_split(gdf1, n_cores)
-    gdf2_chunks = [gdf2] * n_cores
-    inputs = zip(gdf1_chunks, gdf2_chunks, [how] * n_cores, [keep_geom_type] * n_cores)
-
-    with Pool(n_cores) as pool:  # Create a multiprocessing pool and apply the overlay function in parallel on each chunk
-        df = pd.concat(pool.starmap(gpd.overlay, inputs))
-    return gpd.GeoDataFrame(df, crs=gdf1.crs)
-
-
-def flatten_3d(geom: gpd.GeoSeries) -> List[Union[Polygon, MultiPolygon]]:
-    """
-    Converts a GeoSeries of 3D Polygons (Polygon Z) or MultiPolygons into a list of 2D Polygons or MultiPolygons
-    by removing the z-coordinate from each geometry.
-
-    Args:
-        geom (gpd.GeoSeries): A GeoSeries containing 3D Polygons or MultiPolygons (geometries with z-coordinates).
-
-    Returns:
-        List[Union[Polygon, MultiPolygon]]: A list of 2D Polygons or MultiPolygons with z-coordinates removed.
-
-    Example:
-        >>> gdf.geometry = gsp.flatten_3d(gdf.geometry)
-    """
-    new_geom = []
-    for p in geom:
-        if p.has_z:
-            if p.geom_type == "Polygon":
-                lines = [xy[:2] for xy in list(p.exterior.coords)]
-                new_p = Polygon(lines)
-                new_geom.append(new_p)
-            elif p.geom_type == "MultiPolygon":
-                new_multi_p = []
-                for ap in p:
-                    lines = [xy[:2] for xy in list(ap.exterior.coords)]
-                    new_p = Polygon(lines)
-                    new_multi_p.append(new_p)
-                new_geom.append(MultiPolygon(new_multi_p))
-    return new_geom
-
-
-def find_proj(geom: Union[Point, Polygon, MultiPolygon]) -> str:
-    """
-    Determines the appropriate Universal Transverse Mercator (UTM) zone projection
-    based on the input geometry's centroid coordinates.
-
-    The UTM is a map projection system that divides the Earth into multiple zones,
-    each with a specific coordinate reference system (CRS). The function returns
-    the EPSG code corresponding to the UTM zone of the geometry.
-
-    Args:
-        geom (Union[Point, Polygon, MultiPolygon]): A Shapely geometry object, which
-                                                    can be a Point, Polygon, or MultiPolygon.
-
-    Returns:
-        str: The EPSG code representing the UTM projection for the geometry's location.
-             For northern hemisphere, it returns codes in the format 'EPSG:326XX', and for
-             southern hemisphere, it returns 'EPSG:327XX', where 'XX' is the UTM zone number.
-    """
-    if geom.geom_type != "Point":
-        # If the geometry is not a Point, use its centroid
-        geom = geom.centroid
-
-    # Extract latitude and longitude from the geometry
-    lat = geom.y
-    lon = geom.x
-
-    # Determine the base EPSG code depending on the hemisphere
-    if lat >= 0:
-        proj = "EPSG:326"  # Northern Hemisphere
-    else:
-        proj = "EPSG:327"  # Southern Hemisphere
-
-    # Calculate the UTM zone number based on longitude
-    utm = math.ceil(30 + lon / 6)
-
-    # Return the complete EPSG code for the UTM projection
-    return proj + str(utm)
-
-
-def trans_proj(geom, proj1, proj2):  # transform projection
-    project = pyproj.Transformer.from_crs(pyproj.CRS(proj1), pyproj.CRS(proj2), always_xy=True).transform
-    return transform(project, geom)
-
-
-
 def geom_stats(geom: Optional[Union[Polygon, MultiPolygon]] = None, unit: str = "m") -> Optional[List[Union[int, float]]]:
     """
-    Computes various geometric statistics for a given Polygon or MultiPolygon geometry, including the number of 
+    Computes various geometric statistics for a given Polygon or MultiPolygon geometry, including the number of
     shells (outer boundaries), number of holes, number of shell points, total area, and total border length.
 
     If no geometry is provided, the function prints a usage example.
 
     Args:
-        geom (Optional[Union[Polygon, MultiPolygon]]): A Shapely geometry object (Polygon or MultiPolygon) 
+        geom (Optional[Union[Polygon, MultiPolygon]]): A Shapely geometry object (Polygon or MultiPolygon)
                                                        for which to compute the statistics. Defaults to None.
-        unit (str): The unit for area and length calculations. Accepts "m" for meters and "km" for kilometers. 
+        unit (str): The unit for area and length calculations. Accepts "m" for meters and "km" for kilometers.
                     Defaults to "m".
 
     Returns:
@@ -197,70 +73,48 @@ def geom_stats(geom: Optional[Union[Polygon, MultiPolygon]] = None, unit: str = 
         return [n_shells, n_holes, n_shell_points, round(area / 1_000_000), round(border / 1000)]
 
 
-def google_geocoding(address_or_zipcode: str, api_key: str) -> pd.Series:
+def find_proj(geom: Union[Point, Polygon, MultiPolygon]) -> str:
     """
-    Returns geographic coordinates (latitude and longitude) for a given address or zip code
-    using the Google Geocoding API.
+    Determines the appropriate Universal Transverse Mercator (UTM) zone projection
+    based on the input geometry's centroid coordinates.
+
+    The UTM is a map projection system that divides the Earth into multiple zones,
+    each with a specific coordinate reference system (CRS). The function returns
+    the EPSG code corresponding to the UTM zone of the geometry.
 
     Args:
-        address_or_zipcode (str): A text-based address or a zip code that you want to geocode.
-        api_key (str): A valid Google Maps API key for accessing the geocoding service.
+        geom (Union[Point, Polygon, MultiPolygon]): A Shapely geometry object, which
+                                                    can be a Point, Polygon, or MultiPolygon.
 
     Returns:
-        pd.Series: A pandas Series containing the latitude and longitude as floats.
-                   If the request fails or the address is not found, returns a Series of (None, None).
-
-    Example:
-        >>> df[["lat", "lon"]] = df.apply(lambda row: gsp.google_geocoding(row.address), axis=1)
-        >>> google_geocoding("1600 Amphitheatre Parkway, Mountain View, CA", "your_api_key")
-        lat    37.4224764
-        lon   -122.0842499
-        dtype: float64
+        str: The EPSG code representing the UTM projection for the geometry's location.
+             For northern hemisphere, it returns codes in the format 'EPSG:326XX', and for
+             southern hemisphere, it returns 'EPSG:327XX', where 'XX' is the UTM zone number.
     """
+    if geom.geom_type != "Point":
+        # If the geometry is not a Point, use its centroid
+        geom = geom.centroid
 
-    lat, lon = None, None
-    base_url = "https://maps.googleapis.com/maps/api/geocode/json"
-    endpoint = f"{base_url}?address={address_or_zipcode}&key={api_key}"
-    r = requests.get(endpoint)
-    if r.status_code not in range(200, 299):
-        return None, None
-    try:
-        """
-        This try block incase any of our inputs are invalid. This is done instead
-        of actually writing out handlers for all kinds of responses.
-        """
-        results = r.json()["results"][0]
-        lat = results["geometry"]["location"]["lat"]
-        lon = results["geometry"]["location"]["lng"]
-    except Exception:
-        pass  # Handle any errors that may occur
-    return pd.Series([lat, lon])
+    # Extract latitude and longitude from the geometry
+    lat = geom.y
+    lon = geom.x
+
+    # Determine the base EPSG code depending on the hemisphere
+    if lat >= 0:
+        proj = "EPSG:326"  # Northern Hemisphere
+    else:
+        proj = "EPSG:327"  # Southern Hemisphere
+
+    # Calculate the UTM zone number based on longitude
+    utm = math.ceil(30 + lon / 6)
+
+    # Return the complete EPSG code for the UTM projection
+    return proj + str(utm)
 
 
-def google_reverse_geocoding(lat: float, lon: float, api_key: str) -> str:
-    """
-    This function takes a coordinate (lat, lon) and returns the postcode.
-
-    df['postcode'] = df.apply(lambda row : gsp.google_reverse_geocoding(row.lat, row.lon), axis=1)
-    """
-    lat = (
-        0 if abs(lat) < 0.0001 else lat
-    )  # otherwise it returns the following error: "Invalid request. Invalid 'latlng' parameter."
-    lon = 0 if abs(lon) < 0.0001 else lon
-    # Make the reverse geocoding request
-    url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng={lat},{lon}&key={api_key}"
-    response = requests.get(url)
-    data = response.json()
-
-    # Parse the response to extract the postcode
-    if "results" in data and len(data["results"]) > 0:
-        for item in data["results"]:
-            for component in item.get("address_components", []):
-                if (
-                    "postal_code" in component.get("types", []) and len(component["types"]) == 1
-                ):  # 'types': ['postal_code', 'postal_code_prefix']}],
-                    return component.get("long_name", None)
-    return None
+def trans_proj(geom, proj1, proj2):  # transform projection
+    project = pyproj.Transformer.from_crs(pyproj.CRS(proj1), pyproj.CRS(proj2), always_xy=True).transform
+    return transform(project, geom)
 
 
 def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -370,6 +224,37 @@ def vincenty(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return s
 
 
+def flatten_3d(geom: gpd.GeoSeries) -> List[Union[Polygon, MultiPolygon]]:
+    """
+    Converts a GeoSeries of 3D Polygons (Polygon Z) or MultiPolygons into a list of 2D Polygons or MultiPolygons
+    by removing the z-coordinate from each geometry.
+
+    Args:
+        geom (gpd.GeoSeries): A GeoSeries containing 3D Polygons or MultiPolygons (geometries with z-coordinates).
+
+    Returns:
+        List[Union[Polygon, MultiPolygon]]: A list of 2D Polygons or MultiPolygons with z-coordinates removed.
+
+    Example:
+        >>> gdf.geometry = gsp.flatten_3d(gdf.geometry)
+    """
+    new_geom = []
+    for p in geom:
+        if p.has_z:
+            if p.geom_type == "Polygon":
+                lines = [xy[:2] for xy in list(p.exterior.coords)]
+                new_p = Polygon(lines)
+                new_geom.append(new_p)
+            elif p.geom_type == "MultiPolygon":
+                new_multi_p = []
+                for ap in p:
+                    lines = [xy[:2] for xy in list(ap.exterior.coords)]
+                    new_p = Polygon(lines)
+                    new_multi_p.append(new_p)
+                new_geom.append(MultiPolygon(new_multi_p))
+    return new_geom
+
+
 def explode_line_to_points(row: gpd.GeoSeries) -> gpd.GeoDataFrame:
     """
     Splits a LineString geometry from a GeoSeries row into individual Point geometries and returns a new
@@ -390,3 +275,117 @@ def explode_line_to_points(row: gpd.GeoSeries) -> gpd.GeoDataFrame:
     gdf.loc[:, "geometry"] = points
     gdf.loc[:, row.index.drop("geometry")] = row[row.index.drop("geometry")].values
     return gdf
+
+
+def intersection(gdf1, gdf2, poly_id=None):
+    #    """
+    #    Returns a subset of gdf1 intersecting with any object in gdf2.
+    #    The function adds a new column to gdf2 showing the number of intersecting
+    #    objects for all geometries in gdf2. It also adds the geometry id (poly_id in gdf2)
+    #    to the intersected gdf.
+    #    """
+    int_gdf = pd.DataFrame()  # intersected gdf which is a subset of gdf1
+    counts = []
+    for geom in gdf2.geometry:
+        gdf = gdf1[gdf1.intersects(geom)]  # intersected points
+        if poly_id is not None and len(gdf) > 0:
+            gid = gdf2[gdf2.geometry == geom][poly_id].iloc[0]  # gid: geometry id
+            gdf["geom_id"] = gid
+        int_gdf = pd.concat([int_gdf, gdf])  # selected pdf
+        counts.append(len(gdf))
+    gdf2["counts"] = counts
+    return int_gdf
+
+
+def quick_intersection(gdf1, gdf2, poly_id=None):
+    int_gdf = pd.DataFrame()  # intersected gdf which is a subset of gdf1
+    counts = []
+    for geom in gdf2.geometry:
+        # Get the indices of the objects that are likely to be inside the bounding box of the given Polygon
+        pos_idx = list(gdf1.sindex.intersection(geom.bounds))
+        pos_gdf = gdf1.iloc[pos_idx]  # possible gdf
+        pre_gdf = pos_gdf[pos_gdf.intersects(geom)]  # precise gdf
+        if poly_id is not None and len(pre_gdf) > 0:
+            gid = gdf2[gdf2.geometry == geom][poly_id].iloc[0]  # gid: geometry id
+            pre_gdf["geom_id"] = gid
+        int_gdf = pd.concat([int_gdf, pre_gdf])  # intersected gdf
+        counts.append(len(pre_gdf))
+    gdf2["counts"] = counts
+    return int_gdf
+
+
+def overlay_parallel(gdf1, gdf2, how="intersection", keep_geom_type=False):
+    n_cores = cpu_count()
+    gdf1_chunks = np.array_split(gdf1, n_cores)
+    gdf2_chunks = [gdf2] * n_cores
+    inputs = zip(gdf1_chunks, gdf2_chunks, [how] * n_cores, [keep_geom_type] * n_cores)
+
+    with Pool(n_cores) as pool:  # Create a multiprocessing pool and apply the overlay function in parallel on each chunk
+        df = pd.concat(pool.starmap(gpd.overlay, inputs))
+    return gpd.GeoDataFrame(df, crs=gdf1.crs)
+
+
+def google_geocoding(address_or_zipcode: str, api_key: str) -> pd.Series:
+    """
+    Returns geographic coordinates (latitude and longitude) for a given address or zip code
+    using the Google Geocoding API.
+
+    Args:
+        address_or_zipcode (str): A text-based address or a zip code that you want to geocode.
+        api_key (str): A valid Google Maps API key for accessing the geocoding service.
+
+    Returns:
+        pd.Series: A pandas Series containing the latitude and longitude as floats.
+                   If the request fails or the address is not found, returns a Series of (None, None).
+
+    Example:
+        >>> df[["lat", "lon"]] = df.apply(lambda row: gsp.google_geocoding(row.address), axis=1)
+        >>> google_geocoding("1600 Amphitheatre Parkway, Mountain View, CA", "your_api_key")
+        lat    37.4224764
+        lon   -122.0842499
+        dtype: float64
+    """
+
+    lat, lon = None, None
+    base_url = "https://maps.googleapis.com/maps/api/geocode/json"
+    endpoint = f"{base_url}?address={address_or_zipcode}&key={api_key}"
+    r = requests.get(endpoint)
+    if r.status_code not in range(200, 299):
+        return None, None
+    try:
+        """
+        This try block incase any of our inputs are invalid. This is done instead
+        of actually writing out handlers for all kinds of responses.
+        """
+        results = r.json()["results"][0]
+        lat = results["geometry"]["location"]["lat"]
+        lon = results["geometry"]["location"]["lng"]
+    except Exception:
+        pass  # Handle any errors that may occur
+    return pd.Series([lat, lon])
+
+
+def google_reverse_geocoding(lat: float, lon: float, api_key: str) -> str:
+    """
+    This function takes a coordinate (lat, lon) and returns the postcode.
+
+    df['postcode'] = df.apply(lambda row : gsp.google_reverse_geocoding(row.lat, row.lon), axis=1)
+    """
+    lat = (
+        0 if abs(lat) < 0.0001 else lat
+    )  # otherwise it returns the following error: "Invalid request. Invalid 'latlng' parameter."
+    lon = 0 if abs(lon) < 0.0001 else lon
+    # Make the reverse geocoding request
+    url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng={lat},{lon}&key={api_key}"
+    response = requests.get(url)
+    data = response.json()
+
+    # Parse the response to extract the postcode
+    if "results" in data and len(data["results"]) > 0:
+        for item in data["results"]:
+            for component in item.get("address_components", []):
+                if (
+                    "postal_code" in component.get("types", []) and len(component["types"]) == 1
+                ):  # 'types': ['postal_code', 'postal_code_prefix']}],
+                    return component.get("long_name", None)
+    return None
