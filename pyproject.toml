@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "geospatial"
-version = "0.1.0"
+version = "0.2.0"
 description = "A collection of Python functions for performing geospatial analysis and creating visualisations. "
 authors = ["Abbas Kiasari <kiasari@gmail.com>"]
 license = "MIT"
