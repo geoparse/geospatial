@@ -112,27 +112,8 @@ def find_proj(geom: Union[Point, Polygon, MultiPolygon]) -> str:
     return proj + str(utm)
 
 
-def trans_proj(geom: base.BaseGeometry, proj1: str, proj2: str) -> base.BaseGeometry:
-    """
-    Transforms a geometry object from one coordinate reference system (CRS) to another.
-
-    This function uses the `pyproj` library to create a transformation pipeline that converts
-    the input geometry from the source CRS (`proj1`) to the target CRS (`proj2`). The resulting
-    geometry is returned in the new projection.
-
-    Args:
-        geom (base.BaseGeometry): The Shapely geometry object to be transformed. This can be
-                                  any geometry type (e.g., Point, Polygon).
-        proj1 (str): The EPSG code or PROJ string representing the source CRS of the input geometry.
-        proj2 (str): The EPSG code or PROJ string representing the target CRS for the transformed geometry.
-
-    Returns:
-        base.BaseGeometry: The transformed Shapely geometry object in the new projection.
-    """
-    # Create a transformation function using pyproj's Transformer
+def trans_proj(geom, proj1, proj2):  # transform projection
     project = pyproj.Transformer.from_crs(pyproj.CRS(proj1), pyproj.CRS(proj2), always_xy=True).transform
-
-    # Apply the transformation to the geometry and return the transformed geometry
     return transform(project, geom)
 
 
