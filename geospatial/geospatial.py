@@ -314,14 +314,46 @@ def quick_intersection(gdf1, gdf2, poly_id=None):
     return int_gdf
 
 
-def overlay_parallel(gdf1, gdf2, how="intersection", keep_geom_type=False):
+def overlay_parallel(
+    gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame, how: str = "intersection", keep_geom_type: bool = False
+) -> gpd.GeoDataFrame:
+    """
+    Perform a spatial overlay operation between two GeoDataFrames in parallel using multiple CPU cores.
+
+    The function splits the first GeoDataFrame into chunks based on the number of available CPU cores and
+    applies the overlay operation (e.g., intersection, union, difference) in parallel on each chunk with
+    respect to the second GeoDataFrame. The results are then concatenated and returned as a single GeoDataFrame.
+
+    Args:
+        gdf1 (gpd.GeoDataFrame): The first GeoDataFrame to be used in the spatial overlay operation.
+        gdf2 (gpd.GeoDataFrame): The second GeoDataFrame to be used in the spatial overlay operation.
+        how (str, optional): The type of overlay operation to perform. Options include "intersection", "union",
+                             "difference", "symmetric_difference", and "identity". Defaults to "intersection".
+        keep_geom_type (bool, optional): Whether to retain the original geometry type (e.g., Polygon, LineString)
+                                         in the resulting overlay. If set to True, only features of the same
+                                         geometry type are retained. Defaults to False.
+
+    Returns:
+        gpd.GeoDataFrame: A new GeoDataFrame resulting from the spatial overlay operation, with the same coordinate
+                          reference system (CRS) as the first input GeoDataFrame (`gdf1`).
+    """
+    # Determine the number of CPU cores available for parallel processing
     n_cores = cpu_count()
+
+    # Split the first GeoDataFrame into chunks for parallel processing
     gdf1_chunks = np.array_split(gdf1, n_cores)
+
+    # Create a list of the second GeoDataFrame repeated for each chunk
     gdf2_chunks = [gdf2] * n_cores
+
+    # Prepare inputs for the parallel processing pool
     inputs = zip(gdf1_chunks, gdf2_chunks, [how] * n_cores, [keep_geom_type] * n_cores)
 
-    with Pool(n_cores) as pool:  # Create a multiprocessing pool and apply the overlay function in parallel on each chunk
+    # Create a multiprocessing pool and apply the overlay function in parallel on each chunk
+    with Pool(n_cores) as pool:
         df = pd.concat(pool.starmap(gpd.overlay, inputs))
+
+    # Return the concatenated GeoDataFrame with the same CRS as the first input GeoDataFrame
     return gpd.GeoDataFrame(df, crs=gdf1.crs)
 
 
