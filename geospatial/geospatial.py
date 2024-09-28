@@ -9,12 +9,9 @@ import pandas as pd
 import pyproj
 import requests
 from shapely.geometry import MultiPolygon, Point, Polygon
-from shapely.ops import transform
-
-from shapely.geometry import base, Point, Polygon, MultiPolygon, LineString
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import transform
-import pyproj
+
 # pd.options.mode.chained_assignment = None  # default='warn'
 
 
@@ -116,18 +113,16 @@ def find_proj(geom: Union[Point, Polygon, MultiPolygon]) -> str:
     return proj + str(utm)
 
 
-
-
 def trans_proj(geom: BaseGeometry, proj1: str, proj2: str) -> BaseGeometry:
     """
     Transforms a Shapely geometry object from one coordinate reference system (CRS) to another.
 
-    This function uses `pyproj` to create a transformation pipeline that converts the input 
-    geometry from the source CRS (`proj1`) to the target CRS (`proj2`). The resulting geometry 
+    This function uses `pyproj` to create a transformation pipeline that converts the input
+    geometry from the source CRS (`proj1`) to the target CRS (`proj2`). The resulting geometry
     is returned in the new projection.
 
     Args:
-        geom (BaseGeometry): A Shapely geometry object to be transformed. This can include Point, 
+        geom (BaseGeometry): A Shapely geometry object to be transformed. This can include Point,
                              Polygon, MultiPolygon, LineString, or any other Shapely geometry type.
         proj1 (str): The EPSG code or PROJ string representing the source CRS of the input geometry.
         proj2 (str): The EPSG code or PROJ string representing the target CRS for the transformed geometry.
@@ -137,9 +132,10 @@ def trans_proj(geom: BaseGeometry, proj1: str, proj2: str) -> BaseGeometry:
     """
     # Create a transformation function using pyproj's Transformer
     project = pyproj.Transformer.from_crs(pyproj.CRS(proj1), pyproj.CRS(proj2), always_xy=True).transform
-    
+
     # Apply the transformation to the geometry and return the transformed geometry
     return transform(project, geom)
+
 
 def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """
