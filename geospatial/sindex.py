@@ -227,7 +227,7 @@ def cell_to_geom(cells: list, cell_type: str) -> tuple:
     into a geometry object (Polygon) based on the specified cell type. It also calculates the resolution
     level for each cell.
 
-    Parameters:
+    Parameters
     ----------
     cells : list
         A list of spatial cells represented as strings. Each cell corresponds to a spatial area
@@ -239,7 +239,7 @@ def cell_to_geom(cells: list, cell_type: str) -> tuple:
         - "h3"      : H3 hexagonal spatial indexing system.
         - "s2"      : S2 spherical spatial indexing system.
 
-    Returns:
+    Returns
     -------
     tuple
         A tuple containing:
@@ -247,7 +247,17 @@ def cell_to_geom(cells: list, cell_type: str) -> tuple:
             A list of resolution levels corresponding to each cell in the input.
         - `geoms` : list of shapely.geometry.Polygon
             A list of Polygon geometries representing the spatial boundaries of the input cells.
+
+    Raises
+    ------
+    ValueError
+        If `cell_type` is not one of "geohash", "h3", or "s2".
     """
+    # Check for valid cell_type
+    if cell_type not in {"geohash", "h3", "s2"}:
+        raise ValueError(f"Invalid cell_type '{cell_type}'. Accepted values are: 'geohash', 'h3', 's2'.")
+
+    # Determine resolution level based on cell type
     res = [
         len(cell)
         if cell_type == "geohash"
@@ -257,6 +267,7 @@ def cell_to_geom(cells: list, cell_type: str) -> tuple:
         for cell in cells
     ]
 
+    # Create geometry objects based on cell type
     geoms = [
         geohash_to_polygon(cell)
         if cell_type == "geohash"
