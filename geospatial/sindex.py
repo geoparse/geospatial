@@ -219,7 +219,45 @@ def geom_to_cell_parallel_2(mdf, cell_type, res, compact=False, verbose=False, d
     return
 
 
-def cell_to_geom(cells, cell_type):
+def cell_to_geom(cells: list, cell_type: str) -> tuple:
+    """
+    Converts a list of spatial cells to their corresponding geometries and resolution levels.
+
+    The function takes a list of spatial cells (e.g., Geohash, H3, or S2) and converts each cell
+    into a geometry object (Polygon) based on the specified cell type. It also calculates the resolution
+    level for each cell.
+
+    Parameters
+    ----------
+    cells : list
+        A list of spatial cells represented as strings. Each cell corresponds to a spatial area
+        in a specific grid system (e.g., Geohash, H3, or S2).
+
+    cell_type : str
+        The type of spatial cell system used. Accepted values are:
+        - "geohash" : Geohash spatial indexing system.
+        - "h3"      : H3 hexagonal spatial indexing system.
+        - "s2"      : S2 spherical spatial indexing system.
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+        - `res` : list of int
+            A list of resolution levels corresponding to each cell in the input.
+        - `geoms` : list of shapely.geometry.Polygon
+            A list of Polygon geometries representing the spatial boundaries of the input cells.
+
+    Raises
+    ------
+    ValueError
+        If `cell_type` is not one of "geohash", "h3", or "s2".
+    """
+    # Check for valid cell_type
+    if cell_type not in {"geohash", "h3", "s2"}:
+        raise ValueError(f"Invalid cell_type '{cell_type}'. Accepted values are: 'geohash', 'h3', 's2'.")
+
+    # Determine resolution level based on cell type
     res = [
         len(cell)
         if cell_type == "geohash"
@@ -229,6 +267,7 @@ def cell_to_geom(cells, cell_type):
         for cell in cells
     ]
 
+    # Create geometry objects based on cell type
     geoms = [
         geohash_to_polygon(cell)
         if cell_type == "geohash"
