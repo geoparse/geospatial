@@ -280,38 +280,82 @@ def cell_to_geom(cells: list, cell_type: str) -> tuple:
     return res, geoms
 
 
-def compact_cells(cells, cell_type):
+def compact_cells(cells: list, cell_type: str) -> list:
+    """
+    Compacts a list of spatial cells (e.g., Geohash, S2, or H3) by merging adjacent cells into parent cells.
+
+    The function takes a list of spatial cells and compacts them into larger cells if possible, reducing the total number
+    of cells by merging adjacent cells into their parent cell at a coarser resolution. The compaction process differs based
+    on the specified `cell_type` and its respective hierarchy.
+
+    Parameters
+    ----------
+    cells : list
+        A list of spatial cells represented as strings. Each cell corresponds to a spatial area in a specific grid system
+        (e.g., Geohash, H3, or S2).
+
+    cell_type : str
+        The type of spatial cell system used. Accepted values are:
+        - "geohash" : Geohash spatial indexing system.
+        - "h3"      : H3 hexagonal spatial indexing system.
+        - "s2"      : S2 spherical spatial indexing system.
+
+    Returns
+    -------
+    list
+        A list of compacted spatial cells. Each cell is represented as a string and is at the coarsest resolution possible
+        based on the input cells.
+
+    Raises
+    ------
+    ValueError
+        If `cell_type` is not one of "geohash", "h3", or "s2".
+
+    Notes
+    -----
+    - For `h3`, the function uses the built-in `h3.compact()` method.
+    - For `s2`, the compaction merges cells up to their parent cells by considering the S2 hierarchy.
+    - For `geohash`, cells are merged based on shared prefixes.
+    """
     if cell_type == "h3":
         return list(h3.compact(cells))
     elif cell_type == "s2":
-        #    cells = [item['id'] for item in cells]
+        # Convert S2 cell IDs from tokens
         cells = [s2.CellId.from_token(item) for item in cells]
-        res = cells[0].level()  # assuming all s2 cells have the same resolution (the output of geom_to_cell() function)
+        res = cells[0].level()  # Assuming all S2 cells have the same resolution
         num_children = 4
     elif cell_type == "geohash":
-        res = len(cells[0])
+        res = len(cells[0])  # Resolution is based on the length of Geohash strings
         num_children = 32
+    else:
+        raise ValueError(f"Invalid cell_type '{cell_type}'. Accepted values are: 'geohash', 'h3', 's2'.")
 
+    # Initialize list to store compacted cells
     compact_cells = []
     for i in range(res, 0, -1):
+        # Get parent cell IDs based on the type
         parent_ids = [cell.parent() if cell_type == "s2" else cell[: i - 1] for cell in cells]
-        count_dict = collections.Counter(parent_ids)
-        idx = [
-            i for i, item in enumerate(parent_ids) if count_dict.get(item, 0) == num_children
-        ]  # get indices of items with count 4 in parent_ids
+        count_dict = collections.Counter(parent_ids)  # Count occurrences of each parent cell
 
+        # Get indices of parent cells with the required number of children
+        idx = [i for i, item in enumerate(parent_ids) if count_dict.get(item, 0) == num_children]
+
+        # Create a mask to exclude compacted cells
         mask = [True] * len(cells)
         for ix in idx:
             mask[ix] = False
         cells = [item for i, item in enumerate(cells) if mask[i]]
 
+        # Append compacted cells to the result
         compact_cells += cells
         cells = list(set([item for item in parent_ids if count_dict.get(item, 0) == num_children]))
+
+    # Include any remaining cells in the compacted list
     compact_cells += cells
 
     if cell_type == "geohash":
         return compact_cells
-    else:  # s2
+    else:  # Convert S2 cells back to tokens
         return [item.to_token() for item in compact_cells]
 
 
