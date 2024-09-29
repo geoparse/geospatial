@@ -49,5 +49,5 @@ def parallelize(function: Callable[[pd.DataFrame], pd.DataFrame], df: pd.DataFra
     # Create a multiprocessing pool and apply the function to each chunk in parallel
     with Pool(ncores) as pool:
         df = pd.concat(tqdm.tqdm(pool.imap(function, chunks), total=ncores))
-
+        # df = pd.concat(pool.map(function, chunks))
     return df
