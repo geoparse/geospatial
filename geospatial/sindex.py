@@ -4,6 +4,7 @@ from datetime import datetime
 from math import sqrt
 from multiprocessing import Pool, cpu_count
 from time import time
+from typing import List, Union
 
 import geopandas as gpd
 import numpy as np
@@ -11,43 +12,77 @@ from h3 import h3
 from polygon_geohasher.polygon_geohasher import geohash_to_polygon, polygon_to_geohashes
 from s2 import s2
 from shapely.geometry import Polygon
+from shapely.geometry.base import BaseGeometry
 
 # pd.options.mode.chained_assignment = None  # default='warn'
 
 
 # s2.polyfill() function covers the hole in a polygon too (which is not correct).
 # geom_to_cell_parallel() function splits a polygon to smaller polygons without holes
-def geom_to_cell(geoms, cell_type, res, dump=False):
+
+
+def geom_to_cell(geoms: List[BaseGeometry], cell_type: str, res: int, dump: bool = False) -> Union[List[str], None]:
+    """
+    Converts a list of geometries into a set of unique spatial cells based on the specified cell type and resolution.
+
+    This function takes a list of Shapely geometries (e.g., Polygon, MultiPolygon), and converts them into spatial cells
+    using one of the supported cell systems: Geohash, S2, or H3. The resulting cells are returned as a list of unique
+    cell IDs. If `dump` is set to True, the cells are saved to a file instead of being returned.
+
+    Args:
+        geoms (List[BaseGeometry]): A list of Shapely geometry objects (Polygon or MultiPolygon).
+        cell_type (str): The type of spatial cell system to use. Supported values are "geohash", "s2", or "h3".
+        res (int): The resolution level for the spatial cells. The resolution parameter determines the granularity of the cells.
+        dump (bool, optional): If True, the cells are saved to a file on the desktop in a folder named after `cell_type`.
+                               If False, the function returns a list of cell IDs. Default is False.
+
+    Returns:
+        Union[List[str], None]: If `dump` is False, a list of unique cell IDs is returned. If `dump` is True, None is returned
+                                after saving the cells to a file.
+
+    Raises:
+        ValueError: If `cell_type` is not one of the supported values ("geohash", "s2", "h3").
+
+    Example:
+        ```
+        # Define a list of Shapely geometries
+        geometries = [Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), MultiPolygon([...])]
+
+        # Convert geometries to H3 cells at resolution 9
+        h3_cells = geom_to_cell(geometries, cell_type="h3", res=9)
+        ```
+    """
     polys = []
     for geom in geoms:
         if geom.geom_type == "Polygon":
             polys += [geom.__geo_interface__]
-        elif geom.geom_type == "MultiPolygon":  # if multipolygon
-            polys += [g.__geo_interface__ for g in geom.geoms]  # a list of dicts (polygons)
+        elif geom.geom_type == "MultiPolygon":  # If MultiPolygon, extract each Polygon separately
+            polys += [g.__geo_interface__ for g in geom.geoms]
 
     cells = []
     if cell_type == "geohash":
         cells = set()
         for geom in geoms:
-            cells |= polygon_to_geohashes(geom, precision=res, inner=False)
+            cells |= polygon_to_geohashes(geom, precision=res, inner=False)  # Collect Geohashes for each Polygon
         cells = list(cells)
 
     elif cell_type == "s2":
         for poly in polys:
-            cells += s2.polyfill(
-                poly, res, geo_json_conformant=True, with_id=True
-            )  # returns json object with id and geometry (coords)
-        cells = [item["id"] for item in cells]  # remove geometry and keep id only
-        cells = list(set(cells))  # remove duplicates
+            cells += s2.polyfill(poly, res, geo_json_conformant=True, with_id=True)  # Use S2 to fill each Polygon
+        cells = [item["id"] for item in cells]  # Keep only the cell IDs
+        cells = list(set(cells))  # Remove duplicates
 
     elif cell_type == "h3":
         for poly in polys:
-            cells += h3.polyfill(poly, res, geo_json_conformant=True)
+            cells += h3.polyfill(poly, res, geo_json_conformant=True)  # Use H3 to fill each Polygon
+
+    else:
+        raise ValueError(f"Unsupported cell type: {cell_type}. Choose 'geohash', 's2', or 'h3'.")
 
     if dump:
         with open(f"~/Desktop/{cell_type}/{datetime.now()}.txt", "w") as json_file:
             json.dump(cells, json_file)
-        return
+        return None
     else:
         return cells
 
