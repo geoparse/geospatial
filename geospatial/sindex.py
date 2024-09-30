@@ -359,11 +359,46 @@ def compact_cells(cells: list, cell_type: str) -> list:
         return [item.to_token() for item in compact_cells]
 
 
-def uncompact_s2(compact_tokens, level):
+def uncompact_s2(compact_tokens: list, level: int) -> list:
+    """
+    Expands a list of compacted S2 cell tokens to a specified resolution level.
+
+    This function takes a list of compact S2 cell tokens and generates their child cells up to the desired
+    resolution level. It is used to "uncompact" S2 cells that have been previously compacted, producing a
+    more detailed representation.
+
+    Parameters
+    ----------
+    compact_tokens : list
+        A list of S2 cell tokens represented as strings. These tokens are at a coarser resolution level and
+        will be expanded into their child cells.
+
+    level : int
+        The target S2 cell resolution level to which the input tokens should be expanded. The resolution level
+        determines the size of the child cells. A higher level corresponds to finer granularity (smaller cells).
+
+    Returns
+    -------
+    list
+        A list of S2 cell tokens represented as strings. Each token corresponds to a child cell of the input
+        compact tokens, expanded to the specified resolution level.
+
+    Raises
+    ------
+    ValueError
+        If the provided `level` is less than or equal to the resolution level of the input `compact_tokens`.
+
+    Example
+    -------
+    >>> compact_tokens = ["89c2847c", "89c2847d"]
+    >>> uncompact_s2(compact_tokens, level=10)
+    ["89c2847c1", "89c2847c2", "89c2847c3", ..., "89c2847d1", "89c2847d2", ...]
+    """
     uncompact_tokens = []
     for token in compact_tokens:
-        cell_id = s2.CellId.from_token(token)
-        uncompact_tokens += list(cell_id.children(level))
+        cell_id = s2.CellId.from_token(token)  # Convert each token to an S2 CellId object
+        uncompact_tokens += list(cell_id.children(level))  # Generate child cells at the specified level
+    # Convert each CellId object back to a token and remove duplicates
     uncompact_tokens = [item.to_token() for item in uncompact_tokens]
     return list(set(uncompact_tokens))
 
