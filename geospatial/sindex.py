@@ -90,8 +90,8 @@ def geom_to_cell(geoms: List[BaseGeometry], cell_type: str, res: int, dump: bool
 def geom_to_cell_parallel(
     mdf: gpd.GeoDataFrame, cell_type: str, res: int, compact: bool = False, verbose: bool = False
 ) -> Tuple[List[str], int]:
-    """
-    Perform a parallelized conversion of geometries in a GeoDataFrame to cell identifiers of a specified type
+    """ 
+    Perform a parallelised conversion of geometries in a GeoDataFrame to cell identifiers of a specified type
     (e.g., Geohash, S2, or H3), optionally compacting the result to reduce the number of cells.
 
     This function first divides the bounding box of the input GeoDataFrame into smaller grid cells, then calculates
@@ -163,7 +163,7 @@ def geom_to_cell_parallel(
     grid_polygons = []
     for lat in np.arange(minlat, maxlat, steplat):
         for lon in np.arange(minlon, maxlon, steplon):
-            llon, llat, ulon, ulat = (lon, lat, lon + steplon, lat + steplat)
+            llon, llat, ulon, ulat = (lon, lat, lon + steplon, lat + steplat) # lower lat, upper lat
             polygon = Polygon([(llon, llat), (ulon, llat), (ulon, ulat), (llon, ulat)])
             grid_polygons.append(polygon)
 
@@ -176,7 +176,7 @@ def geom_to_cell_parallel(
         print("Performing intersection between grid and input GeoDataFrame geometries ... ", end="")
 
     # Perform intersection between input geometries and grid cells
-    gmdf = gpd.overlay(mdf, gmdf, how="intersection")
+    gmdf = gpd.overlay(mdf, gmdf, how="intersection")  # grid mdf 
 
     if verbose:
         elapsed_time = round(time() - start_time)
