@@ -4,7 +4,7 @@ from datetime import datetime
 from math import sqrt
 from multiprocessing import Pool, cpu_count
 from time import time
-from typing import List, Union
+from typing import List, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -87,84 +87,132 @@ def geom_to_cell(geoms: List[BaseGeometry], cell_type: str, res: int, dump: bool
         return cells
 
 
-def geom_to_cell_parallel(mdf, cell_type, res, compact=False, verbose=False):
+def geom_to_cell_parallel(
+    mdf: gpd.GeoDataFrame, cell_type: str, res: int, compact: bool = False, verbose: bool = False
+) -> Tuple[List[str], int]:
+    """
+    Perform a parallelised conversion of geometries in a GeoDataFrame to cell identifiers of a specified type
+    (e.g., Geohash, S2, or H3), optionally compacting the result to reduce the number of cells.
+
+    This function first divides the bounding box of the input GeoDataFrame into smaller grid cells, then calculates
+    the intersection between these grid cells and the input geometries. The resulting geometries are processed in
+    parallel to generate cell identifiers according to the specified `cell_type` and `res` (resolution). The result
+    can be compacted to reduce the number of cells.
+
+    Parameters
+    ----------
+    mdf : gpd.GeoDataFrame
+        A GeoDataFrame containing geometries that need to be converted to cell identifiers.
+
+    cell_type : str
+        The type of cell identifier to use. Options are:
+        - "geohash": Converts geometries to Geohash identifiers.
+        - "s2": Converts geometries to S2 cell tokens.
+        - "h3": Converts geometries to H3 cell tokens.
+
+    res : int
+        The resolution or precision level of the cell identifiers. Higher values indicate finer precision.
+
+    compact : bool, optional, default=False
+        If True, compact the resulting cells to reduce their number. This is typically applicable for S2 and H3 cells.
+
+    verbose : bool, optional, default=False
+        If True, print timing and progress information to the console.
+
+    Returns
+    -------
+    Tuple[List[str], int]
+        - A list of cell identifiers as strings, corresponding to the geometries in the input GeoDataFrame.
+        - The total number of unique cell identifiers.
+
+    Raises
+    ------
+    ValueError
+        If an invalid `cell_type` is provided. Supported types are "geohash", "s2", and "h3".
+
+    Example
+    -------
+    >>> # Assuming `mdf` is a GeoDataFrame with geometries:
+    >>> cells, count = geom_to_cell_parallel(mdf, cell_type="s2", res=10, compact=True, verbose=True)
+    >>> print(f"Generated {count} cells: {cells}")
+    """
     if verbose:
         print(datetime.now())
-        print("Slicing the bbox of mdf ... ", end="")
+        print("Slicing the bounding box of the GeoDataFrame ... ", end="")
         start_time = time()
+
+    # Determine the number of slices and grid cells based on CPU cores
     n_cores = cpu_count()
     slices = 128 * n_cores
 
+    # Calculate the bounding box dimensions
     minlon, minlat, maxlon, maxlat = mdf.total_bounds
     dlon = maxlon - minlon
     dlat = maxlat - minlat
     ratio = dlon / dlat
 
+    # Calculate the number of grid cells in x and y directions
     x_cells = round(sqrt(slices) * ratio)
     y_cells = round(sqrt(slices) / ratio)
 
+    # Calculate step size for grid cells
     steplon = dlon / x_cells
     steplat = dlat / y_cells
 
+    # Create grid polygons based on bounding box slices
     grid_polygons = []
-    for lat in np.arange(minlat, maxlat, steplat):  # Iterate over the rows and columns to create the grid
-        for lon in np.arange(minlon, maxlon, steplon):  # Calculate the coordinates of the current grid cell
+    for lat in np.arange(minlat, maxlat, steplat):
+        for lon in np.arange(minlon, maxlon, steplon):
             llon, llat, ulon, ulat = (lon, lat, lon + steplon, lat + steplat)  # lower lat, upper lat
             polygon = Polygon([(llon, llat), (ulon, llat), (ulon, ulat), (llon, ulat)])
-            grid_polygons.append(polygon)  # Add the polygon to the list
-    gmdf = gpd.GeoDataFrame(geometry=grid_polygons, crs=mdf.crs)  # Create a GeoDataFrame for the grid polygons
+            grid_polygons.append(polygon)
+
+    gmdf = gpd.GeoDataFrame(geometry=grid_polygons, crs=mdf.crs)  # Create a GeoDataFrame with grid polygons
 
     if verbose:
         elapsed_time = round(time() - start_time)
-        print(f"{elapsed_time} seconds.   {slices} slices")
+        print(f"{elapsed_time} seconds.   {slices} slices created.")
         start_time = time()
-        print("Performing the intersection between the gridded bbox and mdf ... ", end="")
+        print("Performing intersection between grid and input GeoDataFrame geometries ... ", end="")
+
+    # Perform intersection between input geometries and grid cells
     gmdf = gpd.overlay(mdf, gmdf, how="intersection")  # grid mdf
 
     if verbose:
         elapsed_time = round(time() - start_time)
-        print(f"{elapsed_time} seconds.   {len(gmdf)} slices")
+        print(f"{elapsed_time} seconds.   {len(gmdf)} intersected slices.")
         start_time = time()
-        print("Calculating the cells for all geometries of the gridded mdf in parallel ... ", end="")
-    gmdf = gmdf.sample(
-        frac=1
-    )  # Shuffle the rows of gmdf to have a good balance of small (incomplete squares) and big (full squares) in all chunks
+        print("Calculating cell identifiers in parallel ... ", end="")
+
+    # Shuffle geometries for even load distribution across chunks
+    gmdf = gmdf.sample(frac=1)
     geom_chunks = np.array_split(list(gmdf.geometry), 4 * n_cores)
     inputs = zip(geom_chunks, [cell_type] * 4 * n_cores, [res] * 4 * n_cores)
 
-    # Create a multiprocessing pool and apply the overlay function in parallel on each chunk
+    # Parallel processing to generate cells
     with Pool(n_cores) as pool:
         cells = pool.starmap(geom_to_cell, inputs)
-    cells = [item for sublist in cells for item in sublist]  # flatten the list
+    cells = [item for sublist in cells for item in sublist]  # Flatten the list of cells
 
-    if cell_type == "geohash":  # do nothing if cell_type = h3
+    # Remove duplicates based on cell type
+    if cell_type in {"geohash", "s2"}:
         if verbose:
             elapsed_time = round(time() - start_time)
-            print(f"{elapsed_time} seconds")
-            start_time = time()
-            print("Removing duplicate cells ... ", end="")
-        cells = list(set(cells))  # remove duplicated cells
+            print(f"{elapsed_time} seconds. Removing duplicate cells ... ", end="")
+        cells = list(set(cells))  # Remove duplicate cells
 
-    elif cell_type == "s2":
-        if verbose:
-            elapsed_time = round(time() - start_time)
-            print(f"{elapsed_time} seconds")
-            start_time = time()
-            print("Removing duplicate cells ... ", end="")
-        cells = list(set(cells))  # remove duplicates
+    cell_counts = len(cells)  # Total unique cell count
 
-    cell_counts = len(cells)
-
+    # Compact the cells if needed
     if compact:
         if verbose:
             elapsed_time = round(time() - start_time)
-            print(f"{elapsed_time} seconds")
-            start_time = time()
-            print("Compacting cells ... ", end="")
+            print(f"{elapsed_time} seconds. Compacting cells ... ", end="")
         cells = compact_cells(cells, cell_type)
         if verbose:
             elapsed_time = round(time() - start_time)
-            print(f"{elapsed_time} seconds")
+            print(f"{elapsed_time} seconds.")
+
     return cells, cell_counts
 
 
