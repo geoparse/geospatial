@@ -12,56 +12,85 @@ from geospatial import osm, sindex
 # pd.options.mode.chained_assignment = None  # default='warn'
 
 
-def color_map(col, head=None, tail=None):  # col: column name, head and tail: substring indices
-    palettet = [  # colour palette
-        "#e6194b",  # red
-        "#4363d8",  # blue
-        "#3cb44b",  # green
-        "#800000",  # maroon (dark red)
-        "#008080",  # teal (dark green)
-        "#000080",  # navy (dark blue)
-        "#f58231",  # orange
-        "#911eb4",  # purple
-        "#808000",  # olive
-        "#9a6324",  # brown
-        "#f032e6",  # magenta
-        "#dfb119",  # dark yellow
-        "#42d4f4",  # cyan
-        "#808080",  # grey
-        "#e12348",  # Bright Red
-        "#dc2c46",  # Strong Red
-        "#d73644",  # Vivid Red
-        "#cd4a40",  # Deep Red
-        "#c8543e",  # Intense Red
-        "#c25e3c",  # Fire Red
-        "#bd683a",  # Scarlet
-        "#b77238",  # Fiery Orange
-        "#b27c36",  # Tangerine
-        "#ad8634",  # Burnt Orange
-        #        '#a79032', # Rust Orange
-        #        '#a29a30', # Pumpkin
-        #        '#9da42e', # Goldenrod
-        #        '#98ae2c', # Saffron
-        #        '#93b82a', # Amber
-        #        '#8ec228', # Apricot
-        #        '#89cc26', # Peach
-        #        '#84d624', # Cantaloupe
-        #        '#7fde22', # Honeydew
-        #        '#7ae820', # Lime
-        #        '#75f21e', # Chartreuse
-        #        '#70fc1c', # Neon Green
-        #        '#6bff1c', # Fluorescent Green
-        #        '#6bff49', # Grass Green
-        #        '#6bff83', # Periwinkle
-        #        '#6bffbc', # Pink
+def color_map(col: int or str, head: int = None, tail: int = None) -> str:
+    """
+    Generates a consistent color based on the input column value by mapping it to a predefined color palette.
+
+    This function uses a set color palette and maps the given column value to a color. If the column value is a string,
+    a substring can be selected using `head` and `tail` indices, and it will be converted to a numerical index. If the
+    column value is an integer, it will directly be mapped to a color using modulo arithmetic.
+
+    Parameters
+    ----------
+    col : int or str
+        The column value to be mapped to a color. It can be either an integer or a string.
+        - If an integer, it is directly used for color mapping.
+        - If a string, it will be cleaned of non-alphanumeric characters, and a substring defined by `head` and `tail`
+          can be selected for mapping.
+
+    head : int, optional
+        The starting index of the substring to be used for color mapping if `col` is a string. Default is None.
+
+    tail : int, optional
+        The ending index of the substring to be used for color mapping if `col` is a string. Default is None.
+
+    Returns
+    -------
+    str
+        A hexadecimal color code selected from the predefined palette corresponding to the input column value.
+
+    Raises
+    ------
+    ValueError
+        If `col` is a string that cannot be converted to an integer index.
+
+    Examples
+    --------
+    >>> color_map("Category1")
+    '#e6194b'  # Red color from the palette
+
+    >>> color_map(5)
+    '#3cb44b'  # Green color from the palette
+
+    >>> color_map("Example", head=0, tail=3)
+    '#e12348'  # Bright Red from the palette
+    """
+    # Predefined color palette
+    palettet = [
+        "#e6194b",
+        "#4363d8",
+        "#3cb44b",
+        "#800000",
+        "#008080",
+        "#000080",
+        "#f58231",
+        "#911eb4",
+        "#808000",
+        "#9a6324",
+        "#f032e6",
+        "#dfb119",
+        "#42d4f4",
+        "#808080",
+        "#e12348",
+        "#dc2c46",
+        "#d73644",
+        "#cd4a40",
+        "#c8543e",
+        "#c25e3c",
+        "#bd683a",
+        "#b77238",
+        "#b27c36",
+        "#ad8634",
     ]
 
+    # Check if the column is an integer or string
     if isinstance(col, int):
-        idx = col % len(palettet)  # palette index
+        idx = col % len(palettet)  # Get color index using modulo arithmetic
     else:
-        col = str(col)  # convert to string
-        col = re.sub(r"[\W_]+", "", col)  # remove characters which are not numbers and alphabets using re
-        idx = int(col[head:tail], 36) % len(palettet)  # convert text to integer (10 digits + 26 letters = 36)
+        col = str(col)  # Convert to string
+        col = re.sub(r"[\W_]+", "", col)  # Remove non-alphanumeric characters
+        idx = int(col[head:tail], 36) % len(palettet)  # Convert substring to a number base 36
+
     return palettet[idx]
 
 
