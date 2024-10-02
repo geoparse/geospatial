@@ -106,15 +106,52 @@ def color_map(col: int or str, head: int = None, tail: int = None) -> str:
     return palettet[idx]
 
 
-def base_map(sw, ne):
+def base_map(sw: list or tuple, ne: list or tuple) -> folium.Map:
+    """
+    Creates a base map with multiple tile layers and fits the map to the specified bounding box.
+
+    This function initializes a Folium map object with multiple tile layers, including:
+    - `Bright Mode` (CartoDB Positron)
+    - `Dark Mode` (CartoDB Dark Matter)
+    - `Satellite` (Esri World Imagery)
+    - `OpenStreetMap` (OSM)
+
+    It then fits the map's view to the bounding box defined by the southwest (`sw`) and northeast (`ne`) coordinates.
+
+    Parameters
+    ----------
+    sw : list or tuple
+        The southwest coordinate [latitude, longitude] of the bounding box to fit the map view.
+
+    ne : list or tuple
+        The northeast coordinate [latitude, longitude] of the bounding box to fit the map view.
+
+    Returns
+    -------
+    folium.Map
+        A Folium map object with multiple tile layers and the view fitted to the provided bounding box.
+
+    Examples
+    --------
+    >>> sw = [51.2652, -0.5426]  # Southwest coordinate (London, UK)
+    >>> ne = [51.7225, 0.2824]  # Northeast coordinate (London, UK)
+    >>> karta = base_map(sw, ne)
+    >>> karta.save("map.html")  # Save the map to an HTML file
+    """
+    # Initialize the base map without any default tiles
     karta = folium.Map(tiles=None)
+
+    # Dictionary of tile layers to be added
     tiles = {
         "cartodbpositron": "Bright Mode",
         "cartodbdark_matter": "Dark Mode",
     }
+
+    # Add each tile layer to the map
     for item in tiles:
         folium.TileLayer(item, name=tiles[item], max_zoom=21).add_to(karta)
 
+    # Add a satellite tile layer (Esri World Imagery)
     folium.TileLayer(
         name="Satellite",
         attr="Esri",
@@ -124,9 +161,12 @@ def base_map(sw, ne):
         max_zoom=19,
     ).add_to(karta)
 
+    # Add OpenStreetMap (OSM) tile layer
     folium.TileLayer("openstreetmap", name="OpenStreetMap", max_zoom=19).add_to(karta)
 
+    # Fit the map's view to the bounding box defined by the southwest and northeast coordinates
     karta.fit_bounds([sw, ne])
+
     return karta
 
 
