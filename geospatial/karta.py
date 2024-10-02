@@ -343,17 +343,78 @@ def row_polygons(row: pd.Series, karta: folium.Map, fill_color: str, line_width:
     return 0
 
 
-def polygons(karta, mdf, fill_color, highlight_color, line_width, popup_dict):
+def polygons(
+    karta: folium.Map, mdf: pd.DataFrame, fill_color: str, highlight_color: str, line_width: int, popup_dict: dict = None
+) -> int:
+    """
+    Adds multiple polygons from a DataFrame to a Folium map with specified styles and popups.
+
+    This function iterates over the rows of a DataFrame containing geometries and adds each polygon to the given Folium map.
+    The polygon styles can be customized with fill and highlight colors, line width, and optional popup information for
+    each polygon.
+
+    Parameters
+    ----------
+    karta : folium.Map
+        The Folium map object to which the polygons will be added.
+
+    mdf : pd.DataFrame
+        A DataFrame containing polygon geometries in a 'geometry' column and other optional attributes for styling and popup.
+
+    fill_color : str
+        The column name or value used to determine the fill color of the polygons. If the column is present in `mdf`, the color
+        is extracted using the `color_map` function. Otherwise, it is used as a direct color value.
+
+    highlight_color : str
+        The color used to highlight polygons when they are hovered over.
+
+    line_width : int
+        The width of the polygon borders (outlines).
+
+    popup_dict : dict, optional
+        A dictionary where keys are labels and values are column names in `mdf`. This dictionary is used to create an HTML popup
+        with the specified labels and values for each polygon (default is None).
+
+    Returns
+    -------
+    int
+        Returns 0 upon successfully adding the polygons to the map.
+
+    Examples
+    --------
+    >>> # Example DataFrame
+    >>> data = {'geometry': [Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), Polygon([(1, 1), (2, 1), (2, 2), (1, 2)])],
+                'color': ['blue', 'green']}
+    >>> mdf = pd.DataFrame(data)
+    >>> karta = folium.Map(location=[0.5, 0.5], zoom_start=10)
+    >>> polygons(karta, mdf, fill_color="color", highlight_color="yellow", line_width=2)
+    0
+    """
+    # Determine fill color if the specified column is present in the DataFrame
     if fill_color in mdf.columns:
         fill_color = color_map(mdf[fill_color].values[0])
 
+    # Define the default style function for polygons
     def style_function(x):
-        return {"fillColor": fill_color, "color": "#000000", "fillOpacity": 0.25, "weight": line_width}
+        return {
+            "fillColor": fill_color,
+            "color": "#000000",  # Border color
+            "fillOpacity": 0.25,
+            "weight": line_width,
+        }
 
+    # Define the highlight style function for polygons when hovered over
     def highlight_function(x):
-        return {"fillColor": highlight_color, "color": "#000000", "fillOpacity": 0.5, "weight": line_width}
+        return {
+            "fillColor": highlight_color,
+            "color": "#000000",  # Border color
+            "fillOpacity": 0.5,
+            "weight": line_width,
+        }
 
+    # Iterate over each row in the DataFrame and add the corresponding polygon to the map
     for _, row in mdf.iterrows():
+        # Create a popup if a popup dictionary is provided
         if popup_dict is None:
             popup = None
         else:
@@ -361,9 +422,11 @@ def polygons(karta, mdf, fill_color, highlight_color, line_width, popup_dict):
             for item in popup_dict:
                 popup += "<b>{}</b>: <b>{}</b><br>".format(item, row[popup_dict[item]])
 
+        # Convert geometry to GeoJson and add it to the Folium map
         gjson = gpd.GeoSeries(row["geometry"]).to_json()
         gjson = folium.GeoJson(data=gjson, style_function=style_function, highlight_function=highlight_function, tooltip=popup)
         gjson.add_to(karta)
+
     return 0
 
 
