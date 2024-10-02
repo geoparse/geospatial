@@ -171,16 +171,86 @@ def base_map(sw: list or tuple, ne: list or tuple) -> folium.Map:
 
 
 def points(
-    row, karta, color, color_head=None, color_tail=None, opacity=0.5, radius=3, weight=6, popup_dict=None, x=None, y=None
-):  # color_head, color_tail: color substring indices
+    row: pd.Series,
+    karta: folium.Map,
+    color: str,
+    color_head: int = None,
+    color_tail: int = None,
+    opacity: float = 0.5,
+    radius: int = 3,
+    weight: int = 6,
+    popup_dict: dict = None,
+    x: str = None,
+    y: str = None,
+) -> int:
+    """
+    Adds a point (marker) to a Folium map based on the specified parameters and data in the provided row.
+
+    The function attempts to extract coordinates from a geometry column if available, or directly from `x` and `y` columns
+    (longitude and latitude). It then adds a circle marker to the Folium map (`karta`) using the specified color, radius,
+    and other style parameters.
+
+    Parameters
+    ----------
+    row : pd.Series
+        A row of data containing either a 'geometry' attribute or x/y columns for coordinates.
+
+    karta : folium.Map
+        A Folium map object to which the marker will be added.
+
+    color : str
+        Column name to determine the color of the marker. If the column is present in the row, a color from the color map
+        will be used.
+
+    color_head : int, optional
+        Starting index for substring extraction from the `color` column value to create a unique color (default is None).
+
+    color_tail : int, optional
+        Ending index for substring extraction from the `color` column value to create a unique color (default is None).
+
+    opacity : float, optional
+        Opacity of the marker (default is 0.5).
+
+    radius : int, optional
+        Radius of the circle marker (default is 3).
+
+    weight : int, optional
+        Weight (thickness) of the circle marker's border (default is 6).
+
+    popup_dict : dict, optional
+        A dictionary where keys are labels and values are column names in the row. This dictionary is used to create
+        an HTML popup with the specified labels and values (default is None).
+
+    x : str, optional
+        Column name for longitude, if 'geometry' attribute is not present (default is None).
+
+    y : str, optional
+        Column name for latitude, if 'geometry' attribute is not present (default is None).
+
+    Returns
+    -------
+    int
+        Returns 0 upon successfully adding the marker to the map.
+
+    Examples
+    --------
+    >>> row = pd.Series({"geometry": Point(40.748817, -73.985428), "color": "red"})
+    >>> karta = folium.Map(location=[40.748817, -73.985428], zoom_start=12)
+    >>> points(row, karta, "color")
+    0
+    """
     try:
+        # Attempt to extract coordinates from the geometry column if present
         location = [row.geometry.y, row.geometry.x]
     except Exception:
+        # If geometry is not present, use x and y columns for location
         location = [row[y], row[x]]  # x, y: lon, lat column names in DataFrame
 
-    if color in row.index:  # color in df.columns
+    # Determine color if column is specified
+    if color in row.index:  # color in DataFrame columns
         color = color_map(row[color], color_head, color_tail)
 
+    # Create a popup HTML if popup_dict is provided
     if popup_dict is None:
         popup = None
     else:
@@ -188,9 +258,11 @@ def points(
         for item in popup_dict:
             popup += "{}: <b>{}</b><br>".format(item, row[popup_dict[item]])
 
+    # Add a CircleMarker to the map with the specified parameters
     folium.CircleMarker(location=location, radius=radius, color=color, opacity=opacity, weight=weight, tooltip=popup).add_to(
         karta
     )
+
     return 0
 
 
