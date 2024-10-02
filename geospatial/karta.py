@@ -266,16 +266,68 @@ def points(
     return 0
 
 
-def row_polygons(row, karta, fill_color, line_width, popup_dict):
+def row_polygons(row: pd.Series, karta: folium.Map, fill_color: str, line_width: int, popup_dict: dict = None) -> int:
+    """
+    Adds a polygon to a Folium map based on the specified parameters and data in the provided row.
+
+    This function creates a polygon (GeoJson) object for the specified row's geometry and adds it to the Folium map (`karta`).
+    It allows customization of fill color, line width, and popups. The function also defines style and highlight properties
+    for the polygon.
+
+    Parameters
+    ----------
+    row : pd.Series
+        A row of data containing a 'geometry' attribute that defines the polygon shape.
+
+    karta : folium.Map
+        A Folium map object to which the polygon will be added.
+
+    fill_color : str
+        Column name to determine the fill color of the polygon. If the column is present in the row, the color is extracted
+        using the `color_map` function.
+
+    line_width : int
+        The width of the border (outline) of the polygon.
+
+    popup_dict : dict, optional
+        A dictionary where keys are labels and values are column names in the row. This dictionary is used to create an
+        HTML popup with the specified labels and values for the polygon (default is None).
+
+    Returns
+    -------
+    int
+        Returns 0 upon successfully adding the polygon to the map.
+
+    Examples
+    --------
+    >>> row = pd.Series({"geometry": Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), "fill_color": "blue"})
+    >>> karta = folium.Map(location=[0.5, 0.5], zoom_start=10)
+    >>> row_polygons(row, karta, "fill_color", line_width=2)
+    0
+    """
+    # Determine fill color if specified column is present
     if fill_color in row.index:
         fill_color = color_map(row[fill_color])
 
+    # Style function to apply to the polygon
     def style_function(x):
-        return {"fillColor": fill_color, "color": "#000000", "fillOpacity": 0.25, "weight": line_width}
+        return {
+            "fillColor": fill_color,
+            "color": "#000000",  # Border color
+            "fillOpacity": 0.25,
+            "weight": line_width,
+        }
 
+    # Highlight style function when the polygon is hovered over
     def highlight_function(x):
-        return {"fillColor": fill_color, "color": "#000000", "fillOpacity": 0.5, "weight": line_width}
+        return {
+            "fillColor": fill_color,
+            "color": "#000000",  # Border color
+            "fillOpacity": 0.5,
+            "weight": line_width,
+        }
 
+    # Create a popup if a popup dictionary is provided
     if popup_dict is None:
         popup = None
     else:
@@ -283,9 +335,11 @@ def row_polygons(row, karta, fill_color, line_width, popup_dict):
         for item in popup_dict:
             popup += "<b>{}</b>: <b>{}</b><br>".format(item, row[popup_dict[item]])
 
+    # Create a GeoJson object from the row's geometry and add it to the map
     gjson = row.geometry.__geo_interface__
     gjson = folium.GeoJson(data=gjson, style_function=style_function, highlight_function=highlight_function, tooltip=popup)
     gjson.add_to(karta)
+
     return 0
 
 
