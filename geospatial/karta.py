@@ -431,56 +431,202 @@ def polygons(
 
 
 def plp(  # plp: points, lines, polygons
-    gdf_list=None,
+    gdf_list: Union[pd.DataFrame, gpd.GeoDataFrame, List[Union[pd.DataFrame, gpd.GeoDataFrame]]] = None,
     # Point
-    x=None,
-    y=None,  # provide x and y if more than one column in gdf contains 'lat' and 'lon'
-    cluster=False,
-    heatmap=False,
-    line=False,
-    antpath=False,
-    point_color="blue",
-    color_head=None,
-    color_tail=None,  # color_head and color_tail: substring indices
-    point_opacity=0.5,
-    point_radius=3,
-    point_weight=6,
-    point_popup=None,  # point_weight = 2xpoint_radius
-    buffer_radius=0,
-    ring_inner_radius=0,
-    ring_outer_radius=0,
+    x: Optional[str] = None,
+    y: Optional[str] = None,  # provide x and y if more than one column in gdf contains 'lat' and 'lon'
+    cluster: bool = False,
+    heatmap: bool = False,
+    line: bool = False,
+    antpath: bool = False,
+    point_color: str = "blue",
+    color_head: Optional[str] = None,
+    color_tail: Optional[str] = None,  # color_head and color_tail: substring indices
+    point_opacity: float = 0.5,
+    point_radius: int = 3,
+    point_weight: int = 6,
+    point_popup: Optional[dict] = None,  # point_weight = 2xpoint_radius
+    buffer_radius: int = 0,
+    ring_inner_radius: int = 0,
+    ring_outer_radius: int = 0,
     # LineString
-    line_color="blue",
-    line_opacity=0.5,
-    line_weight=6,
-    line_popup=None,
+    line_color: str = "blue",
+    line_opacity: float = 0.5,
+    line_weight: int = 6,
+    line_popup: Optional[dict] = None,
     # Polygon
-    centroid=False,  # if centroid=True it shows centroids of polygons on the map.
-    fill_color="red",
-    highlight_color="green",
-    line_width=0.3,
-    polygon_popup=None,
-    choropleth_cols=None,
-    choropleth_bins=None,
-    choropleth_legend=None,
-    choropleth_palette="YlOrRd",
-    choropleth_highlight=True,
-    geohash_res=0,
-    s2_res=-1,
-    h3_res=-1,
-    geohash_inner=False,
-    compact=False,
-    cells=None,
-    cell_type=None,  # list of geohash, S2 or H3 cell IDs
-    ways=None,  # list of OSM way IDs (lines or polygons) and Overpass API URL to query from
-    url=None,
-):
+    centroid: bool = False,  # if centroid=True it shows centroids of polygons on the map.
+    fill_color: str = "red",
+    highlight_color: str = "green",
+    line_width: float = 0.3,
+    polygon_popup: Optional[dict] = None,
+    choropleth_cols: Optional[Union[str, List[str]]] = None,
+    choropleth_bins: Optional[List[int]] = None,
+    choropleth_legend: Optional[str] = None,
+    choropleth_palette: str = "YlOrRd",
+    choropleth_highlight: bool = True,
+    geohash_res: int = 0,
+    s2_res: int = -1,
+    h3_res: int = -1,
+    geohash_inner: bool = False,
+    compact: bool = False,
+    cells: Optional[List[str]] = None,
+    cell_type: Optional[str] = None,  # list of geohash, S2 or H3 cell IDs
+    ways: Optional[List[int]] = None,  # list of OSM way IDs (lines or polygons) and Overpass API URL to query from
+    url: Optional[str] = None,
+) -> folium.Map:
+    """
+    Creates a Folium map with points, lines, or polygons based on the input geospatial data.
+
+    The function `plp` allows users to add different geometrical elements (points, lines, polygons) to a Folium map.
+    It supports various visual styles and configurations, such as clustering, heatmaps, choropleth, and geohash or cell-based layers.
+
+    Parameters
+    ----------
+    gdf_list : list of gpd.GeoDataFrame or pd.DataFrame, optional
+        List of GeoDataFrames or DataFrames containing geometrical data to be plotted. If a single DataFrame is provided,
+        it will be wrapped in a list internally.
+
+    x : str, optional
+        Column name for the x-coordinate (longitude). Required if more than one column in the DataFrame contains 'lon' or 'lat'.
+
+    y : str, optional
+        Column name for the y-coordinate (latitude). Required if more than one column in the DataFrame contains 'lon' or 'lat'.
+
+    cluster : bool, default False
+        If True, clusters points together based on their proximity using Folium's `MarkerCluster`.
+
+    heatmap : bool, default False
+        If True, creates a heatmap layer using Folium's `HeatMap` for points.
+
+    line : bool, default False
+        If True, connects points using Folium's `PolyLine` to form lines.
+
+    antpath : bool, default False
+        If True, creates animated ant paths for the line geometries using Folium's `AntPath`.
+
+    point_color : str, default "blue"
+        Color of the points when displayed on the map.
+
+    color_head : str, optional
+        Substring to extract color for the head (used for gradient coloring).
+
+    color_tail : str, optional
+        Substring to extract color for the tail (used for gradient coloring).
+
+    point_opacity : float, default 0.5
+        Opacity of the points. Value should be between 0 and 1.
+
+    point_radius : int, default 3
+        Radius of the points in pixels.
+
+    point_weight : int, default 6
+        Weight (thickness) of the point outline. Typically set to twice the `point_radius`.
+
+    point_popup : dict, optional
+        Dictionary where keys are labels and values are column names in the DataFrame. Used to create HTML popups with 
+        attributes of each point.
+
+    buffer_radius : float, default 0
+        Buffer radius (in meters) to create a buffer around each point. Set to 0 to disable buffering.
+
+    ring_inner_radius : float, default 0
+        Inner radius of ring buffers around points. Only used if `ring_outer_radius` is set.
+
+    ring_outer_radius : float, default 0
+        Outer radius of ring buffers around points. If set, creates a ring around each point.
+
+    line_color : str, default "blue"
+        Color of the lines connecting points or LineString geometries.
+
+    line_opacity : float, default 0.5
+        Opacity of the lines. Value should be between 0 and 1.
+
+    line_weight : int, default 6
+        Thickness of the lines.
+
+    line_popup : dict, optional
+        Dictionary where keys are labels and values are column names in the DataFrame. Used to create HTML popups with 
+        attributes of each line.
+
+    centroid : bool, default False
+        If True, displays the centroids of polygon geometries on the map.
+
+    fill_color : str, default "red"
+        Fill color for polygon geometries.
+
+    highlight_color : str, default "green"
+        Color used to highlight polygons when hovered.
+
+    line_width : float, default 0.3
+        Thickness of polygon outlines.
+
+    polygon_popup : dict, optional
+        Dictionary where keys are labels and values are column names in the DataFrame. Used to create HTML popups with 
+        attributes of each polygon.
+
+    choropleth_cols : list of str, optional
+        List of column names to use for creating choropleth maps. Requires at least two columns for {key, value}.
+
+    choropleth_bins : list of int or float, optional
+        Binning strategy for choropleth maps.
+
+    choropleth_legend : str, optional
+        Legend title for choropleth maps.
+
+    choropleth_palette : str, default "YlOrRd"
+        Color palette for choropleth maps.
+
+    choropleth_highlight : bool, default True
+        If True, highlights choropleth polygons when hovered.
+
+    geohash_res : int, default 0
+        Resolution for creating geohash-based polygonal layers. Set to 0 to disable.
+
+    s2_res : int, default -1
+        Resolution for creating Google S2-based polygonal layers. Set to -1 to disable.
+
+    h3_res : int, default -1
+        Resolution for creating Uber H3-based polygonal layers. Set to -1 to disable.
+
+    geohash_inner : bool, default False
+        If True, shows only inner geohash cells. Does not work if `compact` is set to True.
+
+    compact : bool, default False
+        If True, creates compact representation of geohash, S2, or H3 cells.
+
+    cells : list, optional
+        List of geohash, S2, or H3 cell IDs to visualize.
+
+    cell_type : str, optional
+        Type of cells used in `cells` parameter. Can be 'geohash', 's2', or 'h3'.
+
+    ways : list of str, optional
+        List of OSM way IDs to visualize as lines or polygons.
+
+    url : str, optional
+        Overpass API URL to query OSM geometries by `ways` parameter.
+
+    Returns
+    -------
+    folium.Map
+        A Folium map object with the added geometrical features based on input parameters.
+
+    Examples
+    --------
+    >>> # Example usage
+    >>> gdf = gpd.read_file("path/to/shapefile.shp")
+    >>> plp(gdf)
+    """
+
+    # Handle `cells` input by converting cell IDs to geometries
     if cells:
         res, geoms = sindex.cell_to_geom(cells, cell_type=cell_type)
         gdf = gpd.GeoDataFrame({"id": cells, "res": res, "geometry": geoms}, crs="EPSG:4326")
         karta = plp(gdf, polygon_popup={"ID": "id", "Resolution": "res"})
         return karta
 
+    # Handle `ways` input by converting OSM way IDs to geometries
     if ways:
         geoms = osm.ways_to_geom(ways, url)
         gdf = gpd.GeoDataFrame({"way_id": ways, "geometry": geoms}, crs="EPSG:4326")
@@ -490,41 +636,51 @@ def plp(  # plp: points, lines, polygons
             karta = plp(gdf, polygon_popup={"way_id": "way_id"}, fill_color="way_id")
         return karta
 
+    # Ensure `gdf_list` is always a list of GeoDataFrames or DataFrames
     if isinstance(gdf_list, pd.DataFrame):
         gdf_list = [gdf_list]
 
+    # Initialize bounding box coordinates for the map
     minlat, maxlat, minlon, maxlon = 90, -90, 180, -180
+    # Iterate through the list of GeoDataFrames to update bounding box
     for gdf in gdf_list:
         if not isinstance(gdf, gpd.GeoDataFrame):
-            if not x:  # if x=None (x and y are not specified)
+            if not x:  # Determine longitude and latitude columns if x is not specified
                 xx = [col for col in gdf.columns if "lon" in col.lower() or "lng" in col.lower()][0]
                 yy = [col for col in gdf.columns if "lat" in col.lower()][0]
             lons = gdf[xx]
             lats = gdf[yy]
             minlatg, minlong, maxlatg, maxlong = min(lats), min(lons), max(lats), max(lons)  # minlatg: minlat in gdf
-        else:
+        else:   # If input is a GeoDataFrame, use total_bounds to get the bounding box
             minlong, minlatg, maxlong, maxlatg = gdf.total_bounds
+        # Update overall bounding box
         minlat, minlon = min(minlat, minlatg), min(minlon, minlong)
         maxlat, maxlon = max(maxlat, maxlatg), max(maxlon, maxlong)
 
-    sw = [minlat, minlon]  # South West (bottom left)
-    ne = [maxlat, maxlon]  # North East (top right)
-    karta = base_map(sw, ne)
+    # Create a base map using the bounding box
+    sw = [minlat, minlon]  # South West (bottom left corner)
+    ne = [maxlat, maxlon]  # North East (top right corner)
+    karta = base_map(sw, ne)    # Initialize folium map with the bounding box
 
-    i = 0  # index of gdf in gdf_list
-    for gdf in gdf_list:
-        i += 1
-        if not isinstance(gdf, gpd.GeoDataFrame):  # if pd.DataFrame
-            geom = None
-        else:
-            geom = gdf.geometry.values[0]
+    # Iterate through each DataFrame or GeoDataFrame in the list to add layers to the map
+    for i, gdf in enumerate(gdf_list, start=1):
+        geom = gdf.geometry.values[0] if isinstance(gdf, gpd.GeoDataFrame) else None
+    #i = 0  # index of gdf in gdf_list
+    #for gdf in gdf_list:
+    #    i += 1
+    #    if not isinstance(gdf, gpd.GeoDataFrame):  # if pd.DataFrame
+    #        geom = None
+    #    else:
+    #        geom = gdf.geometry.values[0]
 
+    # Handle Polygon geometries
         if isinstance(geom, Polygon) or isinstance(geom, MultiPolygon):
-            if centroid:
+            if centroid:  # Show centroids of polygons if `centroid=True`
                 group_centroid = folium.FeatureGroup(name=f"{i}- Centroid")
                 cdf = gpd.GeoDataFrame({"geometry": gdf.centroid}, crs="EPSG:4326")  # centroid df
                 cdf.apply(points, karta=group_centroid, color="red", axis=1)
                 group_centroid.add_to(karta)
+            # If choropleth columns are provided, visualize as a choropleth map
             if choropleth_cols:
                 group_chor = folium.FeatureGroup(name=f"{i}- Choropleth")
                 choropleth_plp(
@@ -537,7 +693,7 @@ def plp(  # plp: points, lines, polygons
                     highlight=choropleth_highlight,
                 )
                 group_chor.add_to(karta)
-            else:
+            else:   # Otherwise, visualise polygons normally
                 group_polygon = folium.FeatureGroup(name=f"{i}- Polygon")
                 gdf.apply(
                     row_polygons,
@@ -548,38 +704,38 @@ def plp(  # plp: points, lines, polygons
                     axis=1,
                 )
                 group_polygon.add_to(karta)
-
+        # Handle LineString geometries
         if isinstance(geom, LineString):
             group_line = folium.FeatureGroup(name=f"{i}- Line")
             for _index, row in gdf.iterrows():
                 coordinates = [
                     (coord[1], coord[0]) for coord in row.geometry.coords
                 ]  # Convert LineString geometries to coordinates (lat, lon)
+                # Use color mapping if line_color is a column
+                color = color_map(row[line_color]) if line_color in gdf.columns else line_color
+                # Create popup content if specified
 
-                if line_color in gdf.columns:
-                    color = color_map(row[line_color])
-                else:
-                    color = line_color
-
-                if line_popup is None:
-                    popup = None
-                else:
-                    popup = ""
-                    for item in line_popup:
-                        popup += "{}: <b>{}</b><br>".format(item, row[line_popup[item]])
-
+                popup = "".join(f"{item}: <b>{row[line_popup[item]]}</b><br>" for item in line_popup) if line_popup else None
+                #if line_popup is None:
+                #    popup = None
+                #else:
+                #    popup = ""
+                #    for item in line_popup:
+                #        popup += "{}: <b>{}</b><br>".format(item, row[line_popup[item]])
                 group_line.add_child(
                     folium.PolyLine(coordinates, color=color, weight=line_weight, opacity=line_opacity, tooltip=popup)
                 )
             group_line.add_to(karta)
 
+        # Handle Point geometries or DataFrame inputs with coordinates
         if not isinstance(gdf, gpd.GeoDataFrame) or isinstance(geom, Point):
-            if not isinstance(gdf, gpd.GeoDataFrame) and not x:  # if x=None (x and y are not specified)
+            if not isinstance(gdf, gpd.GeoDataFrame) and not x:  # If DataFrame and no x specified
                 xx = [col for col in gdf.columns if "lon" in col.lower() or "lng" in col.lower()][0]
                 yy = [col for col in gdf.columns if "lat" in col.lower()][0]
             else:
                 xx = yy = None
 
+            # Create point layers and visualizations
             group_point = folium.FeatureGroup(name=f"{i}- Point")
             gdf.apply(
                 points,
@@ -597,14 +753,21 @@ def plp(  # plp: points, lines, polygons
             )
             group_point.add_to(karta)
 
+            # Add clustering, heatmap, line connections, and buffer/ring visualizations as specified
+
+            # Create a clustering layer if `cluster=True`
             if cluster:
                 group_cluster = folium.FeatureGroup(name=f"{i}- Cluster")
+                # If the input is a regular DataFrame, use the latitude and longitude columns
                 if not isinstance(gdf, gpd.GeoDataFrame):
                     group_cluster.add_child(plugins.MarkerCluster(locations=list(zip(lats, lons))))
+                # If it's a GeoDataFrame, use geometry coordinates
                 else:
                     group_cluster.add_child(plugins.MarkerCluster(locations=list(zip(gdf.geometry.y, gdf.geometry.x))))
+                # Add the clustering layer to the map
                 group_cluster.add_to(karta)
 
+            # Create a heatmap layer if `heatmap=True`
             if heatmap:
                 group_heatmap = folium.FeatureGroup(name=f"{i}- Heatmap")
                 if not isinstance(gdf, gpd.GeoDataFrame):
@@ -613,6 +776,7 @@ def plp(  # plp: points, lines, polygons
                     group_heatmap.add_child(plugins.HeatMap(list(zip(gdf.geometry.y, gdf.geometry.x)), radius=10))
                 group_heatmap.add_to(karta)
 
+            # Create a line connection layer if `line=True`
             if line:
                 group_line = folium.FeatureGroup(name=f"{i}- Line")
                 if not isinstance(gdf, gpd.GeoDataFrame):
@@ -628,8 +792,10 @@ def plp(  # plp: points, lines, polygons
                             opacity=line_opacity,
                         )
                     )
+                # Add the line layer to the map
                 group_line.add_to(karta)
 
+            # Create an animated path layer using AntPath if `antpath=True`
             if antpath:
                 group_antpath = folium.FeatureGroup(name=f"{i}- Ant Path")
                 if not isinstance(gdf, gpd.GeoDataFrame):
@@ -638,12 +804,13 @@ def plp(  # plp: points, lines, polygons
                     group_antpath.add_child(plugins.AntPath(list(zip(gdf.geometry.y, gdf.geometry.x))))
                 group_antpath.add_to(karta)
 
+            # Create a buffer visualization if `buffer_radius > 0`
             if buffer_radius > 0:
                 group_buffer = folium.FeatureGroup(name=f"{i}- Buffer")
-                bgdf = gdf.copy()  # buffered gdf
-                bgdf["geometry"] = (
-                    bgdf.to_crs(gsp.find_proj(gdf.geometry.values[0])).buffer(buffer_radius).to_crs("EPSG:4326")
-                )  # radius in meters
+                bgdf = gdf.copy()  # buffered gdf: Create a copy of the GeoDataFrame to modify geometries
+                # Apply buffer to geometries using the specified radius in meters
+                bgdf["geometry"] = bgdf.to_crs(gsp.find_proj(gdf.geometry.values[0])).buffer(buffer_radius).to_crs("EPSG:4326")
+                # Add the buffered geometries to the map as polygons
                 polygons(
                     karta=group_buffer,
                     mdf=bgdf,
@@ -652,17 +819,21 @@ def plp(  # plp: points, lines, polygons
                     line_width=line_width,
                     popup_dict=None,
                 )
+                # Add the buffer layer to the map
                 group_buffer.add_to(karta)
 
+            # Create ring visualization if `ring_outer_radius > 0`
             if ring_outer_radius > 0:
                 group_ring = folium.FeatureGroup(name=f"{i}- Ring")
-                bgdf = gdf.copy()  # buffered gdf
+                bgdf = gdf.copy()  # buffered gdf: Create a copy of the GeoDataFrame to modify geometries
+                # Create ring shapes by applying an outer and inner buffer, subtracting the inner from the outer
                 bgdf["geometry"] = (
                     bgdf.to_crs(gsp.find_proj(gdf.geometry.values[0]))
                     .buffer(ring_outer_radius)
                     .difference(bgdf.to_crs(gsp.find_proj(gdf.geometry.values[0])).buffer(ring_inner_radius))
                     .to_crs("EPSG:4326")
                 )  # radius in meters
+                # Add the ring-shaped geometries to the map as polygons
                 polygons(
                     karta=group_ring,
                     mdf=bgdf,
@@ -671,20 +842,24 @@ def plp(  # plp: points, lines, polygons
                     line_width=line_width,
                     popup_dict=None,
                 )
+                # Add the ring layer to the map
                 group_ring.add_to(karta)
 
+    # Geohash visualization if `geohash_res > 0`
     if geohash_res > 0:  # inner=False doesn't work if compact=True
+        # Create a polygon for bounding box if input is not a polygon
         if isinstance(geom, Polygon) or isinstance(geom, MultiPolygon):
             cdf = gdf.copy()
         else:
             bb = Polygon([[minlon, minlat], [maxlon, minlat], [maxlon, maxlat], [minlon, maxlat], [minlon, minlat]])
-            cdf = gpd.GeoDataFrame({"geometry": [bb]}, crs="EPSG:4326")  # cell df
+            cdf = gpd.GeoDataFrame({"geometry": [bb]}, crs="EPSG:4326") # Create a bounding box GeoDataFrame
 
+        # Convert geometries to geohash cells and their geometries
         cells, _ = sindex.geom_to_cell_parallel(cdf, cell_type="geohash", res=geohash_res, compact=compact)
-        # ids, res, geoms = sindex.cell_to_geom(cells, cell_type='geohash')
         res, geoms = sindex.cell_to_geom(cells, cell_type="geohash")
         cdf = gpd.GeoDataFrame({"id": cells, "res": res, "geometry": geoms}, crs="EPSG:4326")
 
+        # Add geohash cells to the map as a polygon layer
         group_geohash = folium.FeatureGroup(name="Geohash")
         polygons(
             karta=group_geohash,
@@ -696,17 +871,21 @@ def plp(  # plp: points, lines, polygons
         )
         group_geohash.add_to(karta)
 
+    # S2 cell visualization if `s2_res > -1`
     if s2_res > -1:
+        # Create a polygon for bounding box if input is not a polygon
         if isinstance(geom, Polygon) or isinstance(geom, MultiPolygon):
             cdf = gdf.copy()
         else:
             bb = Polygon([[minlon, minlat], [maxlon, minlat], [maxlon, maxlat], [minlon, maxlat], [minlon, minlat]])
             cdf = gpd.GeoDataFrame({"geometry": [bb]}, crs="EPSG:4326")  # cell df
 
+        # Convert geometries to S2 cells and their geometries
         cells, _ = sindex.geom_to_cell_parallel(cdf, cell_type="s2", res=s2_res, compact=compact)
         res, geoms = sindex.cell_to_geom(cells, cell_type="s2")
         cdf = gpd.GeoDataFrame({"id": cells, "res": res, "geometry": geoms}, crs="EPSG:4326")
 
+        # Add S2 cells to the map as a polygon layer
         group_s2 = folium.FeatureGroup(name="Google S2")
         polygons(
             karta=group_s2,
@@ -718,17 +897,21 @@ def plp(  # plp: points, lines, polygons
         )
         group_s2.add_to(karta)
 
+    # H3 cell visualization if `h3_res > -1`
     if h3_res > -1:
         if isinstance(geom, Polygon) or isinstance(geom, MultiPolygon):
             cdf = gdf.copy()
+        # Create a bounding box GeoDataFrame
         else:
             bb = Polygon([[minlon, minlat], [maxlon, minlat], [maxlon, maxlat], [minlon, maxlat], [minlon, minlat]])
             cdf = gpd.GeoDataFrame({"geometry": [bb]}, crs="EPSG:4326")  # cell df
 
+        # Convert geometries to H3 cells and their geometries
         cells, _ = sindex.geom_to_cell_parallel(cdf, cell_type="h3", res=h3_res, compact=compact)
         res, geoms = sindex.cell_to_geom(cells, cell_type="h3")
         cdf = gpd.GeoDataFrame({"id": cells, "res": res, "geometry": geoms}, crs="EPSG:4326")
 
+        # Add H3 cells to the map as a polygon layer
         group_h3 = folium.FeatureGroup(name="Uber H3")
         polygons(
             karta=group_h3,
