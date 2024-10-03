@@ -666,13 +666,13 @@ def plp(  # plp: points, lines, polygons
     # Iterate through each DataFrame or GeoDataFrame in the list to add layers to the map
     for i, gdf in enumerate(gdf_list, start=1):
         geom = gdf.geometry.values[0] if isinstance(gdf, gpd.GeoDataFrame) else None
-    # i = 0  # index of gdf in gdf_list
-    # for gdf in gdf_list:
-    #    i += 1
-    #    if not isinstance(gdf, gpd.GeoDataFrame):  # if pd.DataFrame
-    #        geom = None
-    #    else:
-    #        geom = gdf.geometry.values[0]
+        # i = 0  # index of gdf in gdf_list
+        # for gdf in gdf_list:
+        #    i += 1
+        #    if not isinstance(gdf, gpd.GeoDataFrame):  # if pd.DataFrame
+        #        geom = None
+        #    else:
+        #        geom = gdf.geometry.values[0]
 
         # Handle Polygon geometries
         if isinstance(geom, Polygon) or isinstance(geom, MultiPolygon):
@@ -927,22 +927,61 @@ def plp(  # plp: points, lines, polygons
     return karta
 
 
-def choropleth_plp(karta, gdf, columns, bins, legend, palette, highlight):  # used in plp function only
+def choropleth_plp(
+    karta: folium.Map, gdf: gpd.GeoDataFrame, columns: list, bins: list, legend: str, palette: str, highlight: bool
+) -> int:
+    """
+    Adds a choropleth layer to the given Folium map object using the specified GeoDataFrame and column properties.
+
+    This function is used exclusively within the `plp` function to create choropleth maps, visualizing data attributes
+    over a geographic area using color gradients.
+
+    Args:
+        karta (folium.Map): The Folium map object to which the choropleth layer will be added.
+        gdf (geopandas.GeoDataFrame): The GeoDataFrame containing multipolygon geometries and data to be visualized.
+        columns (list): A list of two elements:
+            - `columns[0]` (str): The column name in `gdf` that contains unique identifiers for each region or geometry.
+            - `columns[1]` (str): The column name in `gdf` containing the data values to be visualized on the map.
+        bins (list): A list of numerical values defining the value intervals to use for the choropleth color categories.
+        legend (str): A string that provides the legend title to describe what is being represented on the map (e.g., "Population Density").
+        palette (str): A string defining the color palette to be used for the choropleth (e.g., "YlOrRd", "BuPu").
+        highlight (bool): A boolean flag to indicate whether regions should be highlighted when hovered over.
+
+    Returns:
+        int: Returns 0 upon successful execution, indicating that the choropleth layer was successfully added to the map.
+
+    Example:
+        choropleth_plp(
+            karta,
+            gdf,
+            ['region_id', 'population'],
+            bins=[0, 100, 500, 1000, 5000],
+            legend="Population by Region",
+            palette="YlOrRd",
+            highlight=True
+        )
+    """
+
+    # Create a choropleth layer based on the GeoDataFrame, using the specified columns and styling options
     choropleth = folium.Choropleth(
-        geo_data=gdf,  # containing multypolygon data
-        name="Choropleth",
-        data=gdf,  # containing data to be shown on map e.g. name, counts, ...
-        columns=columns,
-        key_on="feature.properties." + columns[0],
-        legend_name=legend,  # description of columns[1]
-        bins=bins,
-        fill_color=palette,
-        fill_opacity=0.5,
-        line_opacity=0.25,
-        smooth_factor=0,
-        highlight=highlight,
+        geo_data=gdf,  # The GeoDataFrame containing geographic data and properties
+        name="Choropleth",  # Name of the layer to display in the layer control
+        data=gdf,  # Data source used to extract the values to be represented
+        columns=columns,  # [unique_identifier_column, data_value_column] to match regions with data
+        key_on="feature.properties." + columns[0],  # Key to match regions in the GeoDataFrame with those in geo_data
+        legend_name=legend,  # Description of the data being visualized
+        bins=bins,  # Value ranges for choropleth colors
+        fill_color=palette,  # Color scheme for the choropleth
+        fill_opacity=0.5,  # Transparency level of the filled regions
+        line_opacity=0.25,  # Transparency level of the borders between regions
+        smooth_factor=0,  # Level of smoothing applied to the edges of regions
+        highlight=highlight,  # Enable or disable highlighting of regions on hover
     ).geojson.add_to(karta)
+
+    # Add a tooltip to display the attribute values for each region when hovered over
     folium.features.GeoJsonTooltip(fields=columns).add_to(choropleth)
+
+    # Return 0 to indicate successful addition of the choropleth layer to the map
     return 0
 
 
