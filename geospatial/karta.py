@@ -474,7 +474,7 @@ def plp(  # plp: points, lines, polygons
     cells: Optional[List[str]] = None,
     cell_type: Optional[str] = None,  # list of geohash, S2 or H3 cell IDs
     ways: Optional[List[int]] = None,  # list of OSM way IDs (lines or polygons) and Overpass API URL to query from
-    url: Optional[str] = None,
+    url: Optional[str] = None,  # OpenStreetMap server URL
 ) -> folium.Map:
     """
     Creates a Folium map with points, lines, or polygons based on the input geospatial data.
@@ -510,10 +510,10 @@ def plp(  # plp: points, lines, polygons
         Color of the points when displayed on the map.
 
     color_head : str, optional
-        Substring to extract color for the head (used for gradient coloring).
+        Substring to extract color for the head.
 
     color_tail : str, optional
-        Substring to extract color for the tail (used for gradient coloring).
+        Substring to extract color for the tail.
 
     point_opacity : float, default 0.5
         Opacity of the points. Value should be between 0 and 1.
@@ -666,13 +666,13 @@ def plp(  # plp: points, lines, polygons
     # Iterate through each DataFrame or GeoDataFrame in the list to add layers to the map
     for i, gdf in enumerate(gdf_list, start=1):
         geom = gdf.geometry.values[0] if isinstance(gdf, gpd.GeoDataFrame) else None
-        # i = 0  # index of gdf in gdf_list
-        # for gdf in gdf_list:
-        #    i += 1
-        #    if not isinstance(gdf, gpd.GeoDataFrame):  # if pd.DataFrame
-        #        geom = None
-        #    else:
-        #        geom = gdf.geometry.values[0]
+    # i = 0  # index of gdf in gdf_list
+    # for gdf in gdf_list:
+    #    i += 1
+    #    if not isinstance(gdf, gpd.GeoDataFrame):  # if pd.DataFrame
+    #        geom = None
+    #    else:
+    #        geom = gdf.geometry.values[0]
 
         # Handle Polygon geometries
         if isinstance(geom, Polygon) or isinstance(geom, MultiPolygon):
@@ -714,8 +714,8 @@ def plp(  # plp: points, lines, polygons
                 ]  # Convert LineString geometries to coordinates (lat, lon)
                 # Use color mapping if line_color is a column
                 color = color_map(row[line_color]) if line_color in gdf.columns else line_color
-                # Create popup content if specified
 
+                # Create popup content if specified
                 popup = "".join(f"{item}: <b>{row[line_popup[item]]}</b><br>" for item in line_popup) if line_popup else None
                 # if line_popup is None:
                 #    popup = None
