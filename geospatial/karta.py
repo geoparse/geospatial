@@ -985,26 +985,66 @@ def choropleth_plp(
     return 0
 
 
-def choropleth(gdf, columns, bins, legend, palette="YlOrRd", highlight=True):
-    minlon, minlat, maxlon, maxlat = gdf.total_bounds
-    sw = [minlat, minlon]
-    ne = [maxlat, maxlon]
-    karta = base_map(sw, ne)
+def choropleth(
+    gdf: gpd.GeoDataFrame, columns: list, bins: list, legend: str, palette: str = "YlOrRd", highlight: bool = True
+) -> folium.Map:
+    """
+    Creates a choropleth map based on the given GeoDataFrame and specified parameters.
 
+    This function generates a Folium choropleth map layer using the data from a GeoDataFrame and visualizes it using color
+    gradients to represent different data values across geographic areas.
+
+    Args:
+        gdf (geopandas.GeoDataFrame): The GeoDataFrame containing multipolygon geometries and data attributes to be visualized.
+        columns (list): A list of two elements:
+            - `columns[0]` (str): The column name in `gdf` that contains unique identifiers for each region.
+            - `columns[1]` (str): The column name in `gdf` containing the data values to be visualized.
+        bins (list): A list of numerical values defining the value intervals for the choropleth color categories.
+        legend (str): A string that provides the title for the legend to describe what is represented on the map.
+        palette (str, optional): A string defining the color palette to be used for the choropleth (default is "YlOrRd").
+        highlight (bool, optional): A boolean flag indicating whether regions should be highlighted on hover (default is True).
+
+    Returns:
+        folium.Map: The Folium map object containing the choropleth layer.
+
+    Example:
+        choropleth(
+            gdf,
+            ['region_id', 'population'],
+            bins=[0, 100, 500, 1000, 5000],
+            legend="Population by Region",
+            palette="YlOrRd",
+            highlight=True
+        )
+    """
+
+    # Extract the bounding coordinates of the GeoDataFrame
+    minlon, minlat, maxlon, maxlat = gdf.total_bounds  # Get the total bounds of the GeoDataFrame
+    sw = [minlat, minlon]  # South-west corner
+    ne = [maxlat, maxlon]  # North-east corner
+    karta = base_map(sw, ne)  # Create a base map using the bounding coordinates
+
+    # Create a choropleth layer based on the GeoDataFrame
     choropleth = folium.Choropleth(
-        geo_data=gdf,  # containing multypolygon data
-        name="Choropleth",
-        data=gdf,  # containing data to be shown on map e.g. name, counts, ...
-        columns=columns,
-        key_on="feature.properties." + columns[0],
-        legend_name=legend,  # description of columns[1]
-        bins=bins,
-        fill_color=palette,
-        fill_opacity=0.5,
-        line_opacity=0.25,
-        smooth_factor=0,
-        highlight=highlight,
-    ).add_to(karta)
+        geo_data=gdf,  # The GeoDataFrame containing geographic data
+        name="Choropleth",  # Name of the layer for display in layer control
+        data=gdf,  # The data source for values to be represented
+        columns=columns,  # [unique_identifier_column, data_value_column] for matching regions with data
+        key_on="feature.properties." + columns[0],  # Key to match GeoDataFrame regions with the data
+        legend_name=legend,  # Description of the data being visualized
+        bins=bins,  # Value ranges for choropleth colors
+        fill_color=palette,  # Color scheme for the choropleth
+        fill_opacity=0.5,  # Transparency level of filled regions
+        line_opacity=0.25,  # Transparency level of borders between regions
+        smooth_factor=0,  # Level of smoothing applied to the edges of regions
+        highlight=highlight,  # Enable or disable highlighting of regions on hover
+    ).add_to(karta)  # Add the choropleth layer to the map
+
+    # Add a tooltip to display the attribute values for each region when hovered over
     folium.features.GeoJsonTooltip(fields=columns).add_to(choropleth.geojson)
+
+    # Add layer control to the map
     folium.LayerControl(collapsed=False).add_to(karta)
+
+    # Return the Folium map object containing the choropleth layer
     return karta
