@@ -1,4 +1,5 @@
 import re
+from typing import List, Optional, Union
 
 import folium  # Folium is a Python library used for visualising geospatial data. Actually, it's a Python wrapper for Leaflet which is a leading open-source JavaScript library for plotting interactive maps.
 import geopandas as gpd
@@ -524,7 +525,7 @@ def plp(  # plp: points, lines, polygons
         Weight (thickness) of the point outline. Typically set to twice the `point_radius`.
 
     point_popup : dict, optional
-        Dictionary where keys are labels and values are column names in the DataFrame. Used to create HTML popups with 
+        Dictionary where keys are labels and values are column names in the DataFrame. Used to create HTML popups with
         attributes of each point.
 
     buffer_radius : float, default 0
@@ -546,7 +547,7 @@ def plp(  # plp: points, lines, polygons
         Thickness of the lines.
 
     line_popup : dict, optional
-        Dictionary where keys are labels and values are column names in the DataFrame. Used to create HTML popups with 
+        Dictionary where keys are labels and values are column names in the DataFrame. Used to create HTML popups with
         attributes of each line.
 
     centroid : bool, default False
@@ -562,7 +563,7 @@ def plp(  # plp: points, lines, polygons
         Thickness of polygon outlines.
 
     polygon_popup : dict, optional
-        Dictionary where keys are labels and values are column names in the DataFrame. Used to create HTML popups with 
+        Dictionary where keys are labels and values are column names in the DataFrame. Used to create HTML popups with
         attributes of each polygon.
 
     choropleth_cols : list of str, optional
@@ -651,7 +652,7 @@ def plp(  # plp: points, lines, polygons
             lons = gdf[xx]
             lats = gdf[yy]
             minlatg, minlong, maxlatg, maxlong = min(lats), min(lons), max(lats), max(lons)  # minlatg: minlat in gdf
-        else:   # If input is a GeoDataFrame, use total_bounds to get the bounding box
+        else:  # If input is a GeoDataFrame, use total_bounds to get the bounding box
             minlong, minlatg, maxlong, maxlatg = gdf.total_bounds
         # Update overall bounding box
         minlat, minlon = min(minlat, minlatg), min(minlon, minlong)
@@ -660,20 +661,20 @@ def plp(  # plp: points, lines, polygons
     # Create a base map using the bounding box
     sw = [minlat, minlon]  # South West (bottom left corner)
     ne = [maxlat, maxlon]  # North East (top right corner)
-    karta = base_map(sw, ne)    # Initialize folium map with the bounding box
+    karta = base_map(sw, ne)  # Initialize folium map with the bounding box
 
     # Iterate through each DataFrame or GeoDataFrame in the list to add layers to the map
     for i, gdf in enumerate(gdf_list, start=1):
         geom = gdf.geometry.values[0] if isinstance(gdf, gpd.GeoDataFrame) else None
-    #i = 0  # index of gdf in gdf_list
-    #for gdf in gdf_list:
-    #    i += 1
-    #    if not isinstance(gdf, gpd.GeoDataFrame):  # if pd.DataFrame
-    #        geom = None
-    #    else:
-    #        geom = gdf.geometry.values[0]
+        # i = 0  # index of gdf in gdf_list
+        # for gdf in gdf_list:
+        #    i += 1
+        #    if not isinstance(gdf, gpd.GeoDataFrame):  # if pd.DataFrame
+        #        geom = None
+        #    else:
+        #        geom = gdf.geometry.values[0]
 
-    # Handle Polygon geometries
+        # Handle Polygon geometries
         if isinstance(geom, Polygon) or isinstance(geom, MultiPolygon):
             if centroid:  # Show centroids of polygons if `centroid=True`
                 group_centroid = folium.FeatureGroup(name=f"{i}- Centroid")
@@ -693,7 +694,7 @@ def plp(  # plp: points, lines, polygons
                     highlight=choropleth_highlight,
                 )
                 group_chor.add_to(karta)
-            else:   # Otherwise, visualise polygons normally
+            else:  # Otherwise, visualise polygons normally
                 group_polygon = folium.FeatureGroup(name=f"{i}- Polygon")
                 gdf.apply(
                     row_polygons,
@@ -716,9 +717,9 @@ def plp(  # plp: points, lines, polygons
                 # Create popup content if specified
 
                 popup = "".join(f"{item}: <b>{row[line_popup[item]]}</b><br>" for item in line_popup) if line_popup else None
-                #if line_popup is None:
+                # if line_popup is None:
                 #    popup = None
-                #else:
+                # else:
                 #    popup = ""
                 #    for item in line_popup:
                 #        popup += "{}: <b>{}</b><br>".format(item, row[line_popup[item]])
@@ -852,7 +853,7 @@ def plp(  # plp: points, lines, polygons
             cdf = gdf.copy()
         else:
             bb = Polygon([[minlon, minlat], [maxlon, minlat], [maxlon, maxlat], [minlon, maxlat], [minlon, minlat]])
-            cdf = gpd.GeoDataFrame({"geometry": [bb]}, crs="EPSG:4326") # Create a bounding box GeoDataFrame
+            cdf = gpd.GeoDataFrame({"geometry": [bb]}, crs="EPSG:4326")  # Create a bounding box GeoDataFrame
 
         # Convert geometries to geohash cells and their geometries
         cells, _ = sindex.geom_to_cell_parallel(cdf, cell_type="geohash", res=geohash_res, compact=compact)
