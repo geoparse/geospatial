@@ -6,10 +6,41 @@ from shapely.geometry import LineString, Polygon
 
 def ways_to_geom(ids, url):
     """
-    Gets an array of OSM way IDs and returns the
-    corresponding array of shapely LineString or Polygon.
+    Convert an array of OpenStreetMap (OSM) way IDs into Shapely geometries.
 
-    How to call:
+    This function retrieves the geometries corresponding to the given OSM way IDs and
+    returns a list of Shapely `LineString` or `Polygon` objects based on the geometries
+    fetched from the OSM API.
+
+    Parameters
+    ----------
+    ids : list of int
+        A list of OSM way IDs to be retrieved.
+    url : str
+        The URL endpoint for the Overpass API to request the geometries.
+
+    Returns
+    -------
+    list of shapely.geometry.LineString or shapely.geometry.Polygon
+        A list of Shapely `LineString` or `Polygon` objects representing the geometries
+        of the OSM ways. If the way forms a closed loop, it is returned as a `Polygon`;
+        otherwise, it is returned as a `LineString`.
+
+    Notes
+    -----
+    - The function constructs an Overpass API query using the given IDs, requests the
+      geometries, and then converts them into Shapely geometries.
+    - The function assumes that the Overpass API returns data in JSON format and expects
+      the "geometry" attribute to contain the coordinates.
+
+    Examples
+    --------
+    >>> way_ids = [123456, 234567, 345678]
+    >>> url = "https://overpass-api.de/api/interpreter"
+    >>> geometries = ways_to_geom(way_ids, url)
+    >>> print(geometries)
+    [<shapely.geometry.polygon.Polygon object at 0x...>,
+     <shapely.geometry.linestring.LineString object at 0x...>]
     """
     query = "[out:json][timeout:600][maxsize:4073741824];"
     for item in ids:
@@ -17,13 +48,13 @@ def ways_to_geom(ids, url):
 
     response = requests.get(url, params={"data": query}).json()
     response = response["elements"]
-    nodes = response[0]["geometry"]  # used later to determine if the way is a Ploygon or a LineString
+    nodes = response[0]["geometry"]  # used later to determine if the way is a Polygon or a LineString
     ways = [item["geometry"] for item in response]
 
     geoms = []
     for way in ways:
         coords = [(node["lon"], node["lat"]) for node in way]
-        if nodes[0] == nodes[-1]:  # in polygons the first and last items are the same.
+        if nodes[0] == nodes[-1]:  # in polygons the first and last items are the same
             geoms.append(Polygon(coords))
         else:
             geoms.append(LineString(coords))
