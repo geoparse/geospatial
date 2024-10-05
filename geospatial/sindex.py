@@ -25,32 +25,39 @@ def geom_to_cell(geoms: List[BaseGeometry], cell_type: str, res: int, dump: bool
     """
     Converts a list of geometries into a set of unique spatial cells based on the specified cell type and resolution.
 
-    This function takes a list of Shapely geometries (e.g., Polygon, MultiPolygon), and converts them into spatial cells
+    This function takes a list of Shapely geometries (e.g., Polygon, MultiPolygon) and converts them into spatial cells
     using one of the supported cell systems: Geohash, S2, or H3. The resulting cells are returned as a list of unique
     cell IDs. If `dump` is set to True, the cells are saved to a file instead of being returned.
 
-    Args:
-        geoms (List[BaseGeometry]): A list of Shapely geometry objects (Polygon or MultiPolygon).
-        cell_type (str): The type of spatial cell system to use. Supported values are "geohash", "s2", or "h3".
-        res (int): The resolution level for the spatial cells. The resolution parameter determines the granularity of the cells.
-        dump (bool, optional): If True, the cells are saved to a file on the desktop in a folder named after `cell_type`.
-                               If False, the function returns a list of cell IDs. Default is False.
+    Parameters
+    ----------
+    geoms : list of shapely.geometry.base.BaseGeometry
+        A list of Shapely geometry objects (Polygon or MultiPolygon).
+    cell_type : str
+        The type of spatial cell system to use. Supported values are "geohash", "s2", or "h3".
+    res : int
+        The resolution level for the spatial cells. The resolution parameter determines the granularity of the cells.
+    dump : bool, optional
+        If True, the cells are saved to a file on the desktop in a folder named after `cell_type`.
+        If False, the function returns a list of cell IDs. Default is False.
 
-    Returns:
-        Union[List[str], None]: If `dump` is False, a list of unique cell IDs is returned. If `dump` is True, None is returned
-                                after saving the cells to a file.
+    Returns
+    -------
+    list of str or None
+        If `dump` is False, a list of unique cell IDs is returned.
+        If `dump` is True, None is returned after saving the cells to a file.
 
-    Raises:
-        ValueError: If `cell_type` is not one of the supported values ("geohash", "s2", "h3").
+    Raises
+    ------
+    ValueError
+        If `cell_type` is not one of the supported values ("geohash", "s2", "h3").
 
-    Example:
-        ```
-        # Define a list of Shapely geometries
-        geometries = [Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), MultiPolygon([...])]
-
-        # Convert geometries to H3 cells at resolution 9
-        h3_cells = geom_to_cell(geometries, cell_type="h3", res=9)
-        ```
+    Examples
+    --------
+    >>> from shapely.geometry import Polygon, MultiPolygon
+    >>> geometries = [Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), MultiPolygon([...])]
+    >>> # Convert geometries to H3 cells at resolution 9
+    >>> h3_cells = geom_to_cell(geometries, cell_type="h3", res=9)
     """
     polys = []
     for geom in geoms:
@@ -451,7 +458,43 @@ def uncompact_s2(compact_tokens: list, level: int) -> list:
     return list(set(uncompact_tokens))
 
 
-def h3_stats(geom, h3_res, compact=False):
+def h3_stats(geom: BaseGeometry, h3_res: int, compact: bool = False) -> Tuple[int, float]:
+    """
+    Computes H3 cell statistics for a given geometry at a specified resolution.
+
+    This function takes a Shapely geometry object and computes the number of H3 cells covering the geometry at a
+    specified resolution. It also calculates the area of each H3 cell at the given resolution. Optionally, the function
+    can return the compacted set of H3 cells, reducing the number of cells required to represent the geometry.
+
+    Parameters
+    ----------
+    geom : shapely.geometry.base.BaseGeometry
+        A Shapely geometry object (e.g., Polygon or MultiPolygon) representing the area of interest.
+    h3_res : int
+        The H3 resolution level for generating spatial cells. The resolution level controls the granularity of the cells.
+    compact : bool, optional
+        If True, the function returns a compacted set of H3 cells, reducing the number of cells needed to represent the geometry.
+        Default is False.
+
+    Returns
+    -------
+    tuple
+        A tuple containing:
+        - int: Number of H3 cells covering the given geometry.
+        - float: Area of each H3 cell at the specified resolution, in square kilometers.
+
+    Examples
+    --------
+    >>> from shapely.geometry import Polygon
+    >>> geom = Polygon([(-122.0, 37.0), (-122.0, 38.0), (-121.0, 38.0), (-121.0, 37.0), (-122.0, 37.0)])
+    >>> h3_stats(geom, h3_res=9, compact=True)
+    (512, 0.001)
+
+    Notes
+    -----
+    The function utilizes the H3 library for generating and compacting H3 cells and for calculating cell area. The area
+    is always returned in square kilometers ("km^2").
+    """
     cells = geom_to_cell(geom, cell="h3", res=h3_res)
     area = h3.hex_area(h3_res, unit="km^2")
     if compact:
