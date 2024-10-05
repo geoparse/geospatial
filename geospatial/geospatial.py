@@ -17,26 +17,38 @@ from shapely.ops import transform
 
 def geom_stats(geom: Optional[Union[Polygon, MultiPolygon]] = None, unit: str = "m") -> Optional[List[Union[int, float]]]:
     """
-    Computes various geometric statistics for a given Polygon or MultiPolygon geometry, including the number of
-    shells (outer boundaries), number of holes, number of shell points, total area, and total border length.
+    Compute geometric statistics for a Polygon or MultiPolygon geometry.
 
-    If no geometry is provided, the function prints a usage example.
+    Calculates various statistics for a given Shapely geometry, such as the number of shells (outer boundaries),
+    number of holes, number of shell points, total area, and total border length. If no geometry is provided,
+    the function will print a usage example.
 
-    Args:
-        geom (Optional[Union[Polygon, MultiPolygon]]): A Shapely geometry object (Polygon or MultiPolygon)
-                                                       for which to compute the statistics. Defaults to None.
-        unit (str): The unit for area and length calculations. Accepts "m" for meters and "km" for kilometers.
-                    Defaults to "m".
+    Parameters
+    ----------
+    geom : Polygon or MultiPolygon, optional
+        A Shapely geometry object (Polygon or MultiPolygon) for which to compute the statistics. If not provided,
+        the function will print a usage example and not perform any computations. Default is None.
+    unit : str, optional
+        The unit for area and length calculations. Accepts "m" for meters and "km" for kilometers. Default is "m".
 
-    Returns:
-        Optional[List[Union[int, float]]]: A list containing the following statistics in order:
-                                           - Number of shells (int)
-                                           - Number of holes (int)
-                                           - Number of shell points (int)
-                                           - Total area (float, rounded to nearest integer in specified unit)
-                                           - Total border length (float, rounded to nearest integer in specified unit)
+    Returns
+    -------
+    list of int or float, optional
+        A list containing the following statistics in order:
+            - Number of shells (int)
+            - Number of holes (int)
+            - Number of shell points (int)
+            - Total area (float, rounded to nearest integer in the specified unit)
+            - Total border length (float, rounded to nearest integer in the specified unit)
 
-        Returns None if no geometry is provided.
+        If no geometry is provided, the function returns None.
+
+    Examples
+    --------
+    >>> from shapely.geometry import Polygon
+    >>> geom = Polygon([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)])
+    >>> compute_geometry_statistics(geom, unit="km")
+    [1, 0, 5, 1.0, 4.0]
     """
     if not geom:  # Print usage help if geom is None
         print(
