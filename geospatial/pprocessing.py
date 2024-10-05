@@ -13,29 +13,48 @@ def parallelize(function: Callable[[pd.DataFrame], pd.DataFrame], df: pd.DataFra
     and applies the specified function in parallel to each chunk using the `multiprocess` library.
     It then concatenates the results back into a single DataFrame.
 
-    The 'multiprocessing' module has a major limitation when it comes to IPython use.
-    'multiprocess' is a fork of the 'multiprocessing' module which uses dill instead of pickle
-    to serialization and overcomes this issue conveniently.
+    The `multiprocessing` module has a major limitation when it comes to IPython use.
+    `multiprocess` is a fork of the `multiprocessing` module which uses `dill` instead of `pickle`
+    for serialization and overcomes this issue conveniently.
 
-    Args:
-        function (Callable[[pd.DataFrame], pd.DataFrame]): A function that processes a chunk of the
-                                                           DataFrame and returns a transformed DataFrame.
-        df (pd.DataFrame): The DataFrame to be processed in parallel.
+    Parameters
+    ----------
+    function : Callable[[pd.DataFrame], pd.DataFrame]
+        A function that processes a chunk of the DataFrame and returns a transformed DataFrame.
+    df : pd.DataFrame
+        The DataFrame to be processed in parallel.
 
-    Returns:
-        pd.DataFrame: The resulting DataFrame after applying the function to all chunks in parallel.
+    Returns
+    -------
+    pd.DataFrame
+        The resulting DataFrame after applying the function to all chunks in parallel.
 
-    Example:
-        ```
-        # Define a sample function to apply to each chunk of the DataFrame
-        def sample_function(chunk):
-            chunk["new_column"] = chunk["existing_column"] * 2
-            return chunk
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from multiprocess import Pool
 
+    >>> def sample_function(chunk):
+    ...     chunk["new_column"] = chunk["existing_column"] * 2
+    ...     return chunk
 
-        # Apply the function to the DataFrame in parallel
-        result_df = parallelize(sample_function, input_df)
-        ```
+    >>> # Create a sample DataFrame
+    >>> input_df = pd.DataFrame({"existing_column": [1, 2, 3, 4]})
+
+    >>> # Apply the function to the DataFrame in parallel
+    >>> result_df = parallelize(sample_function, input_df)
+    >>> print(result_df)
+       existing_column  new_column
+    0                1           2
+    1                2           4
+    2                3           6
+    3                4           8
+
+    Notes
+    -----
+    This function uses the `multiprocess` library instead of the standard `multiprocessing` module
+    because `multiprocess` supports a broader range of serialization scenarios, making it more
+    suitable for use with IPython and Jupyter notebooks.
     """
     # Get the number of available CPU cores for parallel processing
     ncores = cpu_count()
