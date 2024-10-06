@@ -441,7 +441,7 @@ def quick_intersection(gdf1, gdf2, poly_id=None):
     return int_gdf
 
 
-def overlay_parallel(
+def poverlay(
     gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame, how: str = "intersection", keep_geom_type: bool = False
 ) -> gpd.GeoDataFrame:
     """
@@ -474,7 +474,7 @@ def overlay_parallel(
     --------
     >>> gdf1 = gpd.GeoDataFrame({"geometry": [Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])]})
     >>> gdf2 = gpd.GeoDataFrame({"geometry": [Polygon([(1, 1), (3, 1), (3, 3), (1, 3)])]})
-    >>> result_gdf = parallel_spatial_overlay(gdf1, gdf2, how="intersection")
+    >>> result_gdf = poverlay(gdf1, gdf2, how="intersection")
     >>> print(result_gdf)
                                                  geometry
     0  POLYGON ((2.00000 1.00000, 2.00000 2.00000, 1....
@@ -514,25 +514,45 @@ def overlay_parallel(
 
 def google_geocoding(address_or_zipcode: str, api_key: str) -> pd.Series:
     """
-    Returns geographic coordinates (latitude and longitude) for a given address or zip code
-    using the Google Geocoding API.
+    Get geographic coordinates (latitude and longitude) for a given address or zip code using the Google Geocoding API.
 
-    Args:
-        address_or_zipcode (str): A text-based address or a zip code that you want to geocode.
-        api_key (str): A valid Google Maps API key for accessing the geocoding service.
+    This function utilizes the Google Geocoding API to convert a given address or zip code into geographic coordinates.
+    The function returns the latitude and longitude as a pandas Series. If the request is unsuccessful or the address
+    is not found, the function returns a Series with `(None, None)`.
 
-    Returns:
-        pd.Series: A pandas Series containing the latitude and longitude as floats.
-                   If the request fails or the address is not found, returns a Series of (None, None).
+    Parameters
+    ----------
+    address_or_zipcode : str
+        A text-based address or zip code that needs to be geocoded.
+    api_key : str
+        A valid Google Maps API key required to access the Google Geocoding service.
 
-    Example:
-        >>> df[["lat", "lon"]] = df.apply(lambda row: gsp.google_geocoding(row.address), axis=1)
-        >>> google_geocoding("1600 Amphitheatre Parkway, Mountain View, CA", "your_api_key")
-        lat    37.4224764
-        lon   -122.0842499
-        dtype: float64
+    Returns
+    -------
+    pd.Series
+        A pandas Series containing the latitude and longitude as floats. If the request fails or the address is not found,
+        returns a Series with `(None, None)`.
+
+    Examples
+    --------
+    >>> df[["lat", "lon"]] = df.apply(lambda row: google_geocoding(row.address, "your_api_key"), axis=1)
+    >>> result = google_geocoding("1600 Amphitheatre Parkway, Mountain View, CA", "your_api_key")
+    >>> print(result)
+    lat    37.4224764
+    lon   -122.0842499
+    dtype: float64
+
+    Notes
+    -----
+    - Make sure to enable the Google Geocoding API in your Google Cloud Console and provide a valid API key.
+    - The API might return ambiguous results if the input address is incomplete or vague.
+    - Consider handling `None` values in the returned Series if the API fails to find the address or the request limit is exceeded.
+
+    Raises
+    ------
+    Exception
+        If there is an error in the API request or response parsing, an exception is raised with an error message.
     """
-
     lat, lon = None, None
     base_url = "https://maps.googleapis.com/maps/api/geocode/json"
     endpoint = f"{base_url}?address={address_or_zipcode}&key={api_key}"
