@@ -322,17 +322,31 @@ def vincenty(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 def flatten_3d(geom: gpd.GeoSeries) -> List[Union[Polygon, MultiPolygon]]:
     """
-    Converts a GeoSeries of 3D Polygons (Polygon Z) or MultiPolygons into a list of 2D Polygons or MultiPolygons
-    by removing the z-coordinate from each geometry.
+    Flatten a GeoSeries of 3D Polygons or MultiPolygons into 2D geometries.
 
-    Args:
-        geom (gpd.GeoSeries): A GeoSeries containing 3D Polygons or MultiPolygons (geometries with z-coordinates).
+    This function removes the z-coordinate from each 3D geometry in the input GeoSeries,
+    converting it into a 2D Polygon or MultiPolygon. The result is a list of 2D geometries.
 
-    Returns:
-        List[Union[Polygon, MultiPolygon]]: A list of 2D Polygons or MultiPolygons with z-coordinates removed.
+    Parameters
+    ----------
+    geom : gpd.GeoSeries
+        A GeoSeries containing 3D Polygons or MultiPolygons (geometries with z-coordinates).
 
-    Example:
-        >>> gdf.geometry = gsp.flatten_3d(gdf.geometry)
+    Returns
+    -------
+    List[Union[Polygon, MultiPolygon]]
+        A list of 2D Polygons or MultiPolygons with the z-coordinates removed.
+
+    Examples
+    --------
+    >>> gdf.geometry = gsp.flatten_3d(gdf.geometry)
+        Converts all 3D geometries in the GeoSeries `gdf.geometry` to 2D geometries.
+
+    Notes
+    -----
+    The function is useful when working with datasets that contain 3D geometries but
+    only 2D geometries are needed for further spatial analysis or visualization.
+
     """
     new_geom = []
     for p in geom:
