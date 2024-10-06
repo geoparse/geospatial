@@ -367,16 +367,33 @@ def flatten_3d(geom: gpd.GeoSeries) -> List[Union[Polygon, MultiPolygon]]:
 
 def explode_line_to_points(row: gpd.GeoSeries) -> gpd.GeoDataFrame:
     """
-    Splits a LineString geometry from a GeoSeries row into individual Point geometries and returns a new
-    GeoDataFrame with each Point as a separate row while preserving the original attributes.
+    Split a LineString geometry into individual Point geometries while preserving original attributes.
 
-    Args:
-        row (gpd.GeoSeries): A GeoSeries representing a single row of a GeoDataFrame.
-                             It must include a 'geometry' column of type LineString.
+    This function takes a GeoSeries representing a single row of a GeoDataFrame, extracts the coordinates
+    from a LineString geometry, and creates a new GeoDataFrame with each Point as a separate row. All original
+    attributes from the input row are preserved in the new GeoDataFrame.
 
-    Returns:
-        gpd.GeoDataFrame: A new GeoDataFrame where each row corresponds to a Point geometry derived
-                          from the coordinates of the LineString. All other columns from the original row are preserved.
+    Parameters
+    ----------
+    row : gpd.GeoSeries
+        A GeoSeries representing a single row of a GeoDataFrame. It must include a 'geometry' column
+        containing a LineString geometry.
+
+    Returns
+    -------
+    gpd.GeoDataFrame
+        A new GeoDataFrame where each row corresponds to a Point geometry derived from the coordinates of the LineString.
+        All other columns from the original row are preserved.
+
+    Examples
+    --------
+    >>> line_gdf = gpd.GeoDataFrame({"geometry": [LineString([(0, 0), (1, 1), (2, 2)])]})
+    >>> point_gdf = split_linestring_to_points(line_gdf.iloc[0])
+    >>> print(point_gdf)
+       geometry
+    0  POINT (0 0)
+    1  POINT (1 1)
+    2  POINT (2 2)
     """
     points = [Point(x) for x in list(row["geometry"].coords)]  # create list of Point objects
     gdf = gpd.GeoDataFrame(
