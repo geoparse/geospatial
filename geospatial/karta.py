@@ -1001,26 +1001,38 @@ def choropleth(
     gdf: gpd.GeoDataFrame, columns: list, bins: list, legend: str, palette: str = "YlOrRd", highlight: bool = True
 ) -> folium.Map:
     """
-    Creates a choropleth map based on the given GeoDataFrame and specified parameters.
+    Creates a choropleth map using the given GeoDataFrame and specified parameters.
 
-    This function generates a Folium choropleth map layer using the data from a GeoDataFrame and visualizes it using color
-    gradients to represent different data values across geographic areas.
+    This function generates a Folium choropleth map layer by visualizing the data from a GeoDataFrame using color gradients
+    to represent different data values across geographic areas.
 
-    Args:
-        gdf (geopandas.GeoDataFrame): The GeoDataFrame containing multipolygon geometries and data attributes to be visualized.
-        columns (list): A list of two elements:
-            - `columns[0]` (str): The column name in `gdf` that contains unique identifiers for each region.
-            - `columns[1]` (str): The column name in `gdf` containing the data values to be visualized.
-        bins (list): A list of numerical values defining the value intervals for the choropleth color categories.
-        legend (str): A string that provides the title for the legend to describe what is represented on the map.
-        palette (str, optional): A string defining the color palette to be used for the choropleth (default is "YlOrRd").
-        highlight (bool, optional): A boolean flag indicating whether regions should be highlighted on hover (default is True).
+    Parameters
+    ----------
+    gdf : geopandas.GeoDataFrame
+        The GeoDataFrame containing multipolygon geometries and data attributes to be visualized.
+    columns : list
+        A list of two elements:
+            - columns[0] : str
+                The column name in `gdf` that contains unique identifiers for each region.
+            - columns[1] : str
+                The column name in `gdf` containing the data values to be visualized.
+    bins : list
+        A list of numerical values defining the value intervals for the choropleth color categories.
+    legend : str
+        The title for the legend, which describes what is represented on the map.
+    palette : str, optional
+        The color palette to be used for the choropleth (default is "YlOrRd").
+    highlight : bool, optional
+        A flag indicating whether regions should be highlighted when hovered over (default is True).
 
-    Returns:
-        folium.Map: The Folium map object containing the choropleth layer.
+    Returns
+    -------
+    folium.Map
+        The Folium map object containing the choropleth layer.
 
-    Example:
-        choropleth(
+    Examples
+    --------
+    >>> choropleth(
             gdf,
             ['region_id', 'population'],
             bins=[0, 100, 500, 1000, 5000],
@@ -1029,7 +1041,6 @@ def choropleth(
             highlight=True
         )
     """
-
     # Extract the bounding coordinates of the GeoDataFrame
     minlon, minlat, maxlon, maxlat = gdf.total_bounds  # Get the total bounds of the GeoDataFrame
     sw = [minlat, minlon]  # South-west corner

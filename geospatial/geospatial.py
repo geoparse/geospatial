@@ -576,8 +576,8 @@ def reverse_geocoding_google(lat: float, lon: float, api_key: str) -> str:
     """
     Returns the postal code for a given geographic coordinate (latitude, longitude) using the Google Geocoding API.
 
-    This function makes a reverse geocoding request to the Google Geocoding API to obtain the postal code associated 
-    with the provided latitude and longitude. If the postal code is found, it is returned as a string. If not, 
+    This function makes a reverse geocoding request to the Google Geocoding API to obtain the postal code associated
+    with the provided latitude and longitude. If the postal code is found, it is returned as a string. If not,
     `None` is returned.
 
     Parameters
@@ -592,7 +592,7 @@ def reverse_geocoding_google(lat: float, lon: float, api_key: str) -> str:
     Returns
     -------
     str
-        The postal code corresponding to the input geographic coordinates, if found. Returns `None` if no postal code 
+        The postal code corresponding to the input geographic coordinates, if found. Returns `None` if no postal code
         is found or if the request fails.
 
     Examples
@@ -600,7 +600,7 @@ def reverse_geocoding_google(lat: float, lon: float, api_key: str) -> str:
     >>> reverse_geocoding_google(37.4224764, -122.0842499, "your_api_key")
     '94043'
 
-    >>> df['postcode'] = df.apply(lambda row: reverse_geocoding_google(row.lat, row.lon, "your_api_key"), axis=1)
+    >>> df["postcode"] = df.apply(lambda row: reverse_geocoding_google(row.lat, row.lon, "your_api_key"), axis=1)
     """
     lat = 0 if abs(lat) < 0.0001 else lat  # Prevent invalid 'latlng' error for very small values.
     lon = 0 if abs(lon) < 0.0001 else lon
