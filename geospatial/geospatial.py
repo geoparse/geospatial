@@ -447,22 +447,50 @@ def overlay_parallel(
     """
     Perform a spatial overlay operation between two GeoDataFrames in parallel using multiple CPU cores.
 
-    The function splits the first GeoDataFrame into chunks based on the number of available CPU cores and
-    applies the overlay operation (e.g., intersection, union, difference) in parallel on each chunk with
-    respect to the second GeoDataFrame. The results are then concatenated and returned as a single GeoDataFrame.
+    This function divides the first GeoDataFrame into chunks according to the number of available CPU cores
+    and applies the specified overlay operation (e.g., intersection, union, difference) in parallel on each chunk
+    with respect to the second GeoDataFrame. The results are then concatenated and returned as a single GeoDataFrame.
 
-    Args:
-        gdf1 (gpd.GeoDataFrame): The first GeoDataFrame to be used in the spatial overlay operation.
-        gdf2 (gpd.GeoDataFrame): The second GeoDataFrame to be used in the spatial overlay operation.
-        how (str, optional): The type of overlay operation to perform. Options include "intersection", "union",
-                             "difference", "symmetric_difference", and "identity". Defaults to "intersection".
-        keep_geom_type (bool, optional): Whether to retain the original geometry type (e.g., Polygon, LineString)
-                                         in the resulting overlay. If set to True, only features of the same
-                                         geometry type are retained. Defaults to False.
+    Parameters
+    ----------
+    gdf1 : gpd.GeoDataFrame
+        The first GeoDataFrame to be used in the spatial overlay operation.
+    gdf2 : gpd.GeoDataFrame
+        The second GeoDataFrame to be used in the spatial overlay operation.
+    how : str, optional
+        The type of overlay operation to perform. Options include "intersection", "union", "difference",
+        "symmetric_difference", and "identity". Defaults to "intersection".
+    keep_geom_type : bool, optional
+        Whether to retain the original geometry type (e.g., Polygon, LineString) in the resulting overlay.
+        If set to True, only features of the same geometry type are retained. Defaults to False.
 
-    Returns:
-        gpd.GeoDataFrame: A new GeoDataFrame resulting from the spatial overlay operation, with the same coordinate
-                          reference system (CRS) as the first input GeoDataFrame (`gdf1`).
+    Returns
+    -------
+    gpd.GeoDataFrame
+        A new GeoDataFrame resulting from the spatial overlay operation, with the same coordinate reference system
+        (CRS) as the first input GeoDataFrame (`gdf1`).
+
+    Examples
+    --------
+    >>> gdf1 = gpd.GeoDataFrame({"geometry": [Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])]})
+    >>> gdf2 = gpd.GeoDataFrame({"geometry": [Polygon([(1, 1), (3, 1), (3, 3), (1, 3)])]})
+    >>> result_gdf = parallel_spatial_overlay(gdf1, gdf2, how="intersection")
+    >>> print(result_gdf)
+                                                 geometry
+    0  POLYGON ((2.00000 1.00000, 2.00000 2.00000, 1....
+
+    Notes
+    -----
+    - The spatial overlay operation is performed using the `geopandas.overlay` function. The parallelization is achieved
+      using the `multiprocessing` library to divide and distribute the overlay operations across multiple CPU cores.
+    - Ensure that both GeoDataFrames (`gdf1` and `gdf2`) have the same coordinate reference system (CRS) before applying
+      the overlay operation to avoid unexpected results.
+
+    Raises
+    ------
+    ValueError
+        If the `how` parameter is not one of the supported overlay operation types: "intersection", "union",
+        "difference", "symmetric_difference", or "identity".
     """
     # Determine the number of CPU cores available for parallel processing
     n_cores = cpu_count()
