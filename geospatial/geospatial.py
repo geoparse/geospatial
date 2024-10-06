@@ -142,20 +142,39 @@ def find_proj(geom: Union[Point, Polygon, MultiPolygon]) -> str:
 
 def trans_proj(geom: BaseGeometry, proj1: str, proj2: str) -> BaseGeometry:
     """
-    Transforms a Shapely geometry object from one coordinate reference system (CRS) to another.
+    Transform a Shapely geometry object from one CRS to another.
 
-    This function uses `pyproj` to create a transformation pipeline that converts the input
-    geometry from the source CRS (`proj1`) to the target CRS (`proj2`). The resulting geometry
-    is returned in the new projection.
+    Uses `pyproj` to create a transformation pipeline that converts the input geometry
+    from the source CRS (`proj1`) to the target CRS (`proj2`). The resulting geometry
+    is returned in the new coordinate reference system.
 
-    Args:
-        geom (BaseGeometry): A Shapely geometry object to be transformed. This can include Point,
-                             Polygon, MultiPolygon, LineString, or any other Shapely geometry type.
-        proj1 (str): The EPSG code or PROJ string representing the source CRS of the input geometry.
-        proj2 (str): The EPSG code or PROJ string representing the target CRS for the transformed geometry.
+    Parameters
+    ----------
+    geom : BaseGeometry
+        A Shapely geometry object to be transformed. This can include Point, Polygon,
+        MultiPolygon, LineString, or any other Shapely geometry type.
+    proj1 : str
+        The EPSG code or PROJ string representing the source CRS of the input geometry.
+    proj2 : str
+        The EPSG code or PROJ string representing the target CRS for the transformed geometry.
 
-    Returns:
-        BaseGeometry: The transformed Shapely geometry object in the target projection.
+    Returns
+    -------
+    BaseGeometry
+        The transformed Shapely geometry object in the target projection.
+
+    Notes
+    -----
+    - The function requires `pyproj` and `shapely` libraries.
+    - Ensure that the input and output CRS definitions are valid and supported by `pyproj`.
+
+    Examples
+    --------
+    >>> from shapely.geometry import Point
+    >>> geom = Point(10, 50)
+    >>> trans_proj(geom, "EPSG:4326", "EPSG:32632")
+    <Point object at 0x...>
+
     """
     # Create a transformation function using pyproj's Transformer
     project = pyproj.Transformer.from_crs(pyproj.CRS(proj1), pyproj.CRS(proj2), always_xy=True).transform
