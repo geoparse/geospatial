@@ -98,7 +98,7 @@ def geom_to_cell_parallel(
     mdf: gpd.GeoDataFrame, cell_type: str, res: int, compact: bool = False, verbose: bool = False
 ) -> Tuple[List[str], int]:
     """
-    Perform a parallelised conversion of geometries in a GeoDataFrame to cell identifiers of a specified type
+    Performs a parallelised conversion of geometries in a GeoDataFrame to cell identifiers of a specified type
     (e.g., Geohash, S2, or H3), optionally compacting the result to reduce the number of cells.
 
     This function first divides the bounding box of the input GeoDataFrame into smaller grid cells, then calculates

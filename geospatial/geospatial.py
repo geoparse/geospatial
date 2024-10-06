@@ -17,7 +17,7 @@ from shapely.ops import transform
 
 def geom_stats(geom: Optional[Union[Polygon, MultiPolygon]] = None, unit: str = "m") -> Optional[List[Union[int, float]]]:
     """
-    Compute geometric statistics for a Polygon or MultiPolygon geometry.
+    Computes geometric statistics for a Polygon or MultiPolygon geometry.
 
     Calculates various statistics for a given Shapely geometry, such as the number of shells (outer boundaries),
     number of holes, number of shell points, total area, and total border length. If no geometry is provided,
@@ -88,7 +88,7 @@ def geom_stats(geom: Optional[Union[Polygon, MultiPolygon]] = None, unit: str = 
 
 def find_proj(geom: Union[Point, Polygon, MultiPolygon]) -> str:
     """
-    Determine the appropriate UTM zone projection for a given geometry.
+    Determines the appropriate UTM zone projection for a given geometry.
 
     Calculates the Universal Transverse Mercator (UTM) zone projection based on the centroid
     coordinates of the input geometry. The function returns the corresponding EPSG code for
@@ -142,7 +142,7 @@ def find_proj(geom: Union[Point, Polygon, MultiPolygon]) -> str:
 
 def trans_proj(geom: BaseGeometry, proj1: str, proj2: str) -> BaseGeometry:
     """
-    Transform a Shapely geometry object from one CRS to another.
+    Transforms a Shapely geometry object from one CRS to another.
 
     Uses `pyproj` to create a transformation pipeline that converts the input geometry
     from the source CRS (`proj1`) to the target CRS (`proj2`). The resulting geometry
@@ -322,7 +322,7 @@ def vincenty(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 def flatten_3d(geom: gpd.GeoSeries) -> List[Union[Polygon, MultiPolygon]]:
     """
-    Flatten a GeoSeries of 3D Polygons or MultiPolygons into 2D geometries.
+    Flattens a GeoSeries of 3D Polygons or MultiPolygons into 2D geometries.
 
     This function removes the z-coordinate from each 3D geometry in the input GeoSeries,
     converting it into a 2D Polygon or MultiPolygon. The result is a list of 2D geometries.
@@ -367,7 +367,7 @@ def flatten_3d(geom: gpd.GeoSeries) -> List[Union[Polygon, MultiPolygon]]:
 
 def explode_line_to_points(row: gpd.GeoSeries) -> gpd.GeoDataFrame:
     """
-    Split a LineString geometry into individual Point geometries while preserving original attributes.
+    Splits a LineString geometry into individual Point geometries while preserving original attributes.
 
     This function takes a GeoSeries representing a single row of a GeoDataFrame, extracts the coordinates
     from a LineString geometry, and creates a new GeoDataFrame with each Point as a separate row. All original
@@ -445,7 +445,7 @@ def poverlay(
     gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame, how: str = "intersection", keep_geom_type: bool = False
 ) -> gpd.GeoDataFrame:
     """
-    Perform a spatial overlay operation between two GeoDataFrames in parallel using multiple CPU cores.
+    Performs a spatial overlay operation between two GeoDataFrames in parallel using multiple CPU cores.
 
     This function divides the first GeoDataFrame into chunks according to the number of available CPU cores
     and applies the specified overlay operation (e.g., intersection, union, difference) in parallel on each chunk
