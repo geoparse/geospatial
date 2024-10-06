@@ -185,22 +185,52 @@ def trans_proj(geom: BaseGeometry, proj1: str, proj2: str) -> BaseGeometry:
 
 def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """
-    https://en.wikipedia.org/wiki/Haversine_formula
-    The haversine formula determines the great-circle distance between two points on a sphere given their longitudes and latitudes.
+    Calculate the great-circle distance between two points on the Earth's surface.
 
-    https://en.wikipedia.org/wiki/Longitude
-    a = 6378137.0        # equatorial radius
-    b = 6356752.3142     # polar radius
-    R = (2*a+b)/3        # mean radius = 6371008.7714
+    The haversine formula determines the shortest distance over the Earth's surface
+    between two points given their latitudes and longitudes. The result is the
+    distance in meters, based on a mean Earth radius.
+
+    Parameters
+    ----------
+    lat1 : float
+        Latitude of the first point in decimal degrees.
+    lon1 : float
+        Longitude of the first point in decimal degrees.
+    lat2 : float
+        Latitude of the second point in decimal degrees.
+    lon2 : float
+        Longitude of the second point in decimal degrees.
+
+    Returns
+    -------
+    float
+        The great-circle distance between the two points in meters.
+
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Haversine_formula
+    .. [2] https://en.wikipedia.org/wiki/Longitude
+
+    Examples
+    --------
+    >>> haversine(52.2296756, 21.0122287, 41.8919300, 12.5113300)
+    1319743.483
+
+    Notes
+    -----
+    The mean Earth radius is taken as 6,371,008.8 meters.
+    a = 6378137.0        # Equatorial radius
+    b = 6356752.3142     # Polar radius
+    R = (2*a + b)/3      # Mean radius = 6371008.7714
     """
-
-    r = 6371008.8
+    r = 6371008.8  # Mean Earth radius in meters
     lat1, lat2, dlon = radians(lat1), radians(lat2), radians(lon2 - lon1)
     dlat = lat2 - lat1
 
     a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
-    c = 2 * atan2(sqrt(a), sqrt(1 - a))  # distance in gradians
-    return r * c  # distance in meters
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))  # Angular distance in radians
+    return r * c  # Distance in meters
 
 
 def vincenty(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
