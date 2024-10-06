@@ -185,7 +185,7 @@ def trans_proj(geom: BaseGeometry, proj1: str, proj2: str) -> BaseGeometry:
 
 def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """
-    Calculate the great-circle distance between two points on the Earth's surface.
+    Calculates the great-circle distance between two points on the Earth's surface.
 
     The haversine formula determines the shortest distance over the Earth's surface
     between two points given their latitudes and longitudes. The result is the
@@ -514,7 +514,7 @@ def poverlay(
 
 def google_geocoding(address_or_zipcode: str, api_key: str) -> pd.Series:
     """
-    Get geographic coordinates (latitude and longitude) for a given address or zip code using the Google Geocoding API.
+    Returns geographic coordinates (latitude and longitude) for a given address or zip code using the Google Geocoding API.
 
     This function utilizes the Google Geocoding API to convert a given address or zip code into geographic coordinates.
     The function returns the latitude and longitude as a pandas Series. If the request is unsuccessful or the address
