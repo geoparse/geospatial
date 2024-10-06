@@ -512,7 +512,7 @@ def poverlay(
     return gpd.GeoDataFrame(df, crs=gdf1.crs)
 
 
-def google_geocoding(address_or_zipcode: str, api_key: str) -> pd.Series:
+def geocoding_google(address_or_zipcode: str, api_key: str) -> pd.Series:
     """
     Returns geographic coordinates (latitude and longitude) for a given address or zip code using the Google Geocoding API.
 
@@ -535,8 +535,8 @@ def google_geocoding(address_or_zipcode: str, api_key: str) -> pd.Series:
 
     Examples
     --------
-    >>> df[["lat", "lon"]] = df.apply(lambda row: google_geocoding(row.address, "your_api_key"), axis=1)
-    >>> result = google_geocoding("1600 Amphitheatre Parkway, Mountain View, CA", "your_api_key")
+    >>> df[["lat", "lon"]] = df.apply(lambda row: geocoding_google(row.address, "your_api_key"), axis=1)
+    >>> result = geocoding_google("1600 Amphitheatre Parkway, Mountain View, CA", "your_api_key")
     >>> print(result)
     lat    37.4224764
     lon   -122.0842499
@@ -572,7 +572,7 @@ def google_geocoding(address_or_zipcode: str, api_key: str) -> pd.Series:
     return pd.Series([lat, lon])
 
 
-def google_reverse_geocoding(lat: float, lon: float, api_key: str) -> str:
+def reverse_geocoding_google(lat: float, lon: float, api_key: str) -> str:
     """
     Returns the postal code for a given geographic coordinate (latitude, longitude) using the Google Geocoding API.
 
@@ -597,10 +597,10 @@ def google_reverse_geocoding(lat: float, lon: float, api_key: str) -> str:
 
     Examples
     --------
-    >>> google_reverse_geocoding(37.4224764, -122.0842499, "your_api_key")
+    >>> reverse_geocoding_google(37.4224764, -122.0842499, "your_api_key")
     '94043'
 
-    >>> df['postcode'] = df.apply(lambda row: google_reverse_geocoding(row.lat, row.lon, "your_api_key"), axis=1)
+    >>> df['postcode'] = df.apply(lambda row: reverse_geocoding_google(row.lat, row.lon, "your_api_key"), axis=1)
     """
     lat = 0 if abs(lat) < 0.0001 else lat  # Prevent invalid 'latlng' error for very small values.
     lon = 0 if abs(lon) < 0.0001 else lon
