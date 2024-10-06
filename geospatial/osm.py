@@ -7,9 +7,55 @@ from shapely.geometry import LineString, Polygon
 # pd.options.mode.chained_assignment = None  # default='warn'
 
 
+def way_to_geom(way_id: int, url: str):
+    """
+    Converts an OSM way ID into a Shapely Polygon or LineString object.
+
+    This function retrieves the geometry corresponding to the given OSM way ID and
+    returns it as a Shapely `Polygon` or `LineString` object based on whether the way
+    forms a closed loop or not.
+
+    Parameters
+    ----------
+    way_id : int
+        The OpenStreetMap (OSM) way ID to be retrieved.
+    url : str
+        The URL endpoint for the Overpass API to request the geometry.
+
+    Returns
+    -------
+    shapely.geometry.Polygon or shapely.geometry.LineString
+        A Shapely `Polygon` object if the way forms a closed loop, or a `LineString`
+        object otherwise.
+
+    Notes
+    -----
+    - The function constructs an Overpass API query using the given way ID,
+      requests the geometry, and then converts it into a Shapely geometry.
+    - Assumes that the Overpass API returns data in JSON format with a "geometry" attribute.
+
+    Examples
+    --------
+    >>> way_id = 123456
+    >>> url = "https://overpass-api.de/api/interpreter"
+    >>> geometry = way_to_geom(way_id, url)
+    >>> print(geometry)
+    POLYGON ((13.3888 52.5170, 13.3976 52.5291, 13.4286 52.5232, 13.3888 52.5170))
+    """
+    query = f"[out:json][timeout:600][maxsize:4073741824];way({way_id});out geom;"
+    response = requests.get(url, params={"data": query}).json()
+    response = response["elements"][0]
+    geom = response["geometry"]
+    coords = [(node["lon"], node["lat"]) for node in geom]
+    if geom[0] == geom[-1]:  # Check if the way forms a closed loop
+        return Polygon(coords)
+    else:
+        return LineString(coords)
+
+
 def ways_to_geom(ids, url):
     """
-    Convert an array of OpenStreetMap (OSM) way IDs into Shapely geometries.
+    Converts an array of OpenStreetMap (OSM) way IDs into Shapely geometries.
 
     This function retrieves the geometries corresponding to the given OSM way IDs and
     returns a list of Shapely `LineString` or `Polygon` objects based on the geometries
@@ -64,55 +110,9 @@ def ways_to_geom(ids, url):
     return geoms
 
 
-def way_to_geom(way_id: int, url: str):
-    """
-    Convert an OSM way ID into a Shapely Polygon or LineString object.
-
-    This function retrieves the geometry corresponding to the given OSM way ID and
-    returns it as a Shapely `Polygon` or `LineString` object based on whether the way
-    forms a closed loop or not.
-
-    Parameters
-    ----------
-    way_id : int
-        The OpenStreetMap (OSM) way ID to be retrieved.
-    url : str
-        The URL endpoint for the Overpass API to request the geometry.
-
-    Returns
-    -------
-    shapely.geometry.Polygon or shapely.geometry.LineString
-        A Shapely `Polygon` object if the way forms a closed loop, or a `LineString`
-        object otherwise.
-
-    Notes
-    -----
-    - The function constructs an Overpass API query using the given way ID,
-      requests the geometry, and then converts it into a Shapely geometry.
-    - Assumes that the Overpass API returns data in JSON format with a "geometry" attribute.
-
-    Examples
-    --------
-    >>> way_id = 123456
-    >>> url = "https://overpass-api.de/api/interpreter"
-    >>> geometry = way_to_geom(way_id, url)
-    >>> print(geometry)
-    POLYGON ((13.3888 52.5170, 13.3976 52.5291, 13.4286 52.5232, 13.3888 52.5170))
-    """
-    query = f"[out:json][timeout:600][maxsize:4073741824];way({way_id});out geom;"
-    response = requests.get(url, params={"data": query}).json()
-    response = response["elements"][0]
-    geom = response["geometry"]
-    coords = [(node["lon"], node["lat"]) for node in geom]
-    if geom[0] == geom[-1]:  # Check if the way forms a closed loop
-        return Polygon(coords)
-    else:
-        return LineString(coords)
-
-
 def decode(encoded: str) -> list:
     """
-    Decode an encoded polyline string from Valhalla into a list of coordinates.
+    Decodes an encoded polyline string from Valhalla into a list of coordinates.
 
     Valhalla routing, map-matching, and elevation services use an encoded polyline format
     to store a series of latitude and longitude coordinates as a single string. This function
@@ -167,7 +167,7 @@ def decode(encoded: str) -> list:
 
 def map_matching(df: pd.DataFrame, cost: str, url: str, format: str = "osrm") -> Optional[dict]:
     """
-    Perform map matching using Valhalla's Meili service.
+    Performs map matching using Valhalla's Meili service.
 
     Map matching aligns a series of GPS points onto a road network. This function takes a DataFrame
     of coordinates, sends a request to the Meili map-matching service, and returns the matched
