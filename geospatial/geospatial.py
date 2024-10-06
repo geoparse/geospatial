@@ -88,21 +88,36 @@ def geom_stats(geom: Optional[Union[Polygon, MultiPolygon]] = None, unit: str = 
 
 def find_proj(geom: Union[Point, Polygon, MultiPolygon]) -> str:
     """
-    Determines the appropriate Universal Transverse Mercator (UTM) zone projection
-    based on the input geometry's centroid coordinates.
+    Determine the appropriate UTM zone projection for a given geometry.
 
-    The UTM is a map projection system that divides the Earth into multiple zones,
-    each with a specific coordinate reference system (CRS). The function returns
-    the EPSG code corresponding to the UTM zone of the geometry.
+    Calculates the Universal Transverse Mercator (UTM) zone projection based on the centroid
+    coordinates of the input geometry. The function returns the corresponding EPSG code for
+    the UTM zone in which the geometry is located.
 
-    Args:
-        geom (Union[Point, Polygon, MultiPolygon]): A Shapely geometry object, which
-                                                    can be a Point, Polygon, or MultiPolygon.
+    Parameters
+    ----------
+    geom : Point, Polygon, or MultiPolygon
+        A Shapely geometry object, which can be a Point, Polygon, or MultiPolygon.
 
-    Returns:
-        str: The EPSG code representing the UTM projection for the geometry's location.
-             For northern hemisphere, it returns codes in the format 'EPSG:326XX', and for
-             southern hemisphere, it returns 'EPSG:327XX', where 'XX' is the UTM zone number.
+    Returns
+    -------
+    str
+        The EPSG code representing the UTM projection for the geometry's location. For the
+        northern hemisphere, the function returns codes in the format 'EPSG:326XX'. For the
+        southern hemisphere, it returns 'EPSG:327XX', where 'XX' is the UTM zone number.
+
+    Notes
+    -----
+    The UTM (Universal Transverse Mercator) system divides the Earth into 60 longitudinal zones,
+    each 6 degrees wide. This function uses the centroid of the input geometry to determine the
+    appropriate zone and EPSG code.
+
+    Examples
+    --------
+    >>> from shapely.geometry import Polygon
+    >>> geom = Polygon([(-120, 35), (-121, 35), (-121, 36), (-120, 36), (-120, 35)])
+    >>> find_proj(geom)
+    'EPSG:32610'
     """
     if geom.geom_type != "Point":
         # If the geometry is not a Point, use its centroid
