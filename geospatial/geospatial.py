@@ -460,21 +460,73 @@ def intersection(gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame, poly_id: Option
     return int_gdf  # Return the intersected subset of gdf1
 
 
-def quick_intersection(gdf1, gdf2, poly_id=None):
-    int_gdf = pd.DataFrame()  # intersected gdf which is a subset of gdf1
-    counts = []
+def quick_intersection(gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame, poly_id: Optional[str] = None) -> gpd.GeoDataFrame:
+    """
+    Performs a quick spatial intersection between two GeoDataFrames using bounding box optimization.
+
+    This function identifies geometries in `gdf1` that intersect with any geometries in `gdf2`. It uses
+    a spatial index to quickly filter `gdf1` geometries that are likely to intersect with the bounding
+    box of each geometry in `gdf2`. It then performs a precise intersection check on this subset, improving
+    the performance of the intersection operation.
+
+    If a `poly_id` column is provided, the function adds a new `geom_id` column to the resulting intersected
+    GeoDataFrame, storing the geometry ID from `gdf2` that each feature in `gdf1` intersects with. It also
+    modifies `gdf2` by adding a `counts` column to indicate the number of intersecting geometries.
+
+    Parameters
+    ----------
+    gdf1 : geopandas.GeoDataFrame
+        The first GeoDataFrame whose geometries are tested for intersection with `gdf2`.
+    gdf2 : geopandas.GeoDataFrame
+        The second GeoDataFrame containing geometries to intersect with `gdf1`.
+    poly_id : str, optional
+        The column name in `gdf2` containing unique geometry identifiers. If provided, the intersected subset of `gdf1`
+        will include a new column `geom_id` indicating the geometry ID from `gdf2` that each feature intersects with.
+
+    Returns
+    -------
+    geopandas.GeoDataFrame
+        A new GeoDataFrame containing only the intersecting geometries from `gdf1` with respect to `gdf2`.
+        If `poly_id` is provided, the intersected GeoDataFrame will also include a `geom_id` column.
+
+    Examples
+    --------
+    >>> gdf1 = geopandas.read_file("data1.shp")
+    >>> gdf2 = geopandas.read_file("data2.shp")
+    >>> result_gdf = quick_intersection(gdf1, gdf2, poly_id="region_id")
+
+    Notes
+    -----
+    - This function modifies `gdf2` in place by adding a `counts` column, which reflects the number of geometries
+      in `gdf1` that intersect with each geometry in `gdf2`.
+    - It leverages spatial indexing using the `sindex` attribute of `gdf1` to quickly identify candidates for
+      intersection, which significantly improves performance for large datasets.
+
+    """
+    int_gdf = pd.DataFrame()  # Initialize an empty DataFrame to store intersecting geometries from gdf1
+    counts = []  # List to store counts of intersecting geometries for each feature in gdf2
+
     for geom in gdf2.geometry:
-        # Get the indices of the objects that are likely to be inside the bounding box of the given Polygon
+        # Get the indices of geometries in `gdf1` that are likely to intersect the bounding box of `geom` in `gdf2`
         pos_idx = list(gdf1.sindex.intersection(geom.bounds))
-        pos_gdf = gdf1.iloc[pos_idx]  # possible gdf
-        pre_gdf = pos_gdf[pos_gdf.intersects(geom)]  # precise gdf
+
+        # Select the subset of `gdf1` based on these indices
+        pos_gdf = gdf1.iloc[pos_idx]
+
+        # Filter the subset to retain only geometries that precisely intersect with `geom`
+        pre_gdf = pos_gdf[pos_gdf.intersects(geom)]
+
         if poly_id is not None and len(pre_gdf) > 0:
-            gid = gdf2[gdf2.geometry == geom][poly_id].iloc[0]  # gid: geometry id
+            # If `poly_id` is provided, assign the geometry ID from `gdf2` to the `geom_id` column in `pre_gdf`
+            gid = gdf2[gdf2.geometry == geom][poly_id].iloc[0]
             pre_gdf["geom_id"] = gid
-        int_gdf = pd.concat([int_gdf, pre_gdf])  # intersected gdf
-        counts.append(len(pre_gdf))
-    gdf2["counts"] = counts
-    return int_gdf
+
+        # Concatenate the precise intersecting geometries to the final intersected DataFrame
+        int_gdf = pd.concat([int_gdf, pre_gdf])
+        counts.append(len(pre_gdf))  # Store the number of intersecting geometries for the current feature in gdf2
+
+    gdf2["counts"] = counts  # Add the counts of intersecting geometries as a new column in gdf2
+    return int_gdf  # Return the intersected subset of gdf1
 
 
 def poverlay(
