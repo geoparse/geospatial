@@ -1,0 +1,1374 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geospatial package &mdash; geospatial 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=7ab3649f" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            geospatial
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">geospatial package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-geospatial.geospatial">geospatial.geospatial module</a><ul>
+<li><a class="reference internal" href="#geospatial.geospatial.explode_line_to_points"><code class="docutils literal notranslate"><span class="pre">explode_line_to_points()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.geospatial.find_proj"><code class="docutils literal notranslate"><span class="pre">find_proj()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.geospatial.flatten_3d"><code class="docutils literal notranslate"><span class="pre">flatten_3d()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.geospatial.geocoding_google"><code class="docutils literal notranslate"><span class="pre">geocoding_google()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.geospatial.geom_stats"><code class="docutils literal notranslate"><span class="pre">geom_stats()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.geospatial.haversine"><code class="docutils literal notranslate"><span class="pre">haversine()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.geospatial.intersection"><code class="docutils literal notranslate"><span class="pre">intersection()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.geospatial.poverlay"><code class="docutils literal notranslate"><span class="pre">poverlay()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.geospatial.quick_intersection"><code class="docutils literal notranslate"><span class="pre">quick_intersection()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.geospatial.reverse_geocoding_google"><code class="docutils literal notranslate"><span class="pre">reverse_geocoding_google()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.geospatial.trans_proj"><code class="docutils literal notranslate"><span class="pre">trans_proj()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.geospatial.vincenty"><code class="docutils literal notranslate"><span class="pre">vincenty()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geospatial.karta">geospatial.karta module</a><ul>
+<li><a class="reference internal" href="#geospatial.karta.base_map"><code class="docutils literal notranslate"><span class="pre">base_map()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.karta.choropleth"><code class="docutils literal notranslate"><span class="pre">choropleth()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.karta.choropleth_plp"><code class="docutils literal notranslate"><span class="pre">choropleth_plp()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.karta.color_map"><code class="docutils literal notranslate"><span class="pre">color_map()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.karta.plp"><code class="docutils literal notranslate"><span class="pre">plp()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.karta.points"><code class="docutils literal notranslate"><span class="pre">points()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.karta.polygons"><code class="docutils literal notranslate"><span class="pre">polygons()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.karta.row_polygons"><code class="docutils literal notranslate"><span class="pre">row_polygons()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geospatial.osm">geospatial.osm module</a><ul>
+<li><a class="reference internal" href="#geospatial.osm.decode"><code class="docutils literal notranslate"><span class="pre">decode()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.osm.map_matching"><code class="docutils literal notranslate"><span class="pre">map_matching()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.osm.way_to_geom"><code class="docutils literal notranslate"><span class="pre">way_to_geom()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.osm.ways_to_geom"><code class="docutils literal notranslate"><span class="pre">ways_to_geom()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#geospatial-pprocessing-module">geospatial.pprocessing module</a></li>
+<li><a class="reference internal" href="#module-geospatial.sindex">geospatial.sindex module</a><ul>
+<li><a class="reference internal" href="#geospatial.sindex.cell_to_geom"><code class="docutils literal notranslate"><span class="pre">cell_to_geom()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.sindex.compact_cells"><code class="docutils literal notranslate"><span class="pre">compact_cells()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.sindex.geom_to_cell"><code class="docutils literal notranslate"><span class="pre">geom_to_cell()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.sindex.geom_to_cell_parallel"><code class="docutils literal notranslate"><span class="pre">geom_to_cell_parallel()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.sindex.geom_to_cell_parallel_2"><code class="docutils literal notranslate"><span class="pre">geom_to_cell_parallel_2()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.sindex.h3_stats"><code class="docutils literal notranslate"><span class="pre">h3_stats()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.sindex.uncompact_s2"><code class="docutils literal notranslate"><span class="pre">uncompact_s2()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-geospatial">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">geospatial</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">geospatial package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/geospatial.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="geospatial-package">
+<h1>geospatial package<a class="headerlink" href="#geospatial-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-geospatial.geospatial">
+<span id="geospatial-geospatial-module"></span><h2>geospatial.geospatial module<a class="headerlink" href="#module-geospatial.geospatial" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.geospatial.explode_line_to_points">
+<span class="sig-prename descclassname"><span class="pre">geospatial.geospatial.</span></span><span class="sig-name descname"><span class="pre">explode_line_to_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoSeries</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="_modules/geospatial/geospatial.html#explode_line_to_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.geospatial.explode_line_to_points" title="Link to this definition"></a></dt>
+<dd><p>Splits a LineString geometry into individual Point geometries while preserving original attributes.</p>
+<p>This function takes a GeoSeries representing a single row of a GeoDataFrame, extracts the coordinates
+from a LineString geometry, and creates a new GeoDataFrame with each Point as a separate row. All original
+attributes from the input row are preserved in the new GeoDataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>row</strong> (<em>gpd.GeoSeries</em>) – A GeoSeries representing a single row of a GeoDataFrame. It must include a ‘geometry’ column
+containing a LineString geometry.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new GeoDataFrame where each row corresponds to a Point geometry derived from the coordinates of the LineString.
+All other columns from the original row are preserved.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">line_gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)])]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">point_gdf</span> <span class="o">=</span> <span class="n">split_linestring_to_points</span><span class="p">(</span><span class="n">line_gdf</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">point_gdf</span><span class="p">)</span>
+<span class="go">   geometry</span>
+<span class="go">0  POINT (0 0)</span>
+<span class="go">1  POINT (1 1)</span>
+<span class="go">2  POINT (2 2)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.geospatial.find_proj">
+<span class="sig-prename descclassname"><span class="pre">geospatial.geospatial.</span></span><span class="sig-name descname"><span class="pre">find_proj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Point</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Polygon</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">MultiPolygon</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/geospatial/geospatial.html#find_proj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.geospatial.find_proj" title="Link to this definition"></a></dt>
+<dd><p>Determines the appropriate UTM zone projection for a given geometry.</p>
+<p>Calculates the Universal Transverse Mercator (UTM) zone projection based on the centroid
+coordinates of the input geometry. The function returns the corresponding EPSG code for
+the UTM zone in which the geometry is located.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>geom</strong> (<em>Point</em><em>, </em><em>Polygon</em><em>, or </em><em>MultiPolygon</em>) – A Shapely geometry object, which can be a Point, Polygon, or MultiPolygon.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The EPSG code representing the UTM projection for the geometry’s location. For the
+northern hemisphere, the function returns codes in the format ‘EPSG:326XX’. For the
+southern hemisphere, it returns ‘EPSG:327XX’, where ‘XX’ is the UTM zone number.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The UTM (Universal Transverse Mercator) system divides the Earth into 60 longitudinal zones,
+each 6 degrees wide. This function uses the centroid of the input geometry to determine the
+appropriate zone and EPSG code.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">geom</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="mi">120</span><span class="p">,</span> <span class="mi">35</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">121</span><span class="p">,</span> <span class="mi">35</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">121</span><span class="p">,</span> <span class="mi">36</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">120</span><span class="p">,</span> <span class="mi">36</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">120</span><span class="p">,</span> <span class="mi">35</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">find_proj</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+<span class="go">&#39;EPSG:32610&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.geospatial.flatten_3d">
+<span class="sig-prename descclassname"><span class="pre">geospatial.geospatial.</span></span><span class="sig-name descname"><span class="pre">flatten_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoSeries</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Polygon</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">MultiPolygon</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geospatial/geospatial.html#flatten_3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.geospatial.flatten_3d" title="Link to this definition"></a></dt>
+<dd><p>Flattens a GeoSeries of 3D Polygons or MultiPolygons into 2D geometries.</p>
+<p>This function removes the z-coordinate from each 3D geometry in the input GeoSeries,
+converting it into a 2D Polygon or MultiPolygon. The result is a list of 2D geometries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>geom</strong> (<em>gpd.GeoSeries</em>) – A GeoSeries containing 3D Polygons or MultiPolygons (geometries with z-coordinates).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of 2D Polygons or MultiPolygons with the z-coordinates removed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[Union[Polygon, MultiPolygon]]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">gsp</span><span class="o">.</span><span class="n">flatten_3d</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+<span class="go">    Converts all 3D geometries in the GeoSeries `gdf.geometry` to 2D geometries.</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>The function is useful when working with datasets that contain 3D geometries but
+only 2D geometries are needed for further spatial analysis or visualization.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.geospatial.geocoding_google">
+<span class="sig-prename descclassname"><span class="pre">geospatial.geospatial.</span></span><span class="sig-name descname"><span class="pre">geocoding_google</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address_or_zipcode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Series</span></span></span><a class="reference internal" href="_modules/geospatial/geospatial.html#geocoding_google"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.geospatial.geocoding_google" title="Link to this definition"></a></dt>
+<dd><p>Returns geographic coordinates (latitude and longitude) for a given address or zip code using the Google Geocoding API.</p>
+<p>This function utilizes the Google Geocoding API to convert a given address or zip code into geographic coordinates.
+The function returns the latitude and longitude as a pandas Series. If the request is unsuccessful or the address
+is not found, the function returns a Series with <cite>(None, None)</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>address_or_zipcode</strong> (<em>str</em>) – A text-based address or zip code that needs to be geocoded.</p></li>
+<li><p><strong>api_key</strong> (<em>str</em>) – A valid Google Maps API key required to access the Google Geocoding service.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pandas Series containing the latitude and longitude as floats. If the request fails or the address is not found,
+returns a Series with <cite>(None, None)</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">geocoding_google</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="s2">&quot;your_api_key&quot;</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">geocoding_google</span><span class="p">(</span><span class="s2">&quot;1600 Amphitheatre Parkway, Mountain View, CA&quot;</span><span class="p">,</span> <span class="s2">&quot;your_api_key&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="go">lat    37.4224764</span>
+<span class="go">lon   -122.0842499</span>
+<span class="go">dtype: float64</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Make sure to enable the Google Geocoding API in your Google Cloud Console and provide a valid API key.</p></li>
+<li><p>The API might return ambiguous results if the input address is incomplete or vague.</p></li>
+<li><p>Consider handling <cite>None</cite> values in the returned Series if the API fails to find the address or the request limit is exceeded.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>Exception</strong> – If there is an error in the API request or response parsing, an exception is raised with an error message.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.geospatial.geom_stats">
+<span class="sig-prename descclassname"><span class="pre">geospatial.geospatial.</span></span><span class="sig-name descname"><span class="pre">geom_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Polygon</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">MultiPolygon</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'m'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/geospatial/geospatial.html#geom_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.geospatial.geom_stats" title="Link to this definition"></a></dt>
+<dd><p>Computes geometric statistics for a Polygon or MultiPolygon geometry.</p>
+<p>Calculates various statistics for a given Shapely geometry, such as the number of shells (outer boundaries),
+number of holes, number of shell points, total area, and total border length. If no geometry is provided,
+the function will print a usage example.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geom</strong> (<em>Polygon</em><em> or </em><em>MultiPolygon</em><em>, </em><em>optional</em>) – A Shapely geometry object (Polygon or MultiPolygon) for which to compute the statistics. If not provided,
+the function will print a usage example and not perform any computations. Default is None.</p></li>
+<li><p><strong>unit</strong> (<em>str</em><em>, </em><em>optional</em>) – The unit for area and length calculations. Accepts “m” for meters and “km” for kilometers. Default is “m”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A list containing the following statistics in order:</dt><dd><ul class="simple">
+<li><p>Number of shells (int)</p></li>
+<li><p>Number of holes (int)</p></li>
+<li><p>Number of shell points (int)</p></li>
+<li><p>Total area (float, rounded to nearest integer in the specified unit)</p></li>
+<li><p>Total border length (float, rounded to nearest integer in the specified unit)</p></li>
+</ul>
+</dd>
+</dl>
+<p>If no geometry is provided, the function returns None.</p>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of int or float, optional</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">geom</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">compute_geometry_statistics</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;km&quot;</span><span class="p">)</span>
+<span class="go">[1, 0, 5, 1.0, 4.0]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.geospatial.haversine">
+<span class="sig-prename descclassname"><span class="pre">geospatial.geospatial.</span></span><span class="sig-name descname"><span class="pre">haversine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/geospatial/geospatial.html#haversine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.geospatial.haversine" title="Link to this definition"></a></dt>
+<dd><p>Calculates the great-circle distance between two points on the Earth’s surface.</p>
+<p>The haversine formula determines the shortest distance over the Earth’s surface
+between two points given their latitudes and longitudes. The result is the
+distance in meters, based on a mean Earth radius.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat1</strong> (<em>float</em>) – Latitude of the first point in decimal degrees.</p></li>
+<li><p><strong>lon1</strong> (<em>float</em>) – Longitude of the first point in decimal degrees.</p></li>
+<li><p><strong>lat2</strong> (<em>float</em>) – Latitude of the second point in decimal degrees.</p></li>
+<li><p><strong>lon2</strong> (<em>float</em>) – Longitude of the second point in decimal degrees.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The great-circle distance between the two points in meters.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Haversine_formula">https://en.wikipedia.org/wiki/Haversine_formula</a></p>
+</aside>
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Longitude">https://en.wikipedia.org/wiki/Longitude</a></p>
+</aside>
+</aside>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">haversine</span><span class="p">(</span><span class="mf">52.2296756</span><span class="p">,</span> <span class="mf">21.0122287</span><span class="p">,</span> <span class="mf">41.8919300</span><span class="p">,</span> <span class="mf">12.5113300</span><span class="p">)</span>
+<span class="go">1319743.483</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>The mean Earth radius is taken as 6,371,008.8 meters.
+a = 6378137.0        # Equatorial radius
+b = 6356752.3142     # Polar radius
+R = (2*a + b)/3      # Mean radius = 6371008.7714</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.geospatial.intersection">
+<span class="sig-prename descclassname"><span class="pre">geospatial.geospatial.</span></span><span class="sig-name descname"><span class="pre">intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gdf2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poly_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="_modules/geospatial/geospatial.html#intersection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.geospatial.intersection" title="Link to this definition"></a></dt>
+<dd><p>Performs a spatial intersection between two GeoDataFrames and return the intersecting subset of the first GeoDataFrame.</p>
+<p>This function identifies geometries in <cite>gdf1</cite> that intersect with any geometries in <cite>gdf2</cite>. It adds a new column, <cite>counts</cite>,
+to <cite>gdf2</cite> representing the number of intersecting geometries for each feature in <cite>gdf2</cite>. If a <cite>poly_id</cite> column is specified,
+it also adds the geometry ID from <cite>gdf2</cite> to the intersected subset of <cite>gdf1</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gdf1</strong> (<em>geopandas.GeoDataFrame</em>) – The first GeoDataFrame whose geometries are tested for intersection with <cite>gdf2</cite>.</p></li>
+<li><p><strong>gdf2</strong> (<em>geopandas.GeoDataFrame</em>) – The second GeoDataFrame containing geometries to intersect with <cite>gdf1</cite>.</p></li>
+<li><p><strong>poly_id</strong> (<em>str</em><em>, </em><em>optional</em>) – The column name in <cite>gdf2</cite> containing unique geometry identifiers. If provided, the intersected subset of <cite>gdf1</cite>
+will include a new column <cite>geom_id</cite> indicating the geometry ID from <cite>gdf2</cite> that each feature intersects with.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new GeoDataFrame containing only the intersecting geometries from <cite>gdf1</cite> with respect to <cite>gdf2</cite>.
+If <cite>poly_id</cite> is provided, the intersected GeoDataFrame will also include a <cite>geom_id</cite> column.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>geopandas.GeoDataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gdf1</span> <span class="o">=</span> <span class="n">geopandas</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="s2">&quot;data1.shp&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gdf2</span> <span class="o">=</span> <span class="n">geopandas</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="s2">&quot;data2.shp&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result_gdf</span> <span class="o">=</span> <span class="n">intersection</span><span class="p">(</span><span class="n">gdf1</span><span class="p">,</span> <span class="n">gdf2</span><span class="p">,</span> <span class="n">poly_id</span><span class="o">=</span><span class="s2">&quot;region_id&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>The function modifies <cite>gdf2</cite> in place by adding a <cite>counts</cite> column, which reflects the number of geometries
+in <cite>gdf1</cite> that intersect with each geometry in <cite>gdf2</cite>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.geospatial.poverlay">
+<span class="sig-prename descclassname"><span class="pre">geospatial.geospatial.</span></span><span class="sig-name descname"><span class="pre">poverlay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gdf2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">how</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'intersection'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_geom_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="_modules/geospatial/geospatial.html#poverlay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.geospatial.poverlay" title="Link to this definition"></a></dt>
+<dd><p>Performs a spatial overlay operation between two GeoDataFrames in parallel using multiple CPU cores.</p>
+<p>This function divides the first GeoDataFrame into chunks according to the number of available CPU cores
+and applies the specified overlay operation (e.g., intersection, union, difference) in parallel on each chunk
+with respect to the second GeoDataFrame. The results are then concatenated and returned as a single GeoDataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gdf1</strong> (<em>gpd.GeoDataFrame</em>) – The first GeoDataFrame to be used in the spatial overlay operation.</p></li>
+<li><p><strong>gdf2</strong> (<em>gpd.GeoDataFrame</em>) – The second GeoDataFrame to be used in the spatial overlay operation.</p></li>
+<li><p><strong>how</strong> (<em>str</em><em>, </em><em>optional</em>) – The type of overlay operation to perform. Options include “intersection”, “union”, “difference”,
+“symmetric_difference”, and “identity”. Defaults to “intersection”.</p></li>
+<li><p><strong>keep_geom_type</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to retain the original geometry type (e.g., Polygon, LineString) in the resulting overlay.
+If set to True, only features of the same geometry type are retained. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new GeoDataFrame resulting from the spatial overlay operation, with the same coordinate reference system
+(CRS) as the first input GeoDataFrame (<cite>gdf1</cite>).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gdf1</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)])]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gdf2</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Polygon</span><span class="p">([(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)])]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result_gdf</span> <span class="o">=</span> <span class="n">poverlay</span><span class="p">(</span><span class="n">gdf1</span><span class="p">,</span> <span class="n">gdf2</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;intersection&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">result_gdf</span><span class="p">)</span>
+<span class="go">                                             geometry</span>
+<span class="go">0  POLYGON ((2.00000 1.00000, 2.00000 2.00000, 1....</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The spatial overlay operation is performed using the <cite>geopandas.overlay</cite> function. The parallelization is achieved
+using the <cite>multiprocessing</cite> library to divide and distribute the overlay operations across multiple CPU cores.</p></li>
+<li><p>Ensure that both GeoDataFrames (<cite>gdf1</cite> and <cite>gdf2</cite>) have the same coordinate reference system (CRS) before applying
+the overlay operation to avoid unexpected results.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If the <cite>how</cite> parameter is not one of the supported overlay operation types: “intersection”, “union”,
+    “difference”, “symmetric_difference”, or “identity”.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.geospatial.quick_intersection">
+<span class="sig-prename descclassname"><span class="pre">geospatial.geospatial.</span></span><span class="sig-name descname"><span class="pre">quick_intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gdf2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poly_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="_modules/geospatial/geospatial.html#quick_intersection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.geospatial.quick_intersection" title="Link to this definition"></a></dt>
+<dd><p>Performs a quick spatial intersection between two GeoDataFrames using bounding box optimization.</p>
+<p>This function identifies geometries in <cite>gdf1</cite> that intersect with any geometries in <cite>gdf2</cite>. It uses
+a spatial index to quickly filter <cite>gdf1</cite> geometries that are likely to intersect with the bounding
+box of each geometry in <cite>gdf2</cite>. It then performs a precise intersection check on this subset, improving
+the performance of the intersection operation.</p>
+<p>If a <cite>poly_id</cite> column is provided, the function adds a new <cite>geom_id</cite> column to the resulting intersected
+GeoDataFrame, storing the geometry ID from <cite>gdf2</cite> that each feature in <cite>gdf1</cite> intersects with. It also
+modifies <cite>gdf2</cite> by adding a <cite>counts</cite> column to indicate the number of intersecting geometries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gdf1</strong> (<em>geopandas.GeoDataFrame</em>) – The first GeoDataFrame whose geometries are tested for intersection with <cite>gdf2</cite>.</p></li>
+<li><p><strong>gdf2</strong> (<em>geopandas.GeoDataFrame</em>) – The second GeoDataFrame containing geometries to intersect with <cite>gdf1</cite>.</p></li>
+<li><p><strong>poly_id</strong> (<em>str</em><em>, </em><em>optional</em>) – The column name in <cite>gdf2</cite> containing unique geometry identifiers. If provided, the intersected subset of <cite>gdf1</cite>
+will include a new column <cite>geom_id</cite> indicating the geometry ID from <cite>gdf2</cite> that each feature intersects with.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new GeoDataFrame containing only the intersecting geometries from <cite>gdf1</cite> with respect to <cite>gdf2</cite>.
+If <cite>poly_id</cite> is provided, the intersected GeoDataFrame will also include a <cite>geom_id</cite> column.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>geopandas.GeoDataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gdf1</span> <span class="o">=</span> <span class="n">geopandas</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="s2">&quot;data1.shp&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gdf2</span> <span class="o">=</span> <span class="n">geopandas</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="s2">&quot;data2.shp&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result_gdf</span> <span class="o">=</span> <span class="n">quick_intersection</span><span class="p">(</span><span class="n">gdf1</span><span class="p">,</span> <span class="n">gdf2</span><span class="p">,</span> <span class="n">poly_id</span><span class="o">=</span><span class="s2">&quot;region_id&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>This function modifies <cite>gdf2</cite> in place by adding a <cite>counts</cite> column, which reflects the number of geometries
+in <cite>gdf1</cite> that intersect with each geometry in <cite>gdf2</cite>.</p></li>
+<li><p>It leverages spatial indexing using the <cite>sindex</cite> attribute of <cite>gdf1</cite> to quickly identify candidates for
+intersection, which significantly improves performance for large datasets.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.geospatial.reverse_geocoding_google">
+<span class="sig-prename descclassname"><span class="pre">geospatial.geospatial.</span></span><span class="sig-name descname"><span class="pre">reverse_geocoding_google</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/geospatial/geospatial.html#reverse_geocoding_google"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.geospatial.reverse_geocoding_google" title="Link to this definition"></a></dt>
+<dd><p>Returns the postal code for a given geographic coordinate (latitude, longitude) using the Google Geocoding API.</p>
+<p>This function makes a reverse geocoding request to the Google Geocoding API to obtain the postal code associated
+with the provided latitude and longitude. If the postal code is found, it is returned as a string. If not,
+<cite>None</cite> is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>float</em>) – The latitude of the location to reverse geocode.</p></li>
+<li><p><strong>lon</strong> (<em>float</em>) – The longitude of the location to reverse geocode.</p></li>
+<li><p><strong>api_key</strong> (<em>str</em>) – A valid Google Maps API key for accessing the geocoding service.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The postal code corresponding to the input geographic coordinates, if found. Returns <cite>None</cite> if no postal code
+is found or if the request fails.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reverse_geocoding_google</span><span class="p">(</span><span class="mf">37.4224764</span><span class="p">,</span> <span class="o">-</span><span class="mf">122.0842499</span><span class="p">,</span> <span class="s2">&quot;your_api_key&quot;</span><span class="p">)</span>
+<span class="go">&#39;94043&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;postcode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">reverse_geocoding_google</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> <span class="s2">&quot;your_api_key&quot;</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.geospatial.trans_proj">
+<span class="sig-prename descclassname"><span class="pre">geospatial.geospatial.</span></span><span class="sig-name descname"><span class="pre">trans_proj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BaseGeometry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">BaseGeometry</span></span></span><a class="reference internal" href="_modules/geospatial/geospatial.html#trans_proj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.geospatial.trans_proj" title="Link to this definition"></a></dt>
+<dd><p>Transforms a Shapely geometry object from one CRS to another.</p>
+<p>Uses <cite>pyproj</cite> to create a transformation pipeline that converts the input geometry
+from the source CRS (<cite>proj1</cite>) to the target CRS (<cite>proj2</cite>). The resulting geometry
+is returned in the new coordinate reference system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geom</strong> (<em>BaseGeometry</em>) – A Shapely geometry object to be transformed. This can include Point, Polygon,
+MultiPolygon, LineString, or any other Shapely geometry type.</p></li>
+<li><p><strong>proj1</strong> (<em>str</em>) – The EPSG code or PROJ string representing the source CRS of the input geometry.</p></li>
+<li><p><strong>proj2</strong> (<em>str</em>) – The EPSG code or PROJ string representing the target CRS for the transformed geometry.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The transformed Shapely geometry object in the target projection.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>BaseGeometry</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The function requires <cite>pyproj</cite> and <cite>shapely</cite> libraries.</p></li>
+<li><p>Ensure that the input and output CRS definitions are valid and supported by <cite>pyproj</cite>.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Point</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">geom</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trans_proj</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span> <span class="s2">&quot;EPSG:32632&quot;</span><span class="p">)</span>
+<span class="go">&lt;Point object at 0x...&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.geospatial.vincenty">
+<span class="sig-prename descclassname"><span class="pre">geospatial.geospatial.</span></span><span class="sig-name descname"><span class="pre">vincenty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/geospatial/geospatial.html#vincenty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.geospatial.vincenty" title="Link to this definition"></a></dt>
+<dd><p>Calculates the geodesic distance between two points on the Earth’s surface
+using the Vincenty formula, which accounts for the Earth’s ellipsoidal shape.</p>
+<p>Parameters:
+- lat1, lon1: Latitude and longitude of the first point (in degrees).
+- lat2, lon2: Latitude and longitude of the second point (in degrees).</p>
+<p>Returns:
+- Distance between the two points in meters.</p>
+<p>Notes:
+- This implementation may encounter numerical issues, such as divide-by-zero errors,</p>
+<blockquote>
+<div><p>in edge cases where the points are on opposite sides of the Earth or on the same meridian
+e.g., from (0,0) to (0,90).However, for points (0,0) to (0.001,90), the distance calculation
+is accurate within a small error margin (about 9.3e-06 meters).</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>The error in the above approach can be significant for very small distances,
+such as between (0,0) and (0,0.001).</p></li>
+</ul>
+</dd></dl>
+
+</section>
+<section id="module-geospatial.karta">
+<span id="geospatial-karta-module"></span><h2>geospatial.karta module<a class="headerlink" href="#module-geospatial.karta" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.karta.base_map">
+<span class="sig-prename descclassname"><span class="pre">geospatial.karta.</span></span><span class="sig-name descname"><span class="pre">base_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ne</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Map</span></span></span><a class="reference internal" href="_modules/geospatial/karta.html#base_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.karta.base_map" title="Link to this definition"></a></dt>
+<dd><p>Creates a base map with multiple tile layers and fits the map to the specified bounding box.</p>
+<p>This function initializes a Folium map object with multiple tile layers, including:
+- <cite>Bright Mode</cite> (CartoDB Positron)
+- <cite>Dark Mode</cite> (CartoDB Dark Matter)
+- <cite>Satellite</cite> (Esri World Imagery)
+- <cite>OpenStreetMap</cite> (OSM)</p>
+<p>It then fits the map’s view to the bounding box defined by the southwest (<cite>sw</cite>) and northeast (<cite>ne</cite>) coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sw</strong> (<em>list</em><em> or </em><em>tuple</em>) – The southwest coordinate [latitude, longitude] of the bounding box to fit the map view.</p></li>
+<li><p><strong>ne</strong> (<em>list</em><em> or </em><em>tuple</em>) – The northeast coordinate [latitude, longitude] of the bounding box to fit the map view.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Folium map object with multiple tile layers and the view fitted to the provided bounding box.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>folium.Map</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sw</span> <span class="o">=</span> <span class="p">[</span><span class="mf">51.2652</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5426</span><span class="p">]</span>  <span class="c1"># Southwest coordinate (London, UK)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ne</span> <span class="o">=</span> <span class="p">[</span><span class="mf">51.7225</span><span class="p">,</span> <span class="mf">0.2824</span><span class="p">]</span>  <span class="c1"># Northeast coordinate (London, UK)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">karta</span> <span class="o">=</span> <span class="n">base_map</span><span class="p">(</span><span class="n">sw</span><span class="p">,</span> <span class="n">ne</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">karta</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;map.html&quot;</span><span class="p">)</span>  <span class="c1"># Save the map to an HTML file</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.karta.choropleth">
+<span class="sig-prename descclassname"><span class="pre">geospatial.karta.</span></span><span class="sig-name descname"><span class="pre">choropleth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">palette</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'YlOrRd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Map</span></span></span><a class="reference internal" href="_modules/geospatial/karta.html#choropleth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.karta.choropleth" title="Link to this definition"></a></dt>
+<dd><p>Creates a choropleth map using the given GeoDataFrame and specified parameters.</p>
+<p>This function generates a Folium choropleth map layer by visualizing the data from a GeoDataFrame using color gradients
+to represent different data values across geographic areas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gdf</strong> (<em>geopandas.GeoDataFrame</em>) – The GeoDataFrame containing multipolygon geometries and data attributes to be visualized.</p></li>
+<li><p><strong>columns</strong> (<em>list</em>) – <dl class="simple">
+<dt>A list of two elements:</dt><dd><ul>
+<li><dl class="simple">
+<dt>columns[0]<span class="classifier">str</span></dt><dd><p>The column name in <cite>gdf</cite> that contains unique identifiers for each region.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>columns[1]<span class="classifier">str</span></dt><dd><p>The column name in <cite>gdf</cite> containing the data values to be visualized.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>bins</strong> (<em>list</em>) – A list of numerical values defining the value intervals for the choropleth color categories.</p></li>
+<li><p><strong>legend</strong> (<em>str</em>) – The title for the legend, which describes what is represented on the map.</p></li>
+<li><p><strong>palette</strong> (<em>str</em><em>, </em><em>optional</em>) – The color palette to be used for the choropleth (default is “YlOrRd”).</p></li>
+<li><p><strong>highlight</strong> (<em>bool</em><em>, </em><em>optional</em>) – A flag indicating whether regions should be highlighted when hovered over (default is True).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Folium map object containing the choropleth layer.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>folium.Map</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">choropleth</span><span class="p">(</span>
+<span class="go">        gdf,</span>
+<span class="go">        [&#39;region_id&#39;, &#39;population&#39;],</span>
+<span class="go">        bins=[0, 100, 500, 1000, 5000],</span>
+<span class="go">        legend=&quot;Population by Region&quot;,</span>
+<span class="go">        palette=&quot;YlOrRd&quot;,</span>
+<span class="go">        highlight=True</span>
+<span class="go">    )</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.karta.choropleth_plp">
+<span class="sig-prename descclassname"><span class="pre">geospatial.karta.</span></span><span class="sig-name descname"><span class="pre">choropleth_plp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">karta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">palette</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/geospatial/karta.html#choropleth_plp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.karta.choropleth_plp" title="Link to this definition"></a></dt>
+<dd><p>Adds a choropleth layer to a Folium map using the specified GeoDataFrame and column properties.</p>
+<p>This function is used exclusively within the <cite>plp</cite> function to create choropleth maps, visualizing data attributes
+over a geographic area using color gradients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>karta</strong> (<em>folium.Map</em>) – The Folium map object to which the choropleth layer will be added.</p></li>
+<li><p><strong>gdf</strong> (<em>geopandas.GeoDataFrame</em>) – The GeoDataFrame containing multipolygon geometries and the data to be visualized.</p></li>
+<li><p><strong>columns</strong> (<em>list</em>) – <dl class="simple">
+<dt>A list containing two elements:</dt><dd><ul>
+<li><dl class="simple">
+<dt>columns[0]<span class="classifier">str</span></dt><dd><p>The column name in <cite>gdf</cite> that contains unique identifiers for each region or geometry.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>columns[1]<span class="classifier">str</span></dt><dd><p>The column name in <cite>gdf</cite> containing the data values to be visualized on the map.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>bins</strong> (<em>list</em>) – A list of numerical values defining the value intervals to use for the choropleth color categories.</p></li>
+<li><p><strong>legend</strong> (<em>str</em>) – A string representing the legend title that describes what is being represented on the map (e.g., “Population Density”).</p></li>
+<li><p><strong>palette</strong> (<em>str</em>) – A string defining the color palette to be used for the choropleth (e.g., “YlOrRd”, “BuPu”).</p></li>
+<li><p><strong>highlight</strong> (<em>bool</em>) – A boolean flag indicating whether regions should be highlighted when hovered over.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns 0 upon successful execution, indicating that the choropleth layer was successfully added to the map.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">choropleth_plp</span><span class="p">(</span>
+<span class="go">        karta,</span>
+<span class="go">        gdf,</span>
+<span class="go">        [&#39;region_id&#39;, &#39;population&#39;],</span>
+<span class="go">        bins=[0, 100, 500, 1000, 5000],</span>
+<span class="go">        legend=&quot;Population by Region&quot;,</span>
+<span class="go">        palette=&quot;YlOrRd&quot;,</span>
+<span class="go">        highlight=True</span>
+<span class="go">    )</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.karta.color_map">
+<span class="sig-prename descclassname"><span class="pre">geospatial.karta.</span></span><span class="sig-name descname"><span class="pre">color_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">head</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/geospatial/karta.html#color_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.karta.color_map" title="Link to this definition"></a></dt>
+<dd><p>Generates a consistent color based on the input column value by mapping it to a predefined color palette.</p>
+<p>This function uses a set color palette and maps the given column value to a color. If the column value is a string,
+a substring can be selected using <cite>head</cite> and <cite>tail</cite> indices, and it will be converted to a numerical index. If the
+column value is an integer, it will directly be mapped to a color using modulo arithmetic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>col</strong> (<em>int</em><em> or </em><em>str</em>) – <p>The column value to be mapped to a color. It can be either an integer or a string.
+- If an integer, it is directly used for color mapping.
+- If a string, it will be cleaned of non-alphanumeric characters, and a substring defined by <cite>head</cite> and <cite>tail</cite></p>
+<blockquote>
+<div><p>can be selected for mapping.</p>
+</div></blockquote>
+</p></li>
+<li><p><strong>head</strong> (<em>int</em><em>, </em><em>optional</em>) – The starting index of the substring to be used for color mapping if <cite>col</cite> is a string. Default is None.</p></li>
+<li><p><strong>tail</strong> (<em>int</em><em>, </em><em>optional</em>) – The ending index of the substring to be used for color mapping if <cite>col</cite> is a string. Default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A hexadecimal color code selected from the predefined palette corresponding to the input column value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">color_map</span><span class="p">(</span><span class="s2">&quot;Category1&quot;</span><span class="p">)</span>
+<span class="go">&#39;#e6194b&#39;  # Red color from the palette</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">color_map</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="go">&#39;#3cb44b&#39;  # Green color from the palette</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">color_map</span><span class="p">(</span><span class="s2">&quot;Example&quot;</span><span class="p">,</span> <span class="n">head</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">&#39;#e12348&#39;  # Bright Red from the palette</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.karta.plp">
+<span class="sig-prename descclassname"><span class="pre">geospatial.karta.</span></span><span class="sig-name descname"><span class="pre">plp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">GeoDataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">GeoDataFrame</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heatmap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'blue'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_head</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_tail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_opacity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_popup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ring_inner_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ring_outer_radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'blue'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_opacity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_popup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centroid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'red'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlight_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'green'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polygon_popup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choropleth_cols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choropleth_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choropleth_legend</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choropleth_palette</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'YlOrRd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choropleth_highlight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geohash_res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s2_res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h3_res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geohash_inner</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compact</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cells</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ways</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Map</span></span></span><a class="reference internal" href="_modules/geospatial/karta.html#plp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.karta.plp" title="Link to this definition"></a></dt>
+<dd><p>Creates a Folium map with points, lines, or polygons based on the input geospatial data.</p>
+<p>The function <cite>plp</cite> allows users to add different geometrical elements (points, lines, polygons) to a Folium map.
+It supports various visual styles and configurations, such as clustering, heatmaps, choropleth, and geohash or cell-based layers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gdf_list</strong> (<em>list</em><em> of </em><em>gpd.GeoDataFrame</em><em> or </em><em>pd.DataFrame</em><em>, </em><em>optional</em>) – List of GeoDataFrames or DataFrames containing geometrical data to be plotted. If a single DataFrame is provided,
+it will be wrapped in a list internally.</p></li>
+<li><p><strong>x</strong> (<em>str</em><em>, </em><em>optional</em>) – Column name for the x-coordinate (longitude). Required if more than one column in the DataFrame contains ‘lon’ or ‘lat’.</p></li>
+<li><p><strong>y</strong> (<em>str</em><em>, </em><em>optional</em>) – Column name for the y-coordinate (latitude). Required if more than one column in the DataFrame contains ‘lon’ or ‘lat’.</p></li>
+<li><p><strong>cluster</strong> (<em>bool</em><em>, </em><em>default False</em>) – If True, clusters points together based on their proximity using Folium’s <cite>MarkerCluster</cite>.</p></li>
+<li><p><strong>heatmap</strong> (<em>bool</em><em>, </em><em>default False</em>) – If True, creates a heatmap layer using Folium’s <cite>HeatMap</cite> for points.</p></li>
+<li><p><strong>line</strong> (<em>bool</em><em>, </em><em>default False</em>) – If True, connects points using Folium’s <cite>PolyLine</cite> to form lines.</p></li>
+<li><p><strong>antpath</strong> (<em>bool</em><em>, </em><em>default False</em>) – If True, creates animated ant paths for the line geometries using Folium’s <cite>AntPath</cite>.</p></li>
+<li><p><strong>point_color</strong> (<em>str</em><em>, </em><em>default &quot;blue&quot;</em>) – Color of the points when displayed on the map.</p></li>
+<li><p><strong>color_head</strong> (<em>str</em><em>, </em><em>optional</em>) – Substring to extract color for the head.</p></li>
+<li><p><strong>color_tail</strong> (<em>str</em><em>, </em><em>optional</em>) – Substring to extract color for the tail.</p></li>
+<li><p><strong>point_opacity</strong> (<em>float</em><em>, </em><em>default 0.5</em>) – Opacity of the points. Value should be between 0 and 1.</p></li>
+<li><p><strong>point_radius</strong> (<em>int</em><em>, </em><em>default 3</em>) – Radius of the points in pixels.</p></li>
+<li><p><strong>point_weight</strong> (<em>int</em><em>, </em><em>default 6</em>) – Weight (thickness) of the point outline. Typically set to twice the <cite>point_radius</cite>.</p></li>
+<li><p><strong>point_popup</strong> (<em>dict</em><em>, </em><em>optional</em>) – Dictionary where keys are labels and values are column names in the DataFrame. Used to create HTML popups with
+attributes of each point.</p></li>
+<li><p><strong>buffer_radius</strong> (<em>float</em><em>, </em><em>default 0</em>) – Buffer radius (in meters) to create a buffer around each point. Set to 0 to disable buffering.</p></li>
+<li><p><strong>ring_inner_radius</strong> (<em>float</em><em>, </em><em>default 0</em>) – Inner radius of ring buffers around points. Only used if <cite>ring_outer_radius</cite> is set.</p></li>
+<li><p><strong>ring_outer_radius</strong> (<em>float</em><em>, </em><em>default 0</em>) – Outer radius of ring buffers around points. If set, creates a ring around each point.</p></li>
+<li><p><strong>line_color</strong> (<em>str</em><em>, </em><em>default &quot;blue&quot;</em>) – Color of the lines connecting points or LineString geometries.</p></li>
+<li><p><strong>line_opacity</strong> (<em>float</em><em>, </em><em>default 0.5</em>) – Opacity of the lines. Value should be between 0 and 1.</p></li>
+<li><p><strong>line_weight</strong> (<em>int</em><em>, </em><em>default 6</em>) – Thickness of the lines.</p></li>
+<li><p><strong>line_popup</strong> (<em>dict</em><em>, </em><em>optional</em>) – Dictionary where keys are labels and values are column names in the DataFrame. Used to create HTML popups with
+attributes of each line.</p></li>
+<li><p><strong>centroid</strong> (<em>bool</em><em>, </em><em>default False</em>) – If True, displays the centroids of polygon geometries on the map.</p></li>
+<li><p><strong>fill_color</strong> (<em>str</em><em>, </em><em>default &quot;red&quot;</em>) – Fill color for polygon geometries.</p></li>
+<li><p><strong>highlight_color</strong> (<em>str</em><em>, </em><em>default &quot;green&quot;</em>) – Color used to highlight polygons when hovered.</p></li>
+<li><p><strong>line_width</strong> (<em>float</em><em>, </em><em>default 0.3</em>) – Thickness of polygon outlines.</p></li>
+<li><p><strong>polygon_popup</strong> (<em>dict</em><em>, </em><em>optional</em>) – Dictionary where keys are labels and values are column names in the DataFrame. Used to create HTML popups with
+attributes of each polygon.</p></li>
+<li><p><strong>choropleth_cols</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – List of column names to use for creating choropleth maps. Requires at least two columns for {key, value}.</p></li>
+<li><p><strong>choropleth_bins</strong> (<em>list</em><em> of </em><em>int</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Binning strategy for choropleth maps.</p></li>
+<li><p><strong>choropleth_legend</strong> (<em>str</em><em>, </em><em>optional</em>) – Legend title for choropleth maps.</p></li>
+<li><p><strong>choropleth_palette</strong> (<em>str</em><em>, </em><em>default &quot;YlOrRd&quot;</em>) – Color palette for choropleth maps.</p></li>
+<li><p><strong>choropleth_highlight</strong> (<em>bool</em><em>, </em><em>default True</em>) – If True, highlights choropleth polygons when hovered.</p></li>
+<li><p><strong>geohash_res</strong> (<em>int</em><em>, </em><em>default 0</em>) – Resolution for creating geohash-based polygonal layers. Set to 0 to disable.</p></li>
+<li><p><strong>s2_res</strong> (<em>int</em><em>, </em><em>default -1</em>) – Resolution for creating Google S2-based polygonal layers. Set to -1 to disable.</p></li>
+<li><p><strong>h3_res</strong> (<em>int</em><em>, </em><em>default -1</em>) – Resolution for creating Uber H3-based polygonal layers. Set to -1 to disable.</p></li>
+<li><p><strong>geohash_inner</strong> (<em>bool</em><em>, </em><em>default False</em>) – If True, shows only inner geohash cells. Does not work if <cite>compact</cite> is set to True.</p></li>
+<li><p><strong>compact</strong> (<em>bool</em><em>, </em><em>default False</em>) – If True, creates compact representation of geohash, S2, or H3 cells.</p></li>
+<li><p><strong>cells</strong> (<em>list</em><em>, </em><em>optional</em>) – List of geohash, S2, or H3 cell IDs to visualize.</p></li>
+<li><p><strong>cell_type</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of cells used in <cite>cells</cite> parameter. Can be ‘geohash’, ‘s2’, or ‘h3’.</p></li>
+<li><p><strong>ways</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – List of OSM way IDs to visualize as lines or polygons.</p></li>
+<li><p><strong>url</strong> (<em>str</em><em>, </em><em>optional</em>) – Overpass API URL to query OSM geometries by <cite>ways</cite> parameter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Folium map object with the added geometrical features based on input parameters.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>folium.Map</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example usage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="s2">&quot;path/to/shapefile.shp&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plp</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.karta.points">
+<span class="sig-prename descclassname"><span class="pre">geospatial.karta.</span></span><span class="sig-name descname"><span class="pre">points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">karta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_head</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_tail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opacity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">popup_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/geospatial/karta.html#points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.karta.points" title="Link to this definition"></a></dt>
+<dd><p>Adds a point (marker) to a Folium map based on the specified parameters and data in the provided row.</p>
+<p>The function attempts to extract coordinates from a geometry column if available, or directly from <cite>x</cite> and <cite>y</cite> columns
+(longitude and latitude). It then adds a circle marker to the Folium map (<cite>karta</cite>) using the specified color, radius,
+and other style parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row</strong> (<em>pd.Series</em>) – A row of data containing either a ‘geometry’ attribute or x/y columns for coordinates.</p></li>
+<li><p><strong>karta</strong> (<em>folium.Map</em>) – A Folium map object to which the marker will be added.</p></li>
+<li><p><strong>color</strong> (<em>str</em>) – Column name to determine the color of the marker. If the column is present in the row, a color from the color map
+will be used.</p></li>
+<li><p><strong>color_head</strong> (<em>int</em><em>, </em><em>optional</em>) – Starting index for substring extraction from the <cite>color</cite> column value to create a unique color (default is None).</p></li>
+<li><p><strong>color_tail</strong> (<em>int</em><em>, </em><em>optional</em>) – Ending index for substring extraction from the <cite>color</cite> column value to create a unique color (default is None).</p></li>
+<li><p><strong>opacity</strong> (<em>float</em><em>, </em><em>optional</em>) – Opacity of the marker (default is 0.5).</p></li>
+<li><p><strong>radius</strong> (<em>int</em><em>, </em><em>optional</em>) – Radius of the circle marker (default is 3).</p></li>
+<li><p><strong>weight</strong> (<em>int</em><em>, </em><em>optional</em>) – Weight (thickness) of the circle marker’s border (default is 6).</p></li>
+<li><p><strong>popup_dict</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary where keys are labels and values are column names in the row. This dictionary is used to create
+an HTML popup with the specified labels and values (default is None).</p></li>
+<li><p><strong>x</strong> (<em>str</em><em>, </em><em>optional</em>) – Column name for longitude, if ‘geometry’ attribute is not present (default is None).</p></li>
+<li><p><strong>y</strong> (<em>str</em><em>, </em><em>optional</em>) – Column name for latitude, if ‘geometry’ attribute is not present (default is None).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns 0 upon successfully adding the marker to the map.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">row</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="n">Point</span><span class="p">(</span><span class="mf">40.748817</span><span class="p">,</span> <span class="o">-</span><span class="mf">73.985428</span><span class="p">),</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">karta</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="p">[</span><span class="mf">40.748817</span><span class="p">,</span> <span class="o">-</span><span class="mf">73.985428</span><span class="p">],</span> <span class="n">zoom_start</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">points</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">karta</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">)</span>
+<span class="go">0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.karta.polygons">
+<span class="sig-prename descclassname"><span class="pre">geospatial.karta.</span></span><span class="sig-name descname"><span class="pre">polygons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">karta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlight_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">popup_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/geospatial/karta.html#polygons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.karta.polygons" title="Link to this definition"></a></dt>
+<dd><p>Adds multiple polygons from a DataFrame to a Folium map with specified styles and popups.</p>
+<p>This function iterates over the rows of a DataFrame containing geometries and adds each polygon to the given Folium map.
+The polygon styles can be customized with fill and highlight colors, line width, and optional popup information for
+each polygon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>karta</strong> (<em>folium.Map</em>) – The Folium map object to which the polygons will be added.</p></li>
+<li><p><strong>mdf</strong> (<em>pd.DataFrame</em>) – A DataFrame containing polygon geometries in a ‘geometry’ column and other optional attributes for styling and popup.</p></li>
+<li><p><strong>fill_color</strong> (<em>str</em>) – The column name or value used to determine the fill color of the polygons. If the column is present in <cite>mdf</cite>, the color
+is extracted using the <cite>color_map</cite> function. Otherwise, it is used as a direct color value.</p></li>
+<li><p><strong>highlight_color</strong> (<em>str</em>) – The color used to highlight polygons when they are hovered over.</p></li>
+<li><p><strong>line_width</strong> (<em>int</em>) – The width of the polygon borders (outlines).</p></li>
+<li><p><strong>popup_dict</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary where keys are labels and values are column names in <cite>mdf</cite>. This dictionary is used to create an HTML popup
+with the specified labels and values for each polygon (default is None).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns 0 upon successfully adding the polygons to the map.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example DataFrame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;geometry&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span> <span class="n">Polygon</span><span class="p">([(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)])],</span>
+<span class="go">            &#39;color&#39;: [&#39;blue&#39;, &#39;green&#39;]}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">karta</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">zoom_start</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">polygons</span><span class="p">(</span><span class="n">karta</span><span class="p">,</span> <span class="n">mdf</span><span class="p">,</span> <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="n">highlight_color</span><span class="o">=</span><span class="s2">&quot;yellow&quot;</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.karta.row_polygons">
+<span class="sig-prename descclassname"><span class="pre">geospatial.karta.</span></span><span class="sig-name descname"><span class="pre">row_polygons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">karta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">popup_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/geospatial/karta.html#row_polygons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.karta.row_polygons" title="Link to this definition"></a></dt>
+<dd><p>Adds a polygon to a Folium map based on the specified parameters and data in the provided row.</p>
+<p>This function creates a polygon (GeoJson) object for the specified row’s geometry and adds it to the Folium map (<cite>karta</cite>).
+It allows customization of fill color, line width, and popups. The function also defines style and highlight properties
+for the polygon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>row</strong> (<em>pd.Series</em>) – A row of data containing a ‘geometry’ attribute that defines the polygon shape.</p></li>
+<li><p><strong>karta</strong> (<em>folium.Map</em>) – A Folium map object to which the polygon will be added.</p></li>
+<li><p><strong>fill_color</strong> (<em>str</em>) – Column name to determine the fill color of the polygon. If the column is present in the row, the color is extracted
+using the <cite>color_map</cite> function.</p></li>
+<li><p><strong>line_width</strong> (<em>int</em>) – The width of the border (outline) of the polygon.</p></li>
+<li><p><strong>popup_dict</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary where keys are labels and values are column names in the row. This dictionary is used to create an
+HTML popup with the specified labels and values for the polygon (default is None).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns 0 upon successfully adding the polygon to the map.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">row</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span> <span class="s2">&quot;fill_color&quot;</span><span class="p">:</span> <span class="s2">&quot;blue&quot;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">karta</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">zoom_start</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">row_polygons</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">karta</span><span class="p">,</span> <span class="s2">&quot;fill_color&quot;</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-geospatial.osm">
+<span id="geospatial-osm-module"></span><h2>geospatial.osm module<a class="headerlink" href="#module-geospatial.osm" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.osm.decode">
+<span class="sig-prename descclassname"><span class="pre">geospatial.osm.</span></span><span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoded</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/geospatial/osm.html#decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.osm.decode" title="Link to this definition"></a></dt>
+<dd><p>Decodes an encoded polyline string from Valhalla into a list of coordinates.</p>
+<p>Valhalla routing, map-matching, and elevation services use an encoded polyline format
+to store a series of latitude and longitude coordinates as a single string. This function
+decodes the polyline into a list of coordinates with six decimal precision.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>encoded</strong> (<em>str</em>) – An encoded polyline string as per the Valhalla encoding format.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of [longitude, latitude] pairs decoded from the input polyline string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of list of float</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The function uses six decimal degrees of precision for decoding Valhalla’s encoded polylines.</p></li>
+<li><p>The decoded coordinates are returned in [longitude, latitude] format.</p></li>
+</ul>
+<p class="rubric">References</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/valhalla/valhalla-docs/blob/master/decoding.md#decode-a-route-shape">https://github.com/valhalla/valhalla-docs/blob/master/decoding.md#decode-a-route-shape</a></p></li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">encoded_polyline</span> <span class="o">=</span> <span class="s2">&quot;_p~iF~ps|U_ulLnnqC_mqNvxq`@&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decoded_coords</span> <span class="o">=</span> <span class="n">decode</span><span class="p">(</span><span class="n">encoded_polyline</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">decoded_coords</span><span class="p">)</span>
+<span class="go">[[-120.2, 38.5], [-120.95, 40.7], [-126.453, 43.252]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.osm.map_matching">
+<span class="sig-prename descclassname"><span class="pre">geospatial.osm.</span></span><span class="sig-name descname"><span class="pre">map_matching</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'osrm'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/geospatial/osm.html#map_matching"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.osm.map_matching" title="Link to this definition"></a></dt>
+<dd><p>Performs map matching using Valhalla’s Meili service.</p>
+<p>Map matching aligns a series of GPS points onto a road network. This function takes a DataFrame
+of coordinates, sends a request to the Meili map-matching service, and returns the matched
+coordinates along with other route information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame containing the GPS coordinates to be map-matched. It should be in the
+format of [{“lon”: float, “lat”: float}, …].</p></li>
+<li><p><strong>cost</strong> (<em>str</em>) – The routing profile to use for map matching. Common values include “auto”, “bicycle”,
+or “pedestrian”.</p></li>
+<li><p><strong>url</strong> (<em>str</em>) – The URL endpoint for the Meili map-matching service.</p></li>
+<li><p><strong>format</strong> (<em>str</em><em>, </em><em>optional</em>) – The response format for the request, either “osrm” or “geojson”. Defaults to “osrm”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary representing the JSON response from the map-matching service if the request
+is successful, otherwise None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[dict]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">coordinates</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">73.9857</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="mf">40.7484</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;lon&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">73.9851</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">:</span> <span class="mf">40.7478</span><span class="p">}]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://valhalla.mapzen.com/trace_attributes&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matched_route</span> <span class="o">=</span> <span class="n">map_matching</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">matched_route</span><span class="p">)</span>
+<span class="go">{&#39;shape&#39;: &#39;_p~iF~ps|U_ulLnnqC_mqNvxq`@&#39;, &#39;confidence_score&#39;: 1.0}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.osm.way_to_geom">
+<span class="sig-prename descclassname"><span class="pre">geospatial.osm.</span></span><span class="sig-name descname"><span class="pre">way_to_geom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">way_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geospatial/osm.html#way_to_geom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.osm.way_to_geom" title="Link to this definition"></a></dt>
+<dd><p>Converts an OSM way ID into a Shapely Polygon or LineString object.</p>
+<p>This function retrieves the geometry corresponding to the given OSM way ID and
+returns it as a Shapely <cite>Polygon</cite> or <cite>LineString</cite> object based on whether the way
+forms a closed loop or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>way_id</strong> (<em>int</em>) – The OpenStreetMap (OSM) way ID to be retrieved.</p></li>
+<li><p><strong>url</strong> (<em>str</em>) – The URL endpoint for the Overpass API to request the geometry.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Shapely <cite>Polygon</cite> object if the way forms a closed loop, or a <cite>LineString</cite>
+object otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>shapely.geometry.Polygon or shapely.geometry.LineString</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The function constructs an Overpass API query using the given way ID,
+requests the geometry, and then converts it into a Shapely geometry.</p></li>
+<li><p>Assumes that the Overpass API returns data in JSON format with a “geometry” attribute.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">way_id</span> <span class="o">=</span> <span class="mi">123456</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://overpass-api.de/api/interpreter&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">geometry</span> <span class="o">=</span> <span class="n">way_to_geom</span><span class="p">(</span><span class="n">way_id</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+<span class="go">POLYGON ((13.3888 52.5170, 13.3976 52.5291, 13.4286 52.5232, 13.3888 52.5170))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.osm.ways_to_geom">
+<span class="sig-prename descclassname"><span class="pre">geospatial.osm.</span></span><span class="sig-name descname"><span class="pre">ways_to_geom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geospatial/osm.html#ways_to_geom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.osm.ways_to_geom" title="Link to this definition"></a></dt>
+<dd><p>Converts an array of OpenStreetMap (OSM) way IDs into Shapely geometries.</p>
+<p>This function retrieves the geometries corresponding to the given OSM way IDs and
+returns a list of Shapely <cite>LineString</cite> or <cite>Polygon</cite> objects based on the geometries
+fetched from the OSM API.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ids</strong> (<em>list</em><em> of </em><em>int</em>) – A list of OSM way IDs to be retrieved.</p></li>
+<li><p><strong>url</strong> (<em>str</em>) – The URL endpoint for the Overpass API to request the geometries.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of Shapely <cite>LineString</cite> or <cite>Polygon</cite> objects representing the geometries
+of the OSM ways. If the way forms a closed loop, it is returned as a <cite>Polygon</cite>;
+otherwise, it is returned as a <cite>LineString</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of shapely.geometry.LineString or shapely.geometry.Polygon</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The function constructs an Overpass API query using the given IDs, requests the
+geometries, and then converts them into Shapely geometries.</p></li>
+<li><p>The function assumes that the Overpass API returns data in JSON format and expects
+the “geometry” attribute to contain the coordinates.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">way_ids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">123456</span><span class="p">,</span> <span class="mi">234567</span><span class="p">,</span> <span class="mi">345678</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://overpass-api.de/api/interpreter&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">geometries</span> <span class="o">=</span> <span class="n">ways_to_geom</span><span class="p">(</span><span class="n">way_ids</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">geometries</span><span class="p">)</span>
+<span class="go">[&lt;shapely.geometry.polygon.Polygon object at 0x...&gt;,</span>
+<span class="go"> &lt;shapely.geometry.linestring.LineString object at 0x...&gt;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="geospatial-pprocessing-module">
+<h2>geospatial.pprocessing module<a class="headerlink" href="#geospatial-pprocessing-module" title="Link to this heading"></a></h2>
+</section>
+<section id="module-geospatial.sindex">
+<span id="geospatial-sindex-module"></span><h2>geospatial.sindex module<a class="headerlink" href="#module-geospatial.sindex" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.sindex.cell_to_geom">
+<span class="sig-prename descclassname"><span class="pre">geospatial.sindex.</span></span><span class="sig-name descname"><span class="pre">cell_to_geom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cells</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="_modules/geospatial/sindex.html#cell_to_geom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.sindex.cell_to_geom" title="Link to this definition"></a></dt>
+<dd><p>Converts a list of spatial cells to their corresponding geometries and resolution levels.</p>
+<p>The function takes a list of spatial cells (e.g., Geohash, H3, or S2) and converts each cell
+into a geometry object (Polygon) based on the specified cell type. It also calculates the resolution
+level for each cell.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cells</strong> (<em>list</em>) – A list of spatial cells represented as strings. Each cell corresponds to a spatial area
+in a specific grid system (e.g., Geohash, H3, or S2).</p></li>
+<li><p><strong>cell_type</strong> (<em>str</em>) – The type of spatial cell system used. Accepted values are:
+- “geohash” : Geohash spatial indexing system.
+- “h3”      : H3 hexagonal spatial indexing system.
+- “s2”      : S2 spherical spatial indexing system.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A tuple containing:
+- <cite>res</cite> : list of int</p>
+<blockquote>
+<div><p>A list of resolution levels corresponding to each cell in the input.</p>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt><cite>geoms</cite><span class="classifier">list of shapely.geometry.Polygon</span></dt><dd><p>A list of Polygon geometries representing the spatial boundaries of the input cells.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <cite>cell_type</cite> is not one of “geohash”, “h3”, or “s2”.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.sindex.compact_cells">
+<span class="sig-prename descclassname"><span class="pre">geospatial.sindex.</span></span><span class="sig-name descname"><span class="pre">compact_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cells</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/geospatial/sindex.html#compact_cells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.sindex.compact_cells" title="Link to this definition"></a></dt>
+<dd><p>Compacts a list of spatial cells (e.g., Geohash, S2, or H3) by merging adjacent cells into parent cells.</p>
+<p>The function takes a list of spatial cells and compacts them into larger cells if possible, reducing the total number
+of cells by merging adjacent cells into their parent cell at a coarser resolution. The compaction process differs based
+on the specified <cite>cell_type</cite> and its respective hierarchy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cells</strong> (<em>list</em>) – A list of spatial cells represented as strings. Each cell corresponds to a spatial area in a specific grid system
+(e.g., Geohash, H3, or S2).</p></li>
+<li><p><strong>cell_type</strong> (<em>str</em>) – The type of spatial cell system used. Accepted values are:
+- “geohash” : Geohash spatial indexing system.
+- “h3”      : H3 hexagonal spatial indexing system.
+- “s2”      : S2 spherical spatial indexing system.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of compacted spatial cells. Each cell is represented as a string and is at the coarsest resolution possible
+based on the input cells.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <cite>cell_type</cite> is not one of “geohash”, “h3”, or “s2”.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>For <cite>h3</cite>, the function uses the built-in <cite>h3.compact()</cite> method.</p></li>
+<li><p>For <cite>s2</cite>, the compaction merges cells up to their parent cells by considering the S2 hierarchy.</p></li>
+<li><p>For <cite>geohash</cite>, cells are merged based on shared prefixes.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.sindex.geom_to_cell">
+<span class="sig-prename descclassname"><span class="pre">geospatial.sindex.</span></span><span class="sig-name descname"><span class="pre">geom_to_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">BaseGeometry</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/geospatial/sindex.html#geom_to_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.sindex.geom_to_cell" title="Link to this definition"></a></dt>
+<dd><p>Converts a list of geometries into a set of unique spatial cells based on the specified cell type and resolution.</p>
+<p>This function takes a list of Shapely geometries (e.g., Polygon, MultiPolygon) and converts them into spatial cells
+using one of the supported cell systems: Geohash, S2, or H3. The resulting cells are returned as a list of unique
+cell IDs. If <cite>dump</cite> is set to True, the cells are saved to a file instead of being returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geoms</strong> (<em>list</em><em> of </em><em>shapely.geometry.base.BaseGeometry</em>) – A list of Shapely geometry objects (Polygon or MultiPolygon).</p></li>
+<li><p><strong>cell_type</strong> (<em>str</em>) – The type of spatial cell system to use. Supported values are “geohash”, “s2”, or “h3”.</p></li>
+<li><p><strong>res</strong> (<em>int</em>) – The resolution level for the spatial cells. The resolution parameter determines the granularity of the cells.</p></li>
+<li><p><strong>dump</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the cells are saved to a file on the desktop in a folder named after <cite>cell_type</cite>.
+If False, the function returns a list of cell IDs. Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If <cite>dump</cite> is False, a list of unique cell IDs is returned.
+If <cite>dump</cite> is True, None is returned after saving the cells to a file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str or None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <cite>cell_type</cite> is not one of the supported values (“geohash”, “s2”, “h3”).</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">MultiPolygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">geometries</span> <span class="o">=</span> <span class="p">[</span><span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span> <span class="n">MultiPolygon</span><span class="p">([</span><span class="o">...</span><span class="p">])]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Convert geometries to H3 cells at resolution 9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h3_cells</span> <span class="o">=</span> <span class="n">geom_to_cell</span><span class="p">(</span><span class="n">geometries</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="s2">&quot;h3&quot;</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.sindex.geom_to_cell_parallel">
+<span class="sig-prename descclassname"><span class="pre">geospatial.sindex.</span></span><span class="sig-name descname"><span class="pre">geom_to_cell_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compact</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geospatial/sindex.html#geom_to_cell_parallel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.sindex.geom_to_cell_parallel" title="Link to this definition"></a></dt>
+<dd><p>Performs a parallelised conversion of geometries in a GeoDataFrame to cell identifiers of a specified type
+(e.g., Geohash, S2, or H3), optionally compacting the result to reduce the number of cells.</p>
+<p>This function first divides the bounding box of the input GeoDataFrame into smaller grid cells, then calculates
+the intersection between these grid cells and the input geometries. The resulting geometries are processed in
+parallel to generate cell identifiers according to the specified <cite>cell_type</cite> and <cite>res</cite> (resolution). The result
+can be compacted to reduce the number of cells.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mdf</strong> (<em>gpd.GeoDataFrame</em>) – A GeoDataFrame containing geometries that need to be converted to cell identifiers.</p></li>
+<li><p><strong>cell_type</strong> (<em>str</em>) – The type of cell identifier to use. Options are:
+- “geohash”: Converts geometries to Geohash identifiers.
+- “s2”: Converts geometries to S2 cell tokens.
+- “h3”: Converts geometries to H3 cell tokens.</p></li>
+<li><p><strong>res</strong> (<em>int</em>) – The resolution or precision level of the cell identifiers. Higher values indicate finer precision.</p></li>
+<li><p><strong>compact</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default=False</em>) – If True, compact the resulting cells to reduce their number. This is typically applicable for S2 and H3 cells.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default=False</em>) – If True, print timing and progress information to the console.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>A list of cell identifiers as strings, corresponding to the geometries in the input GeoDataFrame.</p></li>
+<li><p>The total number of unique cell identifiers.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[List[str], int]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If an invalid <cite>cell_type</cite> is provided. Supported types are “geohash”, “s2”, and “h3”.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Assuming `mdf` is a GeoDataFrame with geometries:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cells</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">geom_to_cell_parallel</span><span class="p">(</span><span class="n">mdf</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="s2">&quot;s2&quot;</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">compact</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2"> cells: </span><span class="si">{</span><span class="n">cells</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.sindex.geom_to_cell_parallel_2">
+<span class="sig-prename descclassname"><span class="pre">geospatial.sindex.</span></span><span class="sig-name descname"><span class="pre">geom_to_cell_parallel_2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compact</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geospatial/sindex.html#geom_to_cell_parallel_2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.sindex.geom_to_cell_parallel_2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.sindex.h3_stats">
+<span class="sig-prename descclassname"><span class="pre">geospatial.sindex.</span></span><span class="sig-name descname"><span class="pre">h3_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BaseGeometry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h3_res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compact</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geospatial/sindex.html#h3_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.sindex.h3_stats" title="Link to this definition"></a></dt>
+<dd><p>Computes H3 cell statistics for a given geometry at a specified resolution.</p>
+<p>This function takes a Shapely geometry object and computes the number of H3 cells covering the geometry at a
+specified resolution. It also calculates the area of each H3 cell at the given resolution. Optionally, the function
+can return the compacted set of H3 cells, reducing the number of cells required to represent the geometry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geom</strong> (<em>shapely.geometry.base.BaseGeometry</em>) – A Shapely geometry object (e.g., Polygon or MultiPolygon) representing the area of interest.</p></li>
+<li><p><strong>h3_res</strong> (<em>int</em>) – The H3 resolution level for generating spatial cells. The resolution level controls the granularity of the cells.</p></li>
+<li><p><strong>compact</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the function returns a compacted set of H3 cells, reducing the number of cells needed to represent the geometry.
+Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing:
+- int: Number of H3 cells covering the given geometry.
+- float: Area of each H3 cell at the specified resolution, in square kilometers.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">geom</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="mf">122.0</span><span class="p">,</span> <span class="mf">37.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">122.0</span><span class="p">,</span> <span class="mf">38.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">121.0</span><span class="p">,</span> <span class="mf">38.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">121.0</span><span class="p">,</span> <span class="mf">37.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">122.0</span><span class="p">,</span> <span class="mf">37.0</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h3_stats</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">h3_res</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">compact</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">(512, 0.001)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>The function utilizes the H3 library for generating and compacting H3 cells and for calculating cell area. The area
+is always returned in square kilometers (“km^2”).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.sindex.uncompact_s2">
+<span class="sig-prename descclassname"><span class="pre">geospatial.sindex.</span></span><span class="sig-name descname"><span class="pre">uncompact_s2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compact_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/geospatial/sindex.html#uncompact_s2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.sindex.uncompact_s2" title="Link to this definition"></a></dt>
+<dd><p>Expands a list of compacted S2 cell tokens to a specified resolution level.</p>
+<p>This function takes a list of compact S2 cell tokens and generates their child cells up to the desired
+resolution level. It is used to “uncompact” S2 cells that have been previously compacted, producing a
+more detailed representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>compact_tokens</strong> (<em>list</em>) – A list of S2 cell tokens represented as strings. These tokens are at a coarser resolution level and
+will be expanded into their child cells.</p></li>
+<li><p><strong>level</strong> (<em>int</em>) – The target S2 cell resolution level to which the input tokens should be expanded. The resolution level
+determines the size of the child cells. A higher level corresponds to finer granularity (smaller cells).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of S2 cell tokens represented as strings. Each token corresponds to a child cell of the input
+compact tokens, expanded to the specified resolution level.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the provided <cite>level</cite> is less than or equal to the resolution level of the input <cite>compact_tokens</cite>.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">compact_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;89c2847c&quot;</span><span class="p">,</span> <span class="s2">&quot;89c2847d&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uncompact_s2</span><span class="p">(</span><span class="n">compact_tokens</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="go">[&quot;89c2847c1&quot;, &quot;89c2847c2&quot;, &quot;89c2847c3&quot;, ..., &quot;89c2847d1&quot;, &quot;89c2847d2&quot;, ...]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="module-geospatial">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-geospatial" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Abbas Kiasari.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
