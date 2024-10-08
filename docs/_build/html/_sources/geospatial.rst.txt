@@ -4,10 +4,10 @@ geospatial package
 Submodules
 ----------
 
-geospatial.geospatial module
+geospatial.gutils module
 ----------------------------
 
-.. automodule:: geospatial.geospatial
+.. automodule:: geospatial.gutils
    :members:
    :undoc-members:
    :show-inheritance:
