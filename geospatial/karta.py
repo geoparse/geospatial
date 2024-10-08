@@ -7,8 +7,7 @@ import pandas as pd
 from folium import plugins
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 
-from geospatial import geospatial as gsp
-from geospatial import osm, sindex
+from geospatial import gutils, osm, sindex
 
 # pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -810,7 +809,7 @@ def plp(  # plp: points, lines, polygons
                 group_buffer = folium.FeatureGroup(name=f"{i}- Buffer")
                 bgdf = gdf.copy()  # buffered gdf: Create a copy of the GeoDataFrame to modify geometries
                 # Apply buffer to geometries using the specified radius in meters
-                bgdf["geometry"] = bgdf.to_crs(gsp.find_proj(gdf.geometry.values[0])).buffer(buffer_radius).to_crs("EPSG:4326")
+                bgdf["geometry"] = bgdf.to_crs(gutils.find_proj(gdf.geometry.values[0])).buffer(buffer_radius).to_crs("EPSG:4326")
                 # Add the buffered geometries to the map as polygons
                 polygons(
                     karta=group_buffer,
@@ -829,9 +828,9 @@ def plp(  # plp: points, lines, polygons
                 bgdf = gdf.copy()  # buffered gdf: Create a copy of the GeoDataFrame to modify geometries
                 # Create ring shapes by applying an outer and inner buffer, subtracting the inner from the outer
                 bgdf["geometry"] = (
-                    bgdf.to_crs(gsp.find_proj(gdf.geometry.values[0]))
+                    bgdf.to_crs(gutils.find_proj(gdf.geometry.values[0]))
                     .buffer(ring_outer_radius)
-                    .difference(bgdf.to_crs(gsp.find_proj(gdf.geometry.values[0])).buffer(ring_inner_radius))
+                    .difference(bgdf.to_crs(gutils.find_proj(gdf.geometry.values[0])).buffer(ring_inner_radius))
                     .to_crs("EPSG:4326")
                 )  # radius in meters
                 # Add the ring-shaped geometries to the map as polygons

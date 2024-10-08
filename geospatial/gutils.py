@@ -52,7 +52,7 @@ def geom_stats(geom: Optional[Union[Polygon, MultiPolygon]] = None, unit: str = 
     """
     if not geom:  # Print usage help if geom is None
         print(
-            "mdf[['nshells', 'nholes', 'nshell_points', 'area', 'border']] = [gsp.geom_stats(geom, unit='km') for geom in mdf.geometry]"
+            "mdf[['nshells', 'nholes', 'nshell_points', 'area', 'border']] = [gutils.geom_stats(geom, unit='km') for geom in mdf.geometry]"
         )
         return
 
@@ -339,7 +339,7 @@ def flatten_3d(geom: gpd.GeoSeries) -> List[Union[Polygon, MultiPolygon]]:
 
     Examples
     --------
-    >>> gdf.geometry = gsp.flatten_3d(gdf.geometry)
+    >>> gdf.geometry = flatten_3d(gdf.geometry)
         Converts all 3D geometries in the GeoSeries `gdf.geometry` to 2D geometries.
 
     Notes
