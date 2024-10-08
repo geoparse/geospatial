@@ -1,0 +1,327 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geospatial.osm &mdash; geospatial 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=7ab3649f" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            geospatial
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">geospatial</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">geospatial.osm</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for geospatial.osm</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Polygon</span>
+
+<span class="c1"># pd.options.mode.chained_assignment = None  # default=&#39;warn&#39;</span>
+
+
+<div class="viewcode-block" id="way_to_geom">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.osm.way_to_geom">[docs]</a>
+<span class="k">def</span> <span class="nf">way_to_geom</span><span class="p">(</span><span class="n">way_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts an OSM way ID into a Shapely Polygon or LineString object.</span>
+
+<span class="sd">    This function retrieves the geometry corresponding to the given OSM way ID and</span>
+<span class="sd">    returns it as a Shapely `Polygon` or `LineString` object based on whether the way</span>
+<span class="sd">    forms a closed loop or not.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    way_id : int</span>
+<span class="sd">        The OpenStreetMap (OSM) way ID to be retrieved.</span>
+<span class="sd">    url : str</span>
+<span class="sd">        The URL endpoint for the Overpass API to request the geometry.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    shapely.geometry.Polygon or shapely.geometry.LineString</span>
+<span class="sd">        A Shapely `Polygon` object if the way forms a closed loop, or a `LineString`</span>
+<span class="sd">        object otherwise.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - The function constructs an Overpass API query using the given way ID,</span>
+<span class="sd">      requests the geometry, and then converts it into a Shapely geometry.</span>
+<span class="sd">    - Assumes that the Overpass API returns data in JSON format with a &quot;geometry&quot; attribute.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; way_id = 123456</span>
+<span class="sd">    &gt;&gt;&gt; url = &quot;https://overpass-api.de/api/interpreter&quot;</span>
+<span class="sd">    &gt;&gt;&gt; geometry = way_to_geom(way_id, url)</span>
+<span class="sd">    &gt;&gt;&gt; print(geometry)</span>
+<span class="sd">    POLYGON ((13.3888 52.5170, 13.3976 52.5291, 13.4286 52.5232, 13.3888 52.5170))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[out:json][timeout:600][maxsize:4073741824];way(</span><span class="si">{</span><span class="n">way_id</span><span class="si">}</span><span class="s2">);out geom;&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">query</span><span class="p">})</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;elements&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">geom</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="p">[(</span><span class="n">node</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">],</span> <span class="n">node</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">geom</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">geom</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">geom</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>  <span class="c1"># Check if the way forms a closed loop</span>
+        <span class="k">return</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">LineString</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ways_to_geom">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.osm.ways_to_geom">[docs]</a>
+<span class="k">def</span> <span class="nf">ways_to_geom</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts an array of OpenStreetMap (OSM) way IDs into Shapely geometries.</span>
+
+<span class="sd">    This function retrieves the geometries corresponding to the given OSM way IDs and</span>
+<span class="sd">    returns a list of Shapely `LineString` or `Polygon` objects based on the geometries</span>
+<span class="sd">    fetched from the OSM API.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ids : list of int</span>
+<span class="sd">        A list of OSM way IDs to be retrieved.</span>
+<span class="sd">    url : str</span>
+<span class="sd">        The URL endpoint for the Overpass API to request the geometries.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list of shapely.geometry.LineString or shapely.geometry.Polygon</span>
+<span class="sd">        A list of Shapely `LineString` or `Polygon` objects representing the geometries</span>
+<span class="sd">        of the OSM ways. If the way forms a closed loop, it is returned as a `Polygon`;</span>
+<span class="sd">        otherwise, it is returned as a `LineString`.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - The function constructs an Overpass API query using the given IDs, requests the</span>
+<span class="sd">      geometries, and then converts them into Shapely geometries.</span>
+<span class="sd">    - The function assumes that the Overpass API returns data in JSON format and expects</span>
+<span class="sd">      the &quot;geometry&quot; attribute to contain the coordinates.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; way_ids = [123456, 234567, 345678]</span>
+<span class="sd">    &gt;&gt;&gt; url = &quot;https://overpass-api.de/api/interpreter&quot;</span>
+<span class="sd">    &gt;&gt;&gt; geometries = ways_to_geom(way_ids, url)</span>
+<span class="sd">    &gt;&gt;&gt; print(geometries)</span>
+<span class="sd">    [&lt;shapely.geometry.polygon.Polygon object at 0x...&gt;,</span>
+<span class="sd">     &lt;shapely.geometry.linestring.LineString object at 0x...&gt;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;[out:json][timeout:600][maxsize:4073741824];&quot;</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+        <span class="n">query</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;way(</span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">);out geom;&quot;</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">query</span><span class="p">})</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;elements&quot;</span><span class="p">]</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span>  <span class="c1"># used later to determine if the way is a Polygon or a LineString</span>
+    <span class="n">ways</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">response</span><span class="p">]</span>
+
+    <span class="n">geoms</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">way</span> <span class="ow">in</span> <span class="n">ways</span><span class="p">:</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="p">[(</span><span class="n">node</span><span class="p">[</span><span class="s2">&quot;lon&quot;</span><span class="p">],</span> <span class="n">node</span><span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">way</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">nodes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>  <span class="c1"># in polygons the first and last items are the same</span>
+            <span class="n">geoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Polygon</span><span class="p">(</span><span class="n">coords</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">geoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LineString</span><span class="p">(</span><span class="n">coords</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">geoms</span></div>
+
+
+
+<div class="viewcode-block" id="decode">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.osm.decode">[docs]</a>
+<span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="n">encoded</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decodes an encoded polyline string from Valhalla into a list of coordinates.</span>
+
+<span class="sd">    Valhalla routing, map-matching, and elevation services use an encoded polyline format</span>
+<span class="sd">    to store a series of latitude and longitude coordinates as a single string. This function</span>
+<span class="sd">    decodes the polyline into a list of coordinates with six decimal precision.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    encoded : str</span>
+<span class="sd">        An encoded polyline string as per the Valhalla encoding format.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list of list of float</span>
+<span class="sd">        A list of [longitude, latitude] pairs decoded from the input polyline string.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - The function uses six decimal degrees of precision for decoding Valhalla&#39;s encoded polylines.</span>
+<span class="sd">    - The decoded coordinates are returned in [longitude, latitude] format.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    - https://github.com/valhalla/valhalla-docs/blob/master/decoding.md#decode-a-route-shape</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; encoded_polyline = &quot;_p~iF~ps|U_ulLnnqC_mqNvxq`@&quot;</span>
+<span class="sd">    &gt;&gt;&gt; decoded_coords = decode(encoded_polyline)</span>
+<span class="sd">    &gt;&gt;&gt; print(decoded_coords)</span>
+<span class="sd">    [[-120.2, 38.5], [-120.95, 40.7], [-126.453, 43.252]]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">inv</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">1e6</span>  <span class="c1"># Six decimal places of precision in Valhalla</span>
+    <span class="n">decoded</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">previous</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">encoded</span><span class="p">):</span>  <span class="c1"># For each byte in the encoded string</span>
+        <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># To store latitude and longitude</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
+            <span class="n">shift</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">byte</span> <span class="o">=</span> <span class="mh">0x20</span>
+            <span class="k">while</span> <span class="n">byte</span> <span class="o">&gt;=</span> <span class="mh">0x20</span><span class="p">:</span>  <span class="c1"># Keep decoding bytes until the complete coordinate is read</span>
+                <span class="n">byte</span> <span class="o">=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">encoded</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="mi">63</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">ll</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">|=</span> <span class="p">(</span><span class="n">byte</span> <span class="o">&amp;</span> <span class="mh">0x1F</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">shift</span>
+                <span class="n">shift</span> <span class="o">+=</span> <span class="mi">5</span>
+            <span class="n">ll</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">previous</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="o">~</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">ll</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mi">1</span> <span class="k">else</span> <span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">previous</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+        <span class="c1"># Convert to float and format the result</span>
+        <span class="n">decoded</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%.6f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">inv</span><span class="p">)),</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%.6f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">inv</span><span class="p">))])</span>
+    <span class="k">return</span> <span class="n">decoded</span></div>
+
+
+
+<div class="viewcode-block" id="map_matching">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.osm.map_matching">[docs]</a>
+<span class="k">def</span> <span class="nf">map_matching</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">cost</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;osrm&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs map matching using Valhalla&#39;s Meili service.</span>
+
+<span class="sd">    Map matching aligns a series of GPS points onto a road network. This function takes a DataFrame</span>
+<span class="sd">    of coordinates, sends a request to the Meili map-matching service, and returns the matched</span>
+<span class="sd">    coordinates along with other route information.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : pd.DataFrame</span>
+<span class="sd">        A pandas DataFrame containing the GPS coordinates to be map-matched. It should be in the</span>
+<span class="sd">        format of [{&quot;lon&quot;: float, &quot;lat&quot;: float}, ...].</span>
+<span class="sd">    cost : str</span>
+<span class="sd">        The routing profile to use for map matching. Common values include &quot;auto&quot;, &quot;bicycle&quot;,</span>
+<span class="sd">        or &quot;pedestrian&quot;.</span>
+<span class="sd">    url : str</span>
+<span class="sd">        The URL endpoint for the Meili map-matching service.</span>
+<span class="sd">    format : str, optional</span>
+<span class="sd">        The response format for the request, either &quot;osrm&quot; or &quot;geojson&quot;. Defaults to &quot;osrm&quot;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Optional[dict]</span>
+<span class="sd">        A dictionary representing the JSON response from the map-matching service if the request</span>
+<span class="sd">        is successful, otherwise None.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; coordinates = [{&quot;lon&quot;: -73.9857, &quot;lat&quot;: 40.7484}, {&quot;lon&quot;: -73.9851, &quot;lat&quot;: 40.7478}]</span>
+<span class="sd">    &gt;&gt;&gt; df = pd.DataFrame(coordinates)</span>
+<span class="sd">    &gt;&gt;&gt; url = &quot;https://valhalla.mapzen.com/trace_attributes&quot;</span>
+<span class="sd">    &gt;&gt;&gt; matched_route = map_matching(df, &quot;auto&quot;, url)</span>
+<span class="sd">    &gt;&gt;&gt; print(matched_route)</span>
+<span class="sd">    {&#39;shape&#39;: &#39;_p~iF~ps|U_ulLnnqC_mqNvxq`@&#39;, &#39;confidence_score&#39;: 1.0}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">meili_head</span> <span class="o">=</span> <span class="s1">&#39;{&quot;shape&quot;:&#39;</span>  <span class="c1"># Initial portion of the request body</span>
+    <span class="n">meili_coordinates</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">)</span>  <span class="c1"># Convert DataFrame to JSON format</span>
+
+    <span class="n">meili_tail</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;, &quot;search_radius&quot;:150, &quot;shape_match&quot;:&quot;map_snap&quot;, &quot;costing&quot;:&quot;</span><span class="si">{</span><span class="n">cost</span><span class="si">}</span><span class="s1">&quot;, &quot;format&quot;:&quot;</span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s1">&quot;</span><span class="se">}}</span><span class="s1">&#39;</span>
+
+    <span class="c1"># Combine the header, coordinates, and tail into a single request body</span>
+    <span class="n">meili_request_body</span> <span class="o">=</span> <span class="n">meili_head</span> <span class="o">+</span> <span class="n">meili_coordinates</span> <span class="o">+</span> <span class="n">meili_tail</span>
+
+    <span class="c1"># Send the request to the Meili service</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">meili_request_body</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">})</span>
+    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>  <span class="c1"># Convert the JSON response to a dictionary</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Abbas Kiasari.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

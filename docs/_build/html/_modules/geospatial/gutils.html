@@ -1,0 +1,841 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geospatial.gutils &mdash; geospatial 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=7ab3649f" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            geospatial
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">geospatial</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">geospatial.gutils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for geospatial.gutils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">atan2</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">radians</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">sqrt</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Pool</span><span class="p">,</span> <span class="n">cpu_count</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pyproj</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">MultiPolygon</span><span class="p">,</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Polygon</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry.base</span> <span class="kn">import</span> <span class="n">BaseGeometry</span>
+<span class="kn">from</span> <span class="nn">shapely.ops</span> <span class="kn">import</span> <span class="n">transform</span>
+
+<span class="c1"># pd.options.mode.chained_assignment = None  # default=&#39;warn&#39;</span>
+
+
+<div class="viewcode-block" id="geom_stats">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.gutils.geom_stats">[docs]</a>
+<span class="k">def</span> <span class="nf">geom_stats</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Polygon</span><span class="p">,</span> <span class="n">MultiPolygon</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;m&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes geometric statistics for a Polygon or MultiPolygon geometry.</span>
+
+<span class="sd">    Calculates various statistics for a given Shapely geometry, such as the number of shells (outer boundaries),</span>
+<span class="sd">    number of holes, number of shell points, total area, and total border length. If no geometry is provided,</span>
+<span class="sd">    the function will print a usage example.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    geom : Polygon or MultiPolygon, optional</span>
+<span class="sd">        A Shapely geometry object (Polygon or MultiPolygon) for which to compute the statistics. If not provided,</span>
+<span class="sd">        the function will print a usage example and not perform any computations. Default is None.</span>
+<span class="sd">    unit : str, optional</span>
+<span class="sd">        The unit for area and length calculations. Accepts &quot;m&quot; for meters and &quot;km&quot; for kilometers. Default is &quot;m&quot;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list of int or float, optional</span>
+<span class="sd">        A list containing the following statistics in order:</span>
+<span class="sd">            - Number of shells (int)</span>
+<span class="sd">            - Number of holes (int)</span>
+<span class="sd">            - Number of shell points (int)</span>
+<span class="sd">            - Total area (float, rounded to nearest integer in the specified unit)</span>
+<span class="sd">            - Total border length (float, rounded to nearest integer in the specified unit)</span>
+
+<span class="sd">        If no geometry is provided, the function returns None.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from shapely.geometry import Polygon</span>
+<span class="sd">    &gt;&gt;&gt; geom = Polygon([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)])</span>
+<span class="sd">    &gt;&gt;&gt; compute_geometry_statistics(geom, unit=&quot;km&quot;)</span>
+<span class="sd">    [1, 0, 5, 1.0, 4.0]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">geom</span><span class="p">:</span>  <span class="c1"># Print usage help if geom is None</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;mdf[[&#39;nshells&#39;, &#39;nholes&#39;, &#39;nshell_points&#39;, &#39;area&#39;, &#39;border&#39;]] = [gutils.geom_stats(geom, unit=&#39;km&#39;) for geom in mdf.geometry]&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Determine the appropriate UTM zone for the given geometry</span>
+    <span class="n">utm_zone</span> <span class="o">=</span> <span class="n">find_proj</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+
+    <span class="c1"># Handle different geometry types</span>
+    <span class="k">if</span> <span class="n">geom</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;Polygon&quot;</span><span class="p">:</span>
+        <span class="n">polylist</span> <span class="o">=</span> <span class="p">[</span><span class="n">geom</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">geom</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;MultiPolygon&quot;</span><span class="p">:</span>
+        <span class="n">polylist</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">geom</span><span class="o">.</span><span class="n">geoms</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The input geometry must be a Polygon or MultiPolygon.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Initialize variables for calculating statistics</span>
+    <span class="n">n_shells</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">polylist</span><span class="p">)</span>
+    <span class="n">n_holes</span> <span class="o">=</span> <span class="n">n_shell_points</span> <span class="o">=</span> <span class="n">border</span> <span class="o">=</span> <span class="n">area</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Iterate through each Polygon in the list to calculate statistics</span>
+    <span class="k">for</span> <span class="n">poly</span> <span class="ow">in</span> <span class="n">polylist</span><span class="p">:</span>
+        <span class="n">n_holes</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">poly</span><span class="o">.</span><span class="n">interiors</span><span class="p">)</span>  <span class="c1"># Count the number of holes</span>
+        <span class="n">n_shell_points</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">poly</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>  <span class="c1"># Count the number of shell points</span>
+        <span class="c1"># Transform geometry to the appropriate UTM zone and calculate length/area</span>
+        <span class="n">border</span> <span class="o">+=</span> <span class="n">trans_proj</span><span class="p">(</span><span class="n">poly</span><span class="p">,</span> <span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span> <span class="n">utm_zone</span><span class="p">)</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">length</span>
+        <span class="n">area</span> <span class="o">+=</span> <span class="n">trans_proj</span><span class="p">(</span><span class="n">poly</span><span class="p">,</span> <span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span> <span class="n">utm_zone</span><span class="p">)</span><span class="o">.</span><span class="n">area</span>
+
+    <span class="c1"># Return statistics based on the specified unit</span>
+    <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span>  <span class="c1"># If unit is meters</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">n_shells</span><span class="p">,</span> <span class="n">n_holes</span><span class="p">,</span> <span class="n">n_shell_points</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">area</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">border</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># If unit is kilometers</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">n_shells</span><span class="p">,</span> <span class="n">n_holes</span><span class="p">,</span> <span class="n">n_shell_points</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">area</span> <span class="o">/</span> <span class="mi">1_000_000</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">border</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)]</span></div>
+
+
+
+<div class="viewcode-block" id="find_proj">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.gutils.find_proj">[docs]</a>
+<span class="k">def</span> <span class="nf">find_proj</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Point</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">MultiPolygon</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determines the appropriate UTM zone projection for a given geometry.</span>
+
+<span class="sd">    Calculates the Universal Transverse Mercator (UTM) zone projection based on the centroid</span>
+<span class="sd">    coordinates of the input geometry. The function returns the corresponding EPSG code for</span>
+<span class="sd">    the UTM zone in which the geometry is located.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    geom : Point, Polygon, or MultiPolygon</span>
+<span class="sd">        A Shapely geometry object, which can be a Point, Polygon, or MultiPolygon.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        The EPSG code representing the UTM projection for the geometry&#39;s location. For the</span>
+<span class="sd">        northern hemisphere, the function returns codes in the format &#39;EPSG:326XX&#39;. For the</span>
+<span class="sd">        southern hemisphere, it returns &#39;EPSG:327XX&#39;, where &#39;XX&#39; is the UTM zone number.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The UTM (Universal Transverse Mercator) system divides the Earth into 60 longitudinal zones,</span>
+<span class="sd">    each 6 degrees wide. This function uses the centroid of the input geometry to determine the</span>
+<span class="sd">    appropriate zone and EPSG code.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from shapely.geometry import Polygon</span>
+<span class="sd">    &gt;&gt;&gt; geom = Polygon([(-120, 35), (-121, 35), (-121, 36), (-120, 36), (-120, 35)])</span>
+<span class="sd">    &gt;&gt;&gt; find_proj(geom)</span>
+<span class="sd">    &#39;EPSG:32610&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">geom</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">!=</span> <span class="s2">&quot;Point&quot;</span><span class="p">:</span>
+        <span class="c1"># If the geometry is not a Point, use its centroid</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">centroid</span>
+
+    <span class="c1"># Extract latitude and longitude from the geometry</span>
+    <span class="n">lat</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">y</span>
+    <span class="n">lon</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">x</span>
+
+    <span class="c1"># Determine the base EPSG code depending on the hemisphere</span>
+    <span class="k">if</span> <span class="n">lat</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="s2">&quot;EPSG:326&quot;</span>  <span class="c1"># Northern Hemisphere</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="s2">&quot;EPSG:327&quot;</span>  <span class="c1"># Southern Hemisphere</span>
+
+    <span class="c1"># Calculate the UTM zone number based on longitude</span>
+    <span class="n">utm</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="mi">30</span> <span class="o">+</span> <span class="n">lon</span> <span class="o">/</span> <span class="mi">6</span><span class="p">)</span>
+
+    <span class="c1"># Return the complete EPSG code for the UTM projection</span>
+    <span class="k">return</span> <span class="n">proj</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">utm</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="trans_proj">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.gutils.trans_proj">[docs]</a>
+<span class="k">def</span> <span class="nf">trans_proj</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">BaseGeometry</span><span class="p">,</span> <span class="n">proj1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">proj2</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseGeometry</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Transforms a Shapely geometry object from one CRS to another.</span>
+
+<span class="sd">    Uses `pyproj` to create a transformation pipeline that converts the input geometry</span>
+<span class="sd">    from the source CRS (`proj1`) to the target CRS (`proj2`). The resulting geometry</span>
+<span class="sd">    is returned in the new coordinate reference system.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    geom : BaseGeometry</span>
+<span class="sd">        A Shapely geometry object to be transformed. This can include Point, Polygon,</span>
+<span class="sd">        MultiPolygon, LineString, or any other Shapely geometry type.</span>
+<span class="sd">    proj1 : str</span>
+<span class="sd">        The EPSG code or PROJ string representing the source CRS of the input geometry.</span>
+<span class="sd">    proj2 : str</span>
+<span class="sd">        The EPSG code or PROJ string representing the target CRS for the transformed geometry.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    BaseGeometry</span>
+<span class="sd">        The transformed Shapely geometry object in the target projection.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - The function requires `pyproj` and `shapely` libraries.</span>
+<span class="sd">    - Ensure that the input and output CRS definitions are valid and supported by `pyproj`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from shapely.geometry import Point</span>
+<span class="sd">    &gt;&gt;&gt; geom = Point(10, 50)</span>
+<span class="sd">    &gt;&gt;&gt; trans_proj(geom, &quot;EPSG:4326&quot;, &quot;EPSG:32632&quot;)</span>
+<span class="sd">    &lt;Point object at 0x...&gt;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create a transformation function using pyproj&#39;s Transformer</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">Transformer</span><span class="o">.</span><span class="n">from_crs</span><span class="p">(</span><span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="p">(</span><span class="n">proj1</span><span class="p">),</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="p">(</span><span class="n">proj2</span><span class="p">),</span> <span class="n">always_xy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">transform</span>
+
+    <span class="c1"># Apply the transformation to the geometry and return the transformed geometry</span>
+    <span class="k">return</span> <span class="n">transform</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">geom</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="haversine">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.gutils.haversine">[docs]</a>
+<span class="k">def</span> <span class="nf">haversine</span><span class="p">(</span><span class="n">lat1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lat2</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon2</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the great-circle distance between two points on the Earth&#39;s surface.</span>
+
+<span class="sd">    The haversine formula determines the shortest distance over the Earth&#39;s surface</span>
+<span class="sd">    between two points given their latitudes and longitudes. The result is the</span>
+<span class="sd">    distance in meters, based on a mean Earth radius.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lat1 : float</span>
+<span class="sd">        Latitude of the first point in decimal degrees.</span>
+<span class="sd">    lon1 : float</span>
+<span class="sd">        Longitude of the first point in decimal degrees.</span>
+<span class="sd">    lat2 : float</span>
+<span class="sd">        Latitude of the second point in decimal degrees.</span>
+<span class="sd">    lon2 : float</span>
+<span class="sd">        Longitude of the second point in decimal degrees.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        The great-circle distance between the two points in meters.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] https://en.wikipedia.org/wiki/Haversine_formula</span>
+<span class="sd">    .. [2] https://en.wikipedia.org/wiki/Longitude</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; haversine(52.2296756, 21.0122287, 41.8919300, 12.5113300)</span>
+<span class="sd">    1319743.483</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The mean Earth radius is taken as 6,371,008.8 meters.</span>
+<span class="sd">    a = 6378137.0        # Equatorial radius</span>
+<span class="sd">    b = 6356752.3142     # Polar radius</span>
+<span class="sd">    R = (2*a + b)/3      # Mean radius = 6371008.7714</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="mf">6371008.8</span>  <span class="c1"># Mean Earth radius in meters</span>
+    <span class="n">lat1</span><span class="p">,</span> <span class="n">lat2</span><span class="p">,</span> <span class="n">dlon</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lat1</span><span class="p">),</span> <span class="n">radians</span><span class="p">(</span><span class="n">lat2</span><span class="p">),</span> <span class="n">radians</span><span class="p">(</span><span class="n">lon2</span> <span class="o">-</span> <span class="n">lon1</span><span class="p">)</span>
+    <span class="n">dlat</span> <span class="o">=</span> <span class="n">lat2</span> <span class="o">-</span> <span class="n">lat1</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">dlat</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">dlon</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">atan2</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">a</span><span class="p">))</span>  <span class="c1"># Angular distance in radians</span>
+    <span class="k">return</span> <span class="n">r</span> <span class="o">*</span> <span class="n">c</span>  <span class="c1"># Distance in meters</span></div>
+
+
+
+<div class="viewcode-block" id="vincenty">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.gutils.vincenty">[docs]</a>
+<span class="k">def</span> <span class="nf">vincenty</span><span class="p">(</span><span class="n">lat1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lat2</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon2</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the geodesic distance between two points on the Earth&#39;s surface</span>
+<span class="sd">    using the Vincenty formula, which accounts for the Earth&#39;s ellipsoidal shape.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    - lat1, lon1: Latitude and longitude of the first point (in degrees).</span>
+<span class="sd">    - lat2, lon2: Latitude and longitude of the second point (in degrees).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    - Distance between the two points in meters.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">    - This implementation may encounter numerical issues, such as divide-by-zero errors,</span>
+<span class="sd">      in edge cases where the points are on opposite sides of the Earth or on the same meridian</span>
+<span class="sd">      e.g., from (0,0) to (0,90).However, for points (0,0) to (0.001,90), the distance calculation</span>
+<span class="sd">      is accurate within a small error margin (about 9.3e-06 meters).</span>
+
+<span class="sd">    - The error in the above approach can be significant for very small distances,</span>
+<span class="sd">      such as between (0,0) and (0,0.001).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Constants for WGS-84 ellipsoid</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="mf">6378137.0</span>  <span class="c1"># Equatorial radius in meters</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">298.257223563</span>  <span class="c1"># Flattening</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span>  <span class="c1"># Polar radius</span>
+
+    <span class="c1"># Convert degrees to radians</span>
+    <span class="n">lat1</span><span class="p">,</span> <span class="n">lon1</span><span class="p">,</span> <span class="n">lat2</span><span class="p">,</span> <span class="n">lon2</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">,</span> <span class="p">[</span><span class="n">lat1</span><span class="p">,</span> <span class="n">lon1</span><span class="p">,</span> <span class="n">lat2</span><span class="p">,</span> <span class="n">lon2</span><span class="p">])</span>
+
+    <span class="c1"># Differences in longitude</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="n">lon2</span> <span class="o">-</span> <span class="n">lon1</span>
+
+    <span class="c1"># Iterative Vincenty formula</span>
+    <span class="n">u1</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">lat1</span><span class="p">))</span>
+    <span class="n">u2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">lat2</span><span class="p">))</span>
+    <span class="n">sin_u1</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">u1</span><span class="p">)</span>
+    <span class="n">cos_u1</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">u1</span><span class="p">)</span>
+    <span class="n">sin_u2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">u2</span><span class="p">)</span>
+    <span class="n">cos_u2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">u2</span><span class="p">)</span>
+
+    <span class="n">lambda_</span> <span class="o">=</span> <span class="n">ll</span>
+    <span class="n">lambda_prev</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">max_iterations</span> <span class="o">=</span> <span class="mi">1000</span>
+    <span class="n">tolerance</span> <span class="o">=</span> <span class="mf">1e-12</span>
+
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_iterations</span><span class="p">):</span>
+        <span class="n">sin_lambda</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lambda_</span><span class="p">)</span>
+        <span class="n">cos_lambda</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lambda_</span><span class="p">)</span>
+        <span class="n">sin_sigma</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">cos_u2</span> <span class="o">*</span> <span class="n">sin_lambda</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">cos_u1</span> <span class="o">*</span> <span class="n">sin_u2</span> <span class="o">-</span> <span class="n">sin_u1</span> <span class="o">*</span> <span class="n">cos_u2</span> <span class="o">*</span> <span class="n">cos_lambda</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">cos_sigma</span> <span class="o">=</span> <span class="n">sin_u1</span> <span class="o">*</span> <span class="n">sin_u2</span> <span class="o">+</span> <span class="n">cos_u1</span> <span class="o">*</span> <span class="n">cos_u2</span> <span class="o">*</span> <span class="n">cos_lambda</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">sin_sigma</span><span class="p">,</span> <span class="n">cos_sigma</span><span class="p">)</span>
+        <span class="n">sin_alpha</span> <span class="o">=</span> <span class="n">cos_u1</span> <span class="o">*</span> <span class="n">cos_u2</span> <span class="o">*</span> <span class="n">sin_lambda</span> <span class="o">/</span> <span class="n">sin_sigma</span>
+        <span class="n">cos2_alpha</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">sin_alpha</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">cos2_sigma_m</span> <span class="o">=</span> <span class="n">cos_sigma</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sin_u1</span> <span class="o">*</span> <span class="n">sin_u2</span> <span class="o">/</span> <span class="n">cos2_alpha</span>
+        <span class="n">cc</span> <span class="o">=</span> <span class="n">f</span> <span class="o">/</span> <span class="mi">16</span> <span class="o">*</span> <span class="n">cos2_alpha</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">+</span> <span class="n">f</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">cos2_alpha</span><span class="p">))</span>
+        <span class="n">lambda_prev</span> <span class="o">=</span> <span class="n">lambda_</span>
+        <span class="n">lambda_</span> <span class="o">=</span> <span class="n">ll</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cc</span><span class="p">)</span> <span class="o">*</span> <span class="n">f</span> <span class="o">*</span> <span class="n">sin_alpha</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="n">sigma</span> <span class="o">+</span> <span class="n">cc</span> <span class="o">*</span> <span class="n">sin_sigma</span> <span class="o">*</span> <span class="p">(</span><span class="n">cos2_sigma_m</span> <span class="o">+</span> <span class="n">cc</span> <span class="o">*</span> <span class="n">cos_sigma</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">cos2_sigma_m</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">lambda_</span> <span class="o">-</span> <span class="n">lambda_prev</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tolerance</span><span class="p">:</span>
+            <span class="k">break</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Vincenty formula did not converge&quot;</span><span class="p">)</span>
+
+    <span class="n">u2</span> <span class="o">=</span> <span class="n">cos2_alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">aa</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">u2</span> <span class="o">/</span> <span class="mi">16384</span> <span class="o">*</span> <span class="p">(</span><span class="mi">4096</span> <span class="o">+</span> <span class="n">u2</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">768</span> <span class="o">+</span> <span class="n">u2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">320</span> <span class="o">-</span> <span class="mi">175</span> <span class="o">*</span> <span class="n">u2</span><span class="p">)))</span>
+    <span class="n">bb</span> <span class="o">=</span> <span class="n">u2</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">*</span> <span class="p">(</span><span class="mi">256</span> <span class="o">+</span> <span class="n">u2</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">128</span> <span class="o">+</span> <span class="n">u2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">74</span> <span class="o">-</span> <span class="mi">47</span> <span class="o">*</span> <span class="n">u2</span><span class="p">)))</span>
+    <span class="n">delta_sigma</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">bb</span>
+        <span class="o">*</span> <span class="n">sin_sigma</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="n">cos2_sigma_m</span>
+            <span class="o">+</span> <span class="n">bb</span>
+            <span class="o">/</span> <span class="mi">4</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">cos_sigma</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">cos2_sigma_m</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+                <span class="o">-</span> <span class="n">bb</span> <span class="o">/</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">cos2_sigma_m</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">sin_sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">cos2_sigma_m</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">b</span> <span class="o">*</span> <span class="n">aa</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">-</span> <span class="n">delta_sigma</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">s</span></div>
+
+
+
+<div class="viewcode-block" id="flatten_3d">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.gutils.flatten_3d">[docs]</a>
+<span class="k">def</span> <span class="nf">flatten_3d</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Polygon</span><span class="p">,</span> <span class="n">MultiPolygon</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Flattens a GeoSeries of 3D Polygons or MultiPolygons into 2D geometries.</span>
+
+<span class="sd">    This function removes the z-coordinate from each 3D geometry in the input GeoSeries,</span>
+<span class="sd">    converting it into a 2D Polygon or MultiPolygon. The result is a list of 2D geometries.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    geom : gpd.GeoSeries</span>
+<span class="sd">        A GeoSeries containing 3D Polygons or MultiPolygons (geometries with z-coordinates).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    List[Union[Polygon, MultiPolygon]]</span>
+<span class="sd">        A list of 2D Polygons or MultiPolygons with the z-coordinates removed.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; gdf.geometry = flatten_3d(gdf.geometry)</span>
+<span class="sd">        Converts all 3D geometries in the GeoSeries `gdf.geometry` to 2D geometries.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The function is useful when working with datasets that contain 3D geometries but</span>
+<span class="sd">    only 2D geometries are needed for further spatial analysis or visualization.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">new_geom</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">geom</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">has_z</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;Polygon&quot;</span><span class="p">:</span>
+                <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">xy</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">xy</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)]</span>
+                <span class="n">new_p</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+                <span class="n">new_geom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_p</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">p</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;MultiPolygon&quot;</span><span class="p">:</span>
+                <span class="n">new_multi_p</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">ap</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span>
+                    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">xy</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">xy</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">ap</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)]</span>
+                    <span class="n">new_p</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+                    <span class="n">new_multi_p</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_p</span><span class="p">)</span>
+                <span class="n">new_geom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MultiPolygon</span><span class="p">(</span><span class="n">new_multi_p</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">new_geom</span></div>
+
+
+
+<div class="viewcode-block" id="explode_line_to_points">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.gutils.explode_line_to_points">[docs]</a>
+<span class="k">def</span> <span class="nf">explode_line_to_points</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Splits a LineString geometry into individual Point geometries while preserving original attributes.</span>
+
+<span class="sd">    This function takes a GeoSeries representing a single row of a GeoDataFrame, extracts the coordinates</span>
+<span class="sd">    from a LineString geometry, and creates a new GeoDataFrame with each Point as a separate row. All original</span>
+<span class="sd">    attributes from the input row are preserved in the new GeoDataFrame.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    row : gpd.GeoSeries</span>
+<span class="sd">        A GeoSeries representing a single row of a GeoDataFrame. It must include a &#39;geometry&#39; column</span>
+<span class="sd">        containing a LineString geometry.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    gpd.GeoDataFrame</span>
+<span class="sd">        A new GeoDataFrame where each row corresponds to a Point geometry derived from the coordinates of the LineString.</span>
+<span class="sd">        All other columns from the original row are preserved.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; line_gdf = gpd.GeoDataFrame({&quot;geometry&quot;: [LineString([(0, 0), (1, 1), (2, 2)])]})</span>
+<span class="sd">    &gt;&gt;&gt; point_gdf = split_linestring_to_points(line_gdf.iloc[0])</span>
+<span class="sd">    &gt;&gt;&gt; print(point_gdf)</span>
+<span class="sd">       geometry</span>
+<span class="sd">    0  POINT (0 0)</span>
+<span class="sd">    1  POINT (1 1)</span>
+<span class="sd">    2  POINT (2 2)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="p">[</span><span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)]</span>  <span class="c1"># create list of Point objects</span>
+    <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span>
+        <span class="n">index</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)),</span> <span class="n">columns</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="n">index</span>
+    <span class="p">)</span>  <span class="c1"># create new GeoDataFrame with all columns and Point geometry</span>
+    <span class="n">gdf</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">points</span>
+    <span class="n">gdf</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">row</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">values</span>
+    <span class="k">return</span> <span class="n">gdf</span></div>
+
+
+
+<div class="viewcode-block" id="intersection">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.gutils.intersection">[docs]</a>
+<span class="k">def</span> <span class="nf">intersection</span><span class="p">(</span><span class="n">gdf1</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">gdf2</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">poly_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs a spatial intersection between two GeoDataFrames and return the intersecting subset of the first GeoDataFrame.</span>
+
+<span class="sd">    This function identifies geometries in `gdf1` that intersect with any geometries in `gdf2`. It adds a new column, `counts`,</span>
+<span class="sd">    to `gdf2` representing the number of intersecting geometries for each feature in `gdf2`. If a `poly_id` column is specified,</span>
+<span class="sd">    it also adds the geometry ID from `gdf2` to the intersected subset of `gdf1`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gdf1 : geopandas.GeoDataFrame</span>
+<span class="sd">        The first GeoDataFrame whose geometries are tested for intersection with `gdf2`.</span>
+<span class="sd">    gdf2 : geopandas.GeoDataFrame</span>
+<span class="sd">        The second GeoDataFrame containing geometries to intersect with `gdf1`.</span>
+<span class="sd">    poly_id : str, optional</span>
+<span class="sd">        The column name in `gdf2` containing unique geometry identifiers. If provided, the intersected subset of `gdf1`</span>
+<span class="sd">        will include a new column `geom_id` indicating the geometry ID from `gdf2` that each feature intersects with.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    geopandas.GeoDataFrame</span>
+<span class="sd">        A new GeoDataFrame containing only the intersecting geometries from `gdf1` with respect to `gdf2`.</span>
+<span class="sd">        If `poly_id` is provided, the intersected GeoDataFrame will also include a `geom_id` column.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; gdf1 = geopandas.read_file(&quot;data1.shp&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; gdf2 = geopandas.read_file(&quot;data2.shp&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; result_gdf = intersection(gdf1, gdf2, poly_id=&quot;region_id&quot;)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The function modifies `gdf2` in place by adding a `counts` column, which reflects the number of geometries</span>
+<span class="sd">    in `gdf1` that intersect with each geometry in `gdf2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">int_gdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>  <span class="c1"># Initialize an empty DataFrame to store intersecting geometries from gdf1</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># List to store counts of intersecting geometries for each feature in gdf2</span>
+
+    <span class="k">for</span> <span class="n">geom</span> <span class="ow">in</span> <span class="n">gdf2</span><span class="o">.</span><span class="n">geometry</span><span class="p">:</span>
+        <span class="c1"># Filter `gdf1` to retain only geometries that intersect with the current geometry in `gdf2`</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">gdf1</span><span class="p">[</span><span class="n">gdf1</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">geom</span><span class="p">)]</span>
+
+        <span class="k">if</span> <span class="n">poly_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># If `poly_id` is provided, retrieve the geometry ID from `gdf2` and assign it to `geom_id` column in `gdf`</span>
+            <span class="n">gid</span> <span class="o">=</span> <span class="n">gdf2</span><span class="p">[</span><span class="n">gdf2</span><span class="o">.</span><span class="n">geometry</span> <span class="o">==</span> <span class="n">geom</span><span class="p">][</span><span class="n">poly_id</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;geom_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gid</span>
+
+        <span class="c1"># Concatenate the intersecting geometries to the final DataFrame</span>
+        <span class="n">int_gdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">int_gdf</span><span class="p">,</span> <span class="n">gdf</span><span class="p">])</span>
+        <span class="n">counts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gdf</span><span class="p">))</span>  <span class="c1"># Store the number of intersecting geometries for the current feature in gdf2</span>
+
+    <span class="n">gdf2</span><span class="p">[</span><span class="s2">&quot;counts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span>  <span class="c1"># Add the counts of intersecting geometries as a new column in gdf2</span>
+    <span class="k">return</span> <span class="n">int_gdf</span>  <span class="c1"># Return the intersected subset of gdf1</span></div>
+
+
+
+<div class="viewcode-block" id="quick_intersection">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.gutils.quick_intersection">[docs]</a>
+<span class="k">def</span> <span class="nf">quick_intersection</span><span class="p">(</span><span class="n">gdf1</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">gdf2</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">poly_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs a quick spatial intersection between two GeoDataFrames using bounding box optimization.</span>
+
+<span class="sd">    This function identifies geometries in `gdf1` that intersect with any geometries in `gdf2`. It uses</span>
+<span class="sd">    a spatial index to quickly filter `gdf1` geometries that are likely to intersect with the bounding</span>
+<span class="sd">    box of each geometry in `gdf2`. It then performs a precise intersection check on this subset, improving</span>
+<span class="sd">    the performance of the intersection operation.</span>
+
+<span class="sd">    If a `poly_id` column is provided, the function adds a new `geom_id` column to the resulting intersected</span>
+<span class="sd">    GeoDataFrame, storing the geometry ID from `gdf2` that each feature in `gdf1` intersects with. It also</span>
+<span class="sd">    modifies `gdf2` by adding a `counts` column to indicate the number of intersecting geometries.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gdf1 : geopandas.GeoDataFrame</span>
+<span class="sd">        The first GeoDataFrame whose geometries are tested for intersection with `gdf2`.</span>
+<span class="sd">    gdf2 : geopandas.GeoDataFrame</span>
+<span class="sd">        The second GeoDataFrame containing geometries to intersect with `gdf1`.</span>
+<span class="sd">    poly_id : str, optional</span>
+<span class="sd">        The column name in `gdf2` containing unique geometry identifiers. If provided, the intersected subset of `gdf1`</span>
+<span class="sd">        will include a new column `geom_id` indicating the geometry ID from `gdf2` that each feature intersects with.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    geopandas.GeoDataFrame</span>
+<span class="sd">        A new GeoDataFrame containing only the intersecting geometries from `gdf1` with respect to `gdf2`.</span>
+<span class="sd">        If `poly_id` is provided, the intersected GeoDataFrame will also include a `geom_id` column.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; gdf1 = geopandas.read_file(&quot;data1.shp&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; gdf2 = geopandas.read_file(&quot;data2.shp&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; result_gdf = quick_intersection(gdf1, gdf2, poly_id=&quot;region_id&quot;)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - This function modifies `gdf2` in place by adding a `counts` column, which reflects the number of geometries</span>
+<span class="sd">      in `gdf1` that intersect with each geometry in `gdf2`.</span>
+<span class="sd">    - It leverages spatial indexing using the `sindex` attribute of `gdf1` to quickly identify candidates for</span>
+<span class="sd">      intersection, which significantly improves performance for large datasets.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">int_gdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>  <span class="c1"># Initialize an empty DataFrame to store intersecting geometries from gdf1</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># List to store counts of intersecting geometries for each feature in gdf2</span>
+
+    <span class="k">for</span> <span class="n">geom</span> <span class="ow">in</span> <span class="n">gdf2</span><span class="o">.</span><span class="n">geometry</span><span class="p">:</span>
+        <span class="c1"># Get the indices of geometries in `gdf1` that are likely to intersect the bounding box of `geom` in `gdf2`</span>
+        <span class="n">pos_idx</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">gdf1</span><span class="o">.</span><span class="n">sindex</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">geom</span><span class="o">.</span><span class="n">bounds</span><span class="p">))</span>
+
+        <span class="c1"># Select the subset of `gdf1` based on these indices</span>
+        <span class="n">pos_gdf</span> <span class="o">=</span> <span class="n">gdf1</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">pos_idx</span><span class="p">]</span>
+
+        <span class="c1"># Filter the subset to retain only geometries that precisely intersect with `geom`</span>
+        <span class="n">pre_gdf</span> <span class="o">=</span> <span class="n">pos_gdf</span><span class="p">[</span><span class="n">pos_gdf</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">geom</span><span class="p">)]</span>
+
+        <span class="k">if</span> <span class="n">poly_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">pre_gdf</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># If `poly_id` is provided, assign the geometry ID from `gdf2` to the `geom_id` column in `pre_gdf`</span>
+            <span class="n">gid</span> <span class="o">=</span> <span class="n">gdf2</span><span class="p">[</span><span class="n">gdf2</span><span class="o">.</span><span class="n">geometry</span> <span class="o">==</span> <span class="n">geom</span><span class="p">][</span><span class="n">poly_id</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">pre_gdf</span><span class="p">[</span><span class="s2">&quot;geom_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gid</span>
+
+        <span class="c1"># Concatenate the precise intersecting geometries to the final intersected DataFrame</span>
+        <span class="n">int_gdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">int_gdf</span><span class="p">,</span> <span class="n">pre_gdf</span><span class="p">])</span>
+        <span class="n">counts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pre_gdf</span><span class="p">))</span>  <span class="c1"># Store the number of intersecting geometries for the current feature in gdf2</span>
+
+    <span class="n">gdf2</span><span class="p">[</span><span class="s2">&quot;counts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span>  <span class="c1"># Add the counts of intersecting geometries as a new column in gdf2</span>
+    <span class="k">return</span> <span class="n">int_gdf</span>  <span class="c1"># Return the intersected subset of gdf1</span></div>
+
+
+
+<div class="viewcode-block" id="poverlay">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.gutils.poverlay">[docs]</a>
+<span class="k">def</span> <span class="nf">poverlay</span><span class="p">(</span>
+    <span class="n">gdf1</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">gdf2</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">how</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;intersection&quot;</span><span class="p">,</span> <span class="n">keep_geom_type</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs a spatial overlay operation between two GeoDataFrames in parallel using multiple CPU cores.</span>
+
+<span class="sd">    This function divides the first GeoDataFrame into chunks according to the number of available CPU cores</span>
+<span class="sd">    and applies the specified overlay operation (e.g., intersection, union, difference) in parallel on each chunk</span>
+<span class="sd">    with respect to the second GeoDataFrame. The results are then concatenated and returned as a single GeoDataFrame.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gdf1 : gpd.GeoDataFrame</span>
+<span class="sd">        The first GeoDataFrame to be used in the spatial overlay operation.</span>
+<span class="sd">    gdf2 : gpd.GeoDataFrame</span>
+<span class="sd">        The second GeoDataFrame to be used in the spatial overlay operation.</span>
+<span class="sd">    how : str, optional</span>
+<span class="sd">        The type of overlay operation to perform. Options include &quot;intersection&quot;, &quot;union&quot;, &quot;difference&quot;,</span>
+<span class="sd">        &quot;symmetric_difference&quot;, and &quot;identity&quot;. Defaults to &quot;intersection&quot;.</span>
+<span class="sd">    keep_geom_type : bool, optional</span>
+<span class="sd">        Whether to retain the original geometry type (e.g., Polygon, LineString) in the resulting overlay.</span>
+<span class="sd">        If set to True, only features of the same geometry type are retained. Defaults to False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    gpd.GeoDataFrame</span>
+<span class="sd">        A new GeoDataFrame resulting from the spatial overlay operation, with the same coordinate reference system</span>
+<span class="sd">        (CRS) as the first input GeoDataFrame (`gdf1`).</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; gdf1 = gpd.GeoDataFrame({&quot;geometry&quot;: [Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])]})</span>
+<span class="sd">    &gt;&gt;&gt; gdf2 = gpd.GeoDataFrame({&quot;geometry&quot;: [Polygon([(1, 1), (3, 1), (3, 3), (1, 3)])]})</span>
+<span class="sd">    &gt;&gt;&gt; result_gdf = poverlay(gdf1, gdf2, how=&quot;intersection&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; print(result_gdf)</span>
+<span class="sd">                                                 geometry</span>
+<span class="sd">    0  POLYGON ((2.00000 1.00000, 2.00000 2.00000, 1....</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - The spatial overlay operation is performed using the `geopandas.overlay` function. The parallelization is achieved</span>
+<span class="sd">      using the `multiprocessing` library to divide and distribute the overlay operations across multiple CPU cores.</span>
+<span class="sd">    - Ensure that both GeoDataFrames (`gdf1` and `gdf2`) have the same coordinate reference system (CRS) before applying</span>
+<span class="sd">      the overlay operation to avoid unexpected results.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the `how` parameter is not one of the supported overlay operation types: &quot;intersection&quot;, &quot;union&quot;,</span>
+<span class="sd">        &quot;difference&quot;, &quot;symmetric_difference&quot;, or &quot;identity&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Determine the number of CPU cores available for parallel processing</span>
+    <span class="n">n_cores</span> <span class="o">=</span> <span class="n">cpu_count</span><span class="p">()</span>
+
+    <span class="c1"># Split the first GeoDataFrame into chunks for parallel processing</span>
+    <span class="n">gdf1_chunks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">gdf1</span><span class="p">,</span> <span class="n">n_cores</span><span class="p">)</span>
+
+    <span class="c1"># Create a list of the second GeoDataFrame repeated for each chunk</span>
+    <span class="n">gdf2_chunks</span> <span class="o">=</span> <span class="p">[</span><span class="n">gdf2</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_cores</span>
+
+    <span class="c1"># Prepare inputs for the parallel processing pool</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">gdf1_chunks</span><span class="p">,</span> <span class="n">gdf2_chunks</span><span class="p">,</span> <span class="p">[</span><span class="n">how</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_cores</span><span class="p">,</span> <span class="p">[</span><span class="n">keep_geom_type</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_cores</span><span class="p">)</span>
+
+    <span class="c1"># Create a multiprocessing pool and apply the overlay function in parallel on each chunk</span>
+    <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="n">n_cores</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">gpd</span><span class="o">.</span><span class="n">overlay</span><span class="p">,</span> <span class="n">inputs</span><span class="p">))</span>
+
+    <span class="c1"># Return the concatenated GeoDataFrame with the same CRS as the first input GeoDataFrame</span>
+    <span class="k">return</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">gdf1</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="geocoding_google">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.gutils.geocoding_google">[docs]</a>
+<span class="k">def</span> <span class="nf">geocoding_google</span><span class="p">(</span><span class="n">address_or_zipcode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns geographic coordinates (latitude and longitude) for a given address or zip code using the Google Geocoding API.</span>
+
+<span class="sd">    This function utilizes the Google Geocoding API to convert a given address or zip code into geographic coordinates.</span>
+<span class="sd">    The function returns the latitude and longitude as a pandas Series. If the request is unsuccessful or the address</span>
+<span class="sd">    is not found, the function returns a Series with `(None, None)`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    address_or_zipcode : str</span>
+<span class="sd">        A text-based address or zip code that needs to be geocoded.</span>
+<span class="sd">    api_key : str</span>
+<span class="sd">        A valid Google Maps API key required to access the Google Geocoding service.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.Series</span>
+<span class="sd">        A pandas Series containing the latitude and longitude as floats. If the request fails or the address is not found,</span>
+<span class="sd">        returns a Series with `(None, None)`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; df[[&quot;lat&quot;, &quot;lon&quot;]] = df.apply(lambda row: geocoding_google(row.address, &quot;your_api_key&quot;), axis=1)</span>
+<span class="sd">    &gt;&gt;&gt; result = geocoding_google(&quot;1600 Amphitheatre Parkway, Mountain View, CA&quot;, &quot;your_api_key&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; print(result)</span>
+<span class="sd">    lat    37.4224764</span>
+<span class="sd">    lon   -122.0842499</span>
+<span class="sd">    dtype: float64</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - Make sure to enable the Google Geocoding API in your Google Cloud Console and provide a valid API key.</span>
+<span class="sd">    - The API might return ambiguous results if the input address is incomplete or vague.</span>
+<span class="sd">    - Consider handling `None` values in the returned Series if the API fails to find the address or the request limit is exceeded.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    Exception</span>
+<span class="sd">        If there is an error in the API request or response parsing, an exception is raised with an error message.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="n">base_url</span> <span class="o">=</span> <span class="s2">&quot;https://maps.googleapis.com/maps/api/geocode/json&quot;</span>
+    <span class="n">endpoint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_url</span><span class="si">}</span><span class="s2">?address=</span><span class="si">{</span><span class="n">address_or_zipcode</span><span class="si">}</span><span class="s2">&amp;key=</span><span class="si">{</span><span class="n">api_key</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">299</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This try block incase any of our inputs are invalid. This is done instead</span>
+<span class="sd">        of actually writing out handlers for all kinds of responses.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">&quot;results&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">][</span><span class="s2">&quot;location&quot;</span><span class="p">][</span><span class="s2">&quot;lat&quot;</span><span class="p">]</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">][</span><span class="s2">&quot;location&quot;</span><span class="p">][</span><span class="s2">&quot;lng&quot;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>  <span class="c1"># Handle any errors that may occur</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="reverse_geocoding_google">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.gutils.reverse_geocoding_google">[docs]</a>
+<span class="k">def</span> <span class="nf">reverse_geocoding_google</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the postal code for a given geographic coordinate (latitude, longitude) using the Google Geocoding API.</span>
+
+<span class="sd">    This function makes a reverse geocoding request to the Google Geocoding API to obtain the postal code associated</span>
+<span class="sd">    with the provided latitude and longitude. If the postal code is found, it is returned as a string. If not,</span>
+<span class="sd">    `None` is returned.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lat : float</span>
+<span class="sd">        The latitude of the location to reverse geocode.</span>
+<span class="sd">    lon : float</span>
+<span class="sd">        The longitude of the location to reverse geocode.</span>
+<span class="sd">    api_key : str</span>
+<span class="sd">        A valid Google Maps API key for accessing the geocoding service.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        The postal code corresponding to the input geographic coordinates, if found. Returns `None` if no postal code</span>
+<span class="sd">        is found or if the request fails.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; reverse_geocoding_google(37.4224764, -122.0842499, &quot;your_api_key&quot;)</span>
+<span class="sd">    &#39;94043&#39;</span>
+
+<span class="sd">    &gt;&gt;&gt; df[&quot;postcode&quot;] = df.apply(lambda row: reverse_geocoding_google(row.lat, row.lon, &quot;your_api_key&quot;), axis=1)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lat</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0001</span> <span class="k">else</span> <span class="n">lat</span>  <span class="c1"># Prevent invalid &#39;latlng&#39; error for very small values.</span>
+    <span class="n">lon</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0001</span> <span class="k">else</span> <span class="n">lon</span>
+
+    <span class="c1"># Make the reverse geocoding request</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://maps.googleapis.com/maps/api/geocode/json?latlng=</span><span class="si">{</span><span class="n">lat</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">lon</span><span class="si">}</span><span class="s2">&amp;key=</span><span class="si">{</span><span class="n">api_key</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+    <span class="c1"># Parse the response to extract the postal code</span>
+    <span class="k">if</span> <span class="s2">&quot;results&quot;</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;address_components&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+                <span class="k">if</span> <span class="s2">&quot;postal_code&quot;</span> <span class="ow">in</span> <span class="n">component</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;types&quot;</span><span class="p">,</span> <span class="p">[])</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">component</span><span class="p">[</span><span class="s2">&quot;types&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">component</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;long_name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Abbas Kiasari.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

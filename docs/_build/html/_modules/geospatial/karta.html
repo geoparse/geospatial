@@ -1,0 +1,1196 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geospatial.karta &mdash; geospatial 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=7ab3649f" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            geospatial
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">geospatial</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">geospatial.karta</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for geospatial.karta</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">folium</span>  <span class="c1"># Folium is a Python library used for visualising geospatial data. Actually, it&#39;s a Python wrapper for Leaflet which is a leading open-source JavaScript library for plotting interactive maps.</span>
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">folium</span> <span class="kn">import</span> <span class="n">plugins</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">MultiPolygon</span><span class="p">,</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Polygon</span>
+
+<span class="kn">from</span> <span class="nn">geospatial</span> <span class="kn">import</span> <span class="n">gutils</span><span class="p">,</span> <span class="n">osm</span><span class="p">,</span> <span class="n">sindex</span>
+
+<span class="c1"># pd.options.mode.chained_assignment = None  # default=&#39;warn&#39;</span>
+
+
+<div class="viewcode-block" id="color_map">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.karta.color_map">[docs]</a>
+<span class="k">def</span> <span class="nf">color_map</span><span class="p">(</span><span class="n">col</span><span class="p">:</span> <span class="nb">int</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">,</span> <span class="n">head</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">tail</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a consistent color based on the input column value by mapping it to a predefined color palette.</span>
+
+<span class="sd">    This function uses a set color palette and maps the given column value to a color. If the column value is a string,</span>
+<span class="sd">    a substring can be selected using `head` and `tail` indices, and it will be converted to a numerical index. If the</span>
+<span class="sd">    column value is an integer, it will directly be mapped to a color using modulo arithmetic.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    col : int or str</span>
+<span class="sd">        The column value to be mapped to a color. It can be either an integer or a string.</span>
+<span class="sd">        - If an integer, it is directly used for color mapping.</span>
+<span class="sd">        - If a string, it will be cleaned of non-alphanumeric characters, and a substring defined by `head` and `tail`</span>
+<span class="sd">          can be selected for mapping.</span>
+
+<span class="sd">    head : int, optional</span>
+<span class="sd">        The starting index of the substring to be used for color mapping if `col` is a string. Default is None.</span>
+
+<span class="sd">    tail : int, optional</span>
+<span class="sd">        The ending index of the substring to be used for color mapping if `col` is a string. Default is None.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        A hexadecimal color code selected from the predefined palette corresponding to the input column value.</span>
+
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; color_map(&quot;Category1&quot;)</span>
+<span class="sd">    &#39;#e6194b&#39;  # Red color from the palette</span>
+
+<span class="sd">    &gt;&gt;&gt; color_map(5)</span>
+<span class="sd">    &#39;#3cb44b&#39;  # Green color from the palette</span>
+
+<span class="sd">    &gt;&gt;&gt; color_map(&quot;Example&quot;, head=0, tail=3)</span>
+<span class="sd">    &#39;#e12348&#39;  # Bright Red from the palette</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Predefined color palette</span>
+    <span class="n">palettet</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;#e6194b&quot;</span><span class="p">,</span>  <span class="c1"># red</span>
+        <span class="s2">&quot;#4363d8&quot;</span><span class="p">,</span>  <span class="c1"># blue</span>
+        <span class="s2">&quot;#3cb44b&quot;</span><span class="p">,</span>  <span class="c1"># green</span>
+        <span class="s2">&quot;#800000&quot;</span><span class="p">,</span>  <span class="c1"># maroon (dark red)</span>
+        <span class="s2">&quot;#008080&quot;</span><span class="p">,</span>  <span class="c1"># teal (dark green)</span>
+        <span class="s2">&quot;#000080&quot;</span><span class="p">,</span>  <span class="c1"># navy (dark blue)</span>
+        <span class="s2">&quot;#f58231&quot;</span><span class="p">,</span>  <span class="c1"># orange</span>
+        <span class="s2">&quot;#911eb4&quot;</span><span class="p">,</span>  <span class="c1"># purple</span>
+        <span class="s2">&quot;#808000&quot;</span><span class="p">,</span>  <span class="c1"># olive</span>
+        <span class="s2">&quot;#9a6324&quot;</span><span class="p">,</span>  <span class="c1"># brown</span>
+        <span class="s2">&quot;#f032e6&quot;</span><span class="p">,</span>  <span class="c1"># magenta</span>
+        <span class="s2">&quot;#dfb119&quot;</span><span class="p">,</span>  <span class="c1"># dark yellow</span>
+        <span class="s2">&quot;#42d4f4&quot;</span><span class="p">,</span>  <span class="c1"># cyan</span>
+        <span class="s2">&quot;#808080&quot;</span><span class="p">,</span>  <span class="c1"># grey</span>
+        <span class="s2">&quot;#e12348&quot;</span><span class="p">,</span>  <span class="c1"># Bright Red</span>
+        <span class="s2">&quot;#dc2c46&quot;</span><span class="p">,</span>  <span class="c1"># Strong Red</span>
+        <span class="s2">&quot;#d73644&quot;</span><span class="p">,</span>  <span class="c1"># Vivid Red</span>
+        <span class="s2">&quot;#cd4a40&quot;</span><span class="p">,</span>  <span class="c1"># Deep Red</span>
+        <span class="s2">&quot;#c8543e&quot;</span><span class="p">,</span>  <span class="c1"># Intense Red</span>
+        <span class="s2">&quot;#c25e3c&quot;</span><span class="p">,</span>  <span class="c1"># Fire Red</span>
+        <span class="s2">&quot;#bd683a&quot;</span><span class="p">,</span>  <span class="c1"># Scarlet</span>
+        <span class="s2">&quot;#b77238&quot;</span><span class="p">,</span>  <span class="c1"># Fiery Orange</span>
+        <span class="s2">&quot;#b27c36&quot;</span><span class="p">,</span>  <span class="c1"># Tangerine</span>
+        <span class="s2">&quot;#ad8634&quot;</span><span class="p">,</span>  <span class="c1"># Burnt Orange</span>
+        <span class="c1">#        &#39;#a79032&#39;, # Rust Orange</span>
+        <span class="c1">#        &#39;#a29a30&#39;, # Pumpkin</span>
+        <span class="c1">#        &#39;#9da42e&#39;, # Goldenrod</span>
+        <span class="c1">#        &#39;#98ae2c&#39;, # Saffron</span>
+        <span class="c1">#        &#39;#93b82a&#39;, # Amber</span>
+        <span class="c1">#        &#39;#8ec228&#39;, # Apricot</span>
+        <span class="c1">#        &#39;#89cc26&#39;, # Peach</span>
+        <span class="c1">#        &#39;#84d624&#39;, # Cantaloupe</span>
+        <span class="c1">#        &#39;#7fde22&#39;, # Honeydew</span>
+        <span class="c1">#        &#39;#7ae820&#39;, # Lime</span>
+        <span class="c1">#        &#39;#75f21e&#39;, # Chartreuse</span>
+        <span class="c1">#        &#39;#70fc1c&#39;, # Neon Green</span>
+        <span class="c1">#        &#39;#6bff1c&#39;, # Fluorescent Green</span>
+        <span class="c1">#        &#39;#6bff49&#39;, # Grass Green</span>
+        <span class="c1">#        &#39;#6bff83&#39;, # Periwinkle</span>
+        <span class="c1">#        &#39;#6bffbc&#39;, # Pink</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Check if the column is an integer or string</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">col</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">palettet</span><span class="p">)</span>  <span class="c1"># Get color index using modulo arithmetic</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>  <span class="c1"># Convert to string</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[\W_]+&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>  <span class="c1"># Remove non-alphanumeric characters</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">col</span><span class="p">[</span><span class="n">head</span><span class="p">:</span><span class="n">tail</span><span class="p">],</span> <span class="mi">36</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">palettet</span><span class="p">)</span>  <span class="c1"># Convert substring to a number base 36 (36 = 10 digits + 26 letters)</span>
+
+    <span class="k">return</span> <span class="n">palettet</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="base_map">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.karta.base_map">[docs]</a>
+<span class="k">def</span> <span class="nf">base_map</span><span class="p">(</span><span class="n">sw</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">ne</span><span class="p">:</span> <span class="nb">list</span> <span class="ow">or</span> <span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">folium</span><span class="o">.</span><span class="n">Map</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a base map with multiple tile layers and fits the map to the specified bounding box.</span>
+
+<span class="sd">    This function initializes a Folium map object with multiple tile layers, including:</span>
+<span class="sd">    - `Bright Mode` (CartoDB Positron)</span>
+<span class="sd">    - `Dark Mode` (CartoDB Dark Matter)</span>
+<span class="sd">    - `Satellite` (Esri World Imagery)</span>
+<span class="sd">    - `OpenStreetMap` (OSM)</span>
+
+<span class="sd">    It then fits the map&#39;s view to the bounding box defined by the southwest (`sw`) and northeast (`ne`) coordinates.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sw : list or tuple</span>
+<span class="sd">        The southwest coordinate [latitude, longitude] of the bounding box to fit the map view.</span>
+
+<span class="sd">    ne : list or tuple</span>
+<span class="sd">        The northeast coordinate [latitude, longitude] of the bounding box to fit the map view.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    folium.Map</span>
+<span class="sd">        A Folium map object with multiple tile layers and the view fitted to the provided bounding box.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; sw = [51.2652, -0.5426]  # Southwest coordinate (London, UK)</span>
+<span class="sd">    &gt;&gt;&gt; ne = [51.7225, 0.2824]  # Northeast coordinate (London, UK)</span>
+<span class="sd">    &gt;&gt;&gt; karta = base_map(sw, ne)</span>
+<span class="sd">    &gt;&gt;&gt; karta.save(&quot;map.html&quot;)  # Save the map to an HTML file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Initialize the base map without any default tiles</span>
+    <span class="n">karta</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span><span class="n">tiles</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># Dictionary of tile layers to be added</span>
+    <span class="n">tiles</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;cartodbpositron&quot;</span><span class="p">:</span> <span class="s2">&quot;Bright Mode&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cartodbdark_matter&quot;</span><span class="p">:</span> <span class="s2">&quot;Dark Mode&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Add each tile layer to the map</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">tiles</span><span class="p">:</span>
+        <span class="n">folium</span><span class="o">.</span><span class="n">TileLayer</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">tiles</span><span class="p">[</span><span class="n">item</span><span class="p">],</span> <span class="n">max_zoom</span><span class="o">=</span><span class="mi">21</span><span class="p">)</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+
+    <span class="c1"># Add a satellite tile layer (Esri World Imagery)</span>
+    <span class="n">folium</span><span class="o">.</span><span class="n">TileLayer</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Satellite&quot;</span><span class="p">,</span>
+        <span class="n">attr</span><span class="o">=</span><span class="s2">&quot;Esri&quot;</span><span class="p">,</span>
+        <span class="n">tiles</span><span class="o">=</span><span class="s2">&quot;https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/</span><span class="si">{z}</span><span class="s2">/</span><span class="si">{y}</span><span class="s2">/</span><span class="si">{x}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">overlay</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">control</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">max_zoom</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+
+    <span class="c1"># Add OpenStreetMap (OSM) tile layer</span>
+    <span class="n">folium</span><span class="o">.</span><span class="n">TileLayer</span><span class="p">(</span><span class="s2">&quot;openstreetmap&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;OpenStreetMap&quot;</span><span class="p">,</span> <span class="n">max_zoom</span><span class="o">=</span><span class="mi">19</span><span class="p">)</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+
+    <span class="c1"># Fit the map&#39;s view to the bounding box defined by the southwest and northeast coordinates</span>
+    <span class="n">karta</span><span class="o">.</span><span class="n">fit_bounds</span><span class="p">([</span><span class="n">sw</span><span class="p">,</span> <span class="n">ne</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">karta</span></div>
+
+
+
+<div class="viewcode-block" id="points">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.karta.points">[docs]</a>
+<span class="k">def</span> <span class="nf">points</span><span class="p">(</span>
+    <span class="n">row</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">karta</span><span class="p">:</span> <span class="n">folium</span><span class="o">.</span><span class="n">Map</span><span class="p">,</span>
+    <span class="n">color</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">color_head</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">color_tail</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">opacity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">weight</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="n">popup_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">x</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a point (marker) to a Folium map based on the specified parameters and data in the provided row.</span>
+
+<span class="sd">    The function attempts to extract coordinates from a geometry column if available, or directly from `x` and `y` columns</span>
+<span class="sd">    (longitude and latitude). It then adds a circle marker to the Folium map (`karta`) using the specified color, radius,</span>
+<span class="sd">    and other style parameters.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    row : pd.Series</span>
+<span class="sd">        A row of data containing either a &#39;geometry&#39; attribute or x/y columns for coordinates.</span>
+
+<span class="sd">    karta : folium.Map</span>
+<span class="sd">        A Folium map object to which the marker will be added.</span>
+
+<span class="sd">    color : str</span>
+<span class="sd">        Column name to determine the color of the marker. If the column is present in the row, a color from the color map</span>
+<span class="sd">        will be used.</span>
+
+<span class="sd">    color_head : int, optional</span>
+<span class="sd">        Starting index for substring extraction from the `color` column value to create a unique color (default is None).</span>
+
+<span class="sd">    color_tail : int, optional</span>
+<span class="sd">        Ending index for substring extraction from the `color` column value to create a unique color (default is None).</span>
+
+<span class="sd">    opacity : float, optional</span>
+<span class="sd">        Opacity of the marker (default is 0.5).</span>
+
+<span class="sd">    radius : int, optional</span>
+<span class="sd">        Radius of the circle marker (default is 3).</span>
+
+<span class="sd">    weight : int, optional</span>
+<span class="sd">        Weight (thickness) of the circle marker&#39;s border (default is 6).</span>
+
+<span class="sd">    popup_dict : dict, optional</span>
+<span class="sd">        A dictionary where keys are labels and values are column names in the row. This dictionary is used to create</span>
+<span class="sd">        an HTML popup with the specified labels and values (default is None).</span>
+
+<span class="sd">    x : str, optional</span>
+<span class="sd">        Column name for longitude, if &#39;geometry&#39; attribute is not present (default is None).</span>
+
+<span class="sd">    y : str, optional</span>
+<span class="sd">        Column name for latitude, if &#39;geometry&#39; attribute is not present (default is None).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int</span>
+<span class="sd">        Returns 0 upon successfully adding the marker to the map.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; row = pd.Series({&quot;geometry&quot;: Point(40.748817, -73.985428), &quot;color&quot;: &quot;red&quot;})</span>
+<span class="sd">    &gt;&gt;&gt; karta = folium.Map(location=[40.748817, -73.985428], zoom_start=12)</span>
+<span class="sd">    &gt;&gt;&gt; points(row, karta, &quot;color&quot;)</span>
+<span class="sd">    0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Attempt to extract coordinates from the geometry column if present</span>
+        <span class="n">location</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">x</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="c1"># If geometry is not present, use x and y columns for location</span>
+        <span class="n">location</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="n">x</span><span class="p">]]</span>  <span class="c1"># x, y: lon, lat column names in DataFrame</span>
+
+    <span class="c1"># Determine color if column is specified</span>
+    <span class="k">if</span> <span class="n">color</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>  <span class="c1"># color in DataFrame columns</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">color_map</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">color</span><span class="p">],</span> <span class="n">color_head</span><span class="p">,</span> <span class="n">color_tail</span><span class="p">)</span>
+
+    <span class="c1"># Create a popup HTML if popup_dict is provided</span>
+    <span class="k">if</span> <span class="n">popup_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">popup</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">popup</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">popup_dict</span><span class="p">:</span>
+            <span class="n">popup</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: &lt;b&gt;</span><span class="si">{}</span><span class="s2">&lt;/b&gt;&lt;br&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="n">popup_dict</span><span class="p">[</span><span class="n">item</span><span class="p">]])</span>
+
+    <span class="c1"># Add a CircleMarker to the map with the specified parameters</span>
+    <span class="n">folium</span><span class="o">.</span><span class="n">CircleMarker</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="n">location</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="n">opacity</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="n">popup</span><span class="p">)</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span>
+        <span class="n">karta</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="mi">0</span></div>
+
+
+
+<div class="viewcode-block" id="row_polygons">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.karta.row_polygons">[docs]</a>
+<span class="k">def</span> <span class="nf">row_polygons</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">karta</span><span class="p">:</span> <span class="n">folium</span><span class="o">.</span><span class="n">Map</span><span class="p">,</span> <span class="n">fill_color</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">line_width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">popup_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a polygon to a Folium map based on the specified parameters and data in the provided row.</span>
+
+<span class="sd">    This function creates a polygon (GeoJson) object for the specified row&#39;s geometry and adds it to the Folium map (`karta`).</span>
+<span class="sd">    It allows customization of fill color, line width, and popups. The function also defines style and highlight properties</span>
+<span class="sd">    for the polygon.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    row : pd.Series</span>
+<span class="sd">        A row of data containing a &#39;geometry&#39; attribute that defines the polygon shape.</span>
+
+<span class="sd">    karta : folium.Map</span>
+<span class="sd">        A Folium map object to which the polygon will be added.</span>
+
+<span class="sd">    fill_color : str</span>
+<span class="sd">        Column name to determine the fill color of the polygon. If the column is present in the row, the color is extracted</span>
+<span class="sd">        using the `color_map` function.</span>
+
+<span class="sd">    line_width : int</span>
+<span class="sd">        The width of the border (outline) of the polygon.</span>
+
+<span class="sd">    popup_dict : dict, optional</span>
+<span class="sd">        A dictionary where keys are labels and values are column names in the row. This dictionary is used to create an</span>
+<span class="sd">        HTML popup with the specified labels and values for the polygon (default is None).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int</span>
+<span class="sd">        Returns 0 upon successfully adding the polygon to the map.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; row = pd.Series({&quot;geometry&quot;: Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), &quot;fill_color&quot;: &quot;blue&quot;})</span>
+<span class="sd">    &gt;&gt;&gt; karta = folium.Map(location=[0.5, 0.5], zoom_start=10)</span>
+<span class="sd">    &gt;&gt;&gt; row_polygons(row, karta, &quot;fill_color&quot;, line_width=2)</span>
+<span class="sd">    0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Determine fill color if specified column is present</span>
+    <span class="k">if</span> <span class="n">fill_color</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+        <span class="n">fill_color</span> <span class="o">=</span> <span class="n">color_map</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">fill_color</span><span class="p">])</span>
+
+    <span class="c1"># Style function to apply to the polygon</span>
+    <span class="k">def</span> <span class="nf">style_function</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;fillColor&quot;</span><span class="p">:</span> <span class="n">fill_color</span><span class="p">,</span>
+            <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;#000000&quot;</span><span class="p">,</span>  <span class="c1"># Border color</span>
+            <span class="s2">&quot;fillOpacity&quot;</span><span class="p">:</span> <span class="mf">0.25</span><span class="p">,</span>
+            <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="n">line_width</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="c1"># Highlight style function when the polygon is hovered over</span>
+    <span class="k">def</span> <span class="nf">highlight_function</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;fillColor&quot;</span><span class="p">:</span> <span class="n">fill_color</span><span class="p">,</span>
+            <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;#000000&quot;</span><span class="p">,</span>  <span class="c1"># Border color</span>
+            <span class="s2">&quot;fillOpacity&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="n">line_width</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="c1"># Create a popup if a popup dictionary is provided</span>
+    <span class="k">if</span> <span class="n">popup_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">popup</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">popup</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">popup_dict</span><span class="p">:</span>
+            <span class="n">popup</span> <span class="o">+=</span> <span class="s2">&quot;&lt;b&gt;</span><span class="si">{}</span><span class="s2">&lt;/b&gt;: &lt;b&gt;</span><span class="si">{}</span><span class="s2">&lt;/b&gt;&lt;br&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="n">popup_dict</span><span class="p">[</span><span class="n">item</span><span class="p">]])</span>
+
+    <span class="c1"># Create a GeoJson object from the row&#39;s geometry and add it to the map</span>
+    <span class="n">gjson</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">__geo_interface__</span>
+    <span class="n">gjson</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">GeoJson</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gjson</span><span class="p">,</span> <span class="n">style_function</span><span class="o">=</span><span class="n">style_function</span><span class="p">,</span> <span class="n">highlight_function</span><span class="o">=</span><span class="n">highlight_function</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="n">popup</span><span class="p">)</span>
+    <span class="n">gjson</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="mi">0</span></div>
+
+
+
+<div class="viewcode-block" id="polygons">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.karta.polygons">[docs]</a>
+<span class="k">def</span> <span class="nf">polygons</span><span class="p">(</span>
+    <span class="n">karta</span><span class="p">:</span> <span class="n">folium</span><span class="o">.</span><span class="n">Map</span><span class="p">,</span> <span class="n">mdf</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">fill_color</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">highlight_color</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">line_width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">popup_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds multiple polygons from a DataFrame to a Folium map with specified styles and popups.</span>
+
+<span class="sd">    This function iterates over the rows of a DataFrame containing geometries and adds each polygon to the given Folium map.</span>
+<span class="sd">    The polygon styles can be customized with fill and highlight colors, line width, and optional popup information for</span>
+<span class="sd">    each polygon.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    karta : folium.Map</span>
+<span class="sd">        The Folium map object to which the polygons will be added.</span>
+
+<span class="sd">    mdf : pd.DataFrame</span>
+<span class="sd">        A DataFrame containing polygon geometries in a &#39;geometry&#39; column and other optional attributes for styling and popup.</span>
+
+<span class="sd">    fill_color : str</span>
+<span class="sd">        The column name or value used to determine the fill color of the polygons. If the column is present in `mdf`, the color</span>
+<span class="sd">        is extracted using the `color_map` function. Otherwise, it is used as a direct color value.</span>
+
+<span class="sd">    highlight_color : str</span>
+<span class="sd">        The color used to highlight polygons when they are hovered over.</span>
+
+<span class="sd">    line_width : int</span>
+<span class="sd">        The width of the polygon borders (outlines).</span>
+
+<span class="sd">    popup_dict : dict, optional</span>
+<span class="sd">        A dictionary where keys are labels and values are column names in `mdf`. This dictionary is used to create an HTML popup</span>
+<span class="sd">        with the specified labels and values for each polygon (default is None).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int</span>
+<span class="sd">        Returns 0 upon successfully adding the polygons to the map.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; # Example DataFrame</span>
+<span class="sd">    &gt;&gt;&gt; data = {&#39;geometry&#39;: [Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), Polygon([(1, 1), (2, 1), (2, 2), (1, 2)])],</span>
+<span class="sd">                &#39;color&#39;: [&#39;blue&#39;, &#39;green&#39;]}</span>
+<span class="sd">    &gt;&gt;&gt; mdf = pd.DataFrame(data)</span>
+<span class="sd">    &gt;&gt;&gt; karta = folium.Map(location=[0.5, 0.5], zoom_start=10)</span>
+<span class="sd">    &gt;&gt;&gt; polygons(karta, mdf, fill_color=&quot;color&quot;, highlight_color=&quot;yellow&quot;, line_width=2)</span>
+<span class="sd">    0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Determine fill color if the specified column is present in the DataFrame</span>
+    <span class="k">if</span> <span class="n">fill_color</span> <span class="ow">in</span> <span class="n">mdf</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">fill_color</span> <span class="o">=</span> <span class="n">color_map</span><span class="p">(</span><span class="n">mdf</span><span class="p">[</span><span class="n">fill_color</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># Define the default style function for polygons</span>
+    <span class="k">def</span> <span class="nf">style_function</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;fillColor&quot;</span><span class="p">:</span> <span class="n">fill_color</span><span class="p">,</span>
+            <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;#000000&quot;</span><span class="p">,</span>  <span class="c1"># Border color</span>
+            <span class="s2">&quot;fillOpacity&quot;</span><span class="p">:</span> <span class="mf">0.25</span><span class="p">,</span>
+            <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="n">line_width</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="c1"># Define the highlight style function for polygons when hovered over</span>
+    <span class="k">def</span> <span class="nf">highlight_function</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;fillColor&quot;</span><span class="p">:</span> <span class="n">highlight_color</span><span class="p">,</span>
+            <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;#000000&quot;</span><span class="p">,</span>  <span class="c1"># Border color</span>
+            <span class="s2">&quot;fillOpacity&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+            <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="n">line_width</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="c1"># Iterate over each row in the DataFrame and add the corresponding polygon to the map</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">mdf</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="c1"># Create a popup if a popup dictionary is provided</span>
+        <span class="k">if</span> <span class="n">popup_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">popup</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">popup</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">popup_dict</span><span class="p">:</span>
+                <span class="n">popup</span> <span class="o">+=</span> <span class="s2">&quot;&lt;b&gt;</span><span class="si">{}</span><span class="s2">&lt;/b&gt;: &lt;b&gt;</span><span class="si">{}</span><span class="s2">&lt;/b&gt;&lt;br&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="n">popup_dict</span><span class="p">[</span><span class="n">item</span><span class="p">]])</span>
+
+        <span class="c1"># Convert geometry to GeoJson and add it to the Folium map</span>
+        <span class="n">gjson</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
+        <span class="n">gjson</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">GeoJson</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">gjson</span><span class="p">,</span> <span class="n">style_function</span><span class="o">=</span><span class="n">style_function</span><span class="p">,</span> <span class="n">highlight_function</span><span class="o">=</span><span class="n">highlight_function</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="n">popup</span><span class="p">)</span>
+        <span class="n">gjson</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="mi">0</span></div>
+
+
+
+<div class="viewcode-block" id="plp">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.karta.plp">[docs]</a>
+<span class="k">def</span> <span class="nf">plp</span><span class="p">(</span>  <span class="c1"># plp: points, lines, polygons</span>
+    <span class="n">gdf_list</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="c1"># Point</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># provide x and y if more than one column in gdf contains &#39;lat&#39; and &#39;lon&#39;</span>
+    <span class="n">cluster</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">heatmap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">line</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">antpath</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">point_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span>
+    <span class="n">color_head</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">color_tail</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># color_head and color_tail: substring indices</span>
+    <span class="n">point_opacity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">point_radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">point_weight</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="n">point_popup</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># point_weight = 2xpoint_radius</span>
+    <span class="n">buffer_radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">ring_inner_radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">ring_outer_radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="c1"># LineString</span>
+    <span class="n">line_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span>
+    <span class="n">line_opacity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">line_weight</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="n">line_popup</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="c1"># Polygon</span>
+    <span class="n">centroid</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># if centroid=True it shows centroids of polygons on the map.</span>
+    <span class="n">fill_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;red&quot;</span><span class="p">,</span>
+    <span class="n">highlight_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span>
+    <span class="n">line_width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">polygon_popup</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">choropleth_cols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">choropleth_bins</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">choropleth_legend</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">choropleth_palette</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;YlOrRd&quot;</span><span class="p">,</span>
+    <span class="n">choropleth_highlight</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">geohash_res</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">s2_res</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">h3_res</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">geohash_inner</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">compact</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">cells</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">cell_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># list of geohash, S2 or H3 cell IDs</span>
+    <span class="n">ways</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># list of OSM way IDs (lines or polygons) and Overpass API URL to query from</span>
+    <span class="n">url</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># OpenStreetMap server URL</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">folium</span><span class="o">.</span><span class="n">Map</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a Folium map with points, lines, or polygons based on the input geospatial data.</span>
+
+<span class="sd">    The function `plp` allows users to add different geometrical elements (points, lines, polygons) to a Folium map.</span>
+<span class="sd">    It supports various visual styles and configurations, such as clustering, heatmaps, choropleth, and geohash or cell-based layers.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gdf_list : list of gpd.GeoDataFrame or pd.DataFrame, optional</span>
+<span class="sd">        List of GeoDataFrames or DataFrames containing geometrical data to be plotted. If a single DataFrame is provided,</span>
+<span class="sd">        it will be wrapped in a list internally.</span>
+
+<span class="sd">    x : str, optional</span>
+<span class="sd">        Column name for the x-coordinate (longitude). Required if more than one column in the DataFrame contains &#39;lon&#39; or &#39;lat&#39;.</span>
+
+<span class="sd">    y : str, optional</span>
+<span class="sd">        Column name for the y-coordinate (latitude). Required if more than one column in the DataFrame contains &#39;lon&#39; or &#39;lat&#39;.</span>
+
+<span class="sd">    cluster : bool, default False</span>
+<span class="sd">        If True, clusters points together based on their proximity using Folium&#39;s `MarkerCluster`.</span>
+
+<span class="sd">    heatmap : bool, default False</span>
+<span class="sd">        If True, creates a heatmap layer using Folium&#39;s `HeatMap` for points.</span>
+
+<span class="sd">    line : bool, default False</span>
+<span class="sd">        If True, connects points using Folium&#39;s `PolyLine` to form lines.</span>
+
+<span class="sd">    antpath : bool, default False</span>
+<span class="sd">        If True, creates animated ant paths for the line geometries using Folium&#39;s `AntPath`.</span>
+
+<span class="sd">    point_color : str, default &quot;blue&quot;</span>
+<span class="sd">        Color of the points when displayed on the map.</span>
+
+<span class="sd">    color_head : str, optional</span>
+<span class="sd">        Substring to extract color for the head.</span>
+
+<span class="sd">    color_tail : str, optional</span>
+<span class="sd">        Substring to extract color for the tail.</span>
+
+<span class="sd">    point_opacity : float, default 0.5</span>
+<span class="sd">        Opacity of the points. Value should be between 0 and 1.</span>
+
+<span class="sd">    point_radius : int, default 3</span>
+<span class="sd">        Radius of the points in pixels.</span>
+
+<span class="sd">    point_weight : int, default 6</span>
+<span class="sd">        Weight (thickness) of the point outline. Typically set to twice the `point_radius`.</span>
+
+<span class="sd">    point_popup : dict, optional</span>
+<span class="sd">        Dictionary where keys are labels and values are column names in the DataFrame. Used to create HTML popups with</span>
+<span class="sd">        attributes of each point.</span>
+
+<span class="sd">    buffer_radius : float, default 0</span>
+<span class="sd">        Buffer radius (in meters) to create a buffer around each point. Set to 0 to disable buffering.</span>
+
+<span class="sd">    ring_inner_radius : float, default 0</span>
+<span class="sd">        Inner radius of ring buffers around points. Only used if `ring_outer_radius` is set.</span>
+
+<span class="sd">    ring_outer_radius : float, default 0</span>
+<span class="sd">        Outer radius of ring buffers around points. If set, creates a ring around each point.</span>
+
+<span class="sd">    line_color : str, default &quot;blue&quot;</span>
+<span class="sd">        Color of the lines connecting points or LineString geometries.</span>
+
+<span class="sd">    line_opacity : float, default 0.5</span>
+<span class="sd">        Opacity of the lines. Value should be between 0 and 1.</span>
+
+<span class="sd">    line_weight : int, default 6</span>
+<span class="sd">        Thickness of the lines.</span>
+
+<span class="sd">    line_popup : dict, optional</span>
+<span class="sd">        Dictionary where keys are labels and values are column names in the DataFrame. Used to create HTML popups with</span>
+<span class="sd">        attributes of each line.</span>
+
+<span class="sd">    centroid : bool, default False</span>
+<span class="sd">        If True, displays the centroids of polygon geometries on the map.</span>
+
+<span class="sd">    fill_color : str, default &quot;red&quot;</span>
+<span class="sd">        Fill color for polygon geometries.</span>
+
+<span class="sd">    highlight_color : str, default &quot;green&quot;</span>
+<span class="sd">        Color used to highlight polygons when hovered.</span>
+
+<span class="sd">    line_width : float, default 0.3</span>
+<span class="sd">        Thickness of polygon outlines.</span>
+
+<span class="sd">    polygon_popup : dict, optional</span>
+<span class="sd">        Dictionary where keys are labels and values are column names in the DataFrame. Used to create HTML popups with</span>
+<span class="sd">        attributes of each polygon.</span>
+
+<span class="sd">    choropleth_cols : list of str, optional</span>
+<span class="sd">        List of column names to use for creating choropleth maps. Requires at least two columns for {key, value}.</span>
+
+<span class="sd">    choropleth_bins : list of int or float, optional</span>
+<span class="sd">        Binning strategy for choropleth maps.</span>
+
+<span class="sd">    choropleth_legend : str, optional</span>
+<span class="sd">        Legend title for choropleth maps.</span>
+
+<span class="sd">    choropleth_palette : str, default &quot;YlOrRd&quot;</span>
+<span class="sd">        Color palette for choropleth maps.</span>
+
+<span class="sd">    choropleth_highlight : bool, default True</span>
+<span class="sd">        If True, highlights choropleth polygons when hovered.</span>
+
+<span class="sd">    geohash_res : int, default 0</span>
+<span class="sd">        Resolution for creating geohash-based polygonal layers. Set to 0 to disable.</span>
+
+<span class="sd">    s2_res : int, default -1</span>
+<span class="sd">        Resolution for creating Google S2-based polygonal layers. Set to -1 to disable.</span>
+
+<span class="sd">    h3_res : int, default -1</span>
+<span class="sd">        Resolution for creating Uber H3-based polygonal layers. Set to -1 to disable.</span>
+
+<span class="sd">    geohash_inner : bool, default False</span>
+<span class="sd">        If True, shows only inner geohash cells. Does not work if `compact` is set to True.</span>
+
+<span class="sd">    compact : bool, default False</span>
+<span class="sd">        If True, creates compact representation of geohash, S2, or H3 cells.</span>
+
+<span class="sd">    cells : list, optional</span>
+<span class="sd">        List of geohash, S2, or H3 cell IDs to visualize.</span>
+
+<span class="sd">    cell_type : str, optional</span>
+<span class="sd">        Type of cells used in `cells` parameter. Can be &#39;geohash&#39;, &#39;s2&#39;, or &#39;h3&#39;.</span>
+
+<span class="sd">    ways : list of str, optional</span>
+<span class="sd">        List of OSM way IDs to visualize as lines or polygons.</span>
+
+<span class="sd">    url : str, optional</span>
+<span class="sd">        Overpass API URL to query OSM geometries by `ways` parameter.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    folium.Map</span>
+<span class="sd">        A Folium map object with the added geometrical features based on input parameters.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; # Example usage</span>
+<span class="sd">    &gt;&gt;&gt; gdf = gpd.read_file(&quot;path/to/shapefile.shp&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; plp(gdf)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Handle `cells` input by converting cell IDs to geometries</span>
+    <span class="k">if</span> <span class="n">cells</span><span class="p">:</span>
+        <span class="n">res</span><span class="p">,</span> <span class="n">geoms</span> <span class="o">=</span> <span class="n">sindex</span><span class="o">.</span><span class="n">cell_to_geom</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="n">cell_type</span><span class="p">)</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">cells</span><span class="p">,</span> <span class="s2">&quot;res&quot;</span><span class="p">:</span> <span class="n">res</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="n">geoms</span><span class="p">},</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+        <span class="n">karta</span> <span class="o">=</span> <span class="n">plp</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">polygon_popup</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ID&quot;</span><span class="p">:</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;Resolution&quot;</span><span class="p">:</span> <span class="s2">&quot;res&quot;</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">karta</span>
+
+    <span class="c1"># Handle `ways` input by converting OSM way IDs to geometries</span>
+    <span class="k">if</span> <span class="n">ways</span><span class="p">:</span>
+        <span class="n">geoms</span> <span class="o">=</span> <span class="n">osm</span><span class="o">.</span><span class="n">ways_to_geom</span><span class="p">(</span><span class="n">ways</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">&quot;way_id&quot;</span><span class="p">:</span> <span class="n">ways</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="n">geoms</span><span class="p">},</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">LineString</span><span class="p">):</span>
+            <span class="n">karta</span> <span class="o">=</span> <span class="n">plp</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">line_popup</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;way_id&quot;</span><span class="p">:</span> <span class="s2">&quot;way_id&quot;</span><span class="p">},</span> <span class="n">line_color</span><span class="o">=</span><span class="s2">&quot;way_id&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">karta</span> <span class="o">=</span> <span class="n">plp</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">polygon_popup</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;way_id&quot;</span><span class="p">:</span> <span class="s2">&quot;way_id&quot;</span><span class="p">},</span> <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;way_id&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">karta</span>
+
+    <span class="c1"># Ensure `gdf_list` is always a list of GeoDataFrames or DataFrames</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gdf_list</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="n">gdf_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">gdf_list</span><span class="p">]</span>
+
+    <span class="c1"># Initialize bounding box coordinates for the map</span>
+    <span class="n">minlat</span><span class="p">,</span> <span class="n">maxlat</span><span class="p">,</span> <span class="n">minlon</span><span class="p">,</span> <span class="n">maxlon</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="o">-</span><span class="mi">180</span>
+    <span class="c1"># Iterate through the list of GeoDataFrames to update bounding box</span>
+    <span class="k">for</span> <span class="n">gdf</span> <span class="ow">in</span> <span class="n">gdf_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span><span class="p">:</span>  <span class="c1"># Determine longitude and latitude columns if x is not specified</span>
+                <span class="n">xx</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">gdf</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="s2">&quot;lon&quot;</span> <span class="ow">in</span> <span class="n">col</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;lng&quot;</span> <span class="ow">in</span> <span class="n">col</span><span class="o">.</span><span class="n">lower</span><span class="p">()][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">yy</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">gdf</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="s2">&quot;lat&quot;</span> <span class="ow">in</span> <span class="n">col</span><span class="o">.</span><span class="n">lower</span><span class="p">()][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">lons</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="n">xx</span><span class="p">]</span>
+            <span class="n">lats</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="n">yy</span><span class="p">]</span>
+            <span class="n">minlatg</span><span class="p">,</span> <span class="n">minlong</span><span class="p">,</span> <span class="n">maxlatg</span><span class="p">,</span> <span class="n">maxlong</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">lats</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">lons</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">lats</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">lons</span><span class="p">)</span>  <span class="c1"># minlatg: minlat in gdf</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># If input is a GeoDataFrame, use total_bounds to get the bounding box</span>
+            <span class="n">minlong</span><span class="p">,</span> <span class="n">minlatg</span><span class="p">,</span> <span class="n">maxlong</span><span class="p">,</span> <span class="n">maxlatg</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">total_bounds</span>
+        <span class="c1"># Update overall bounding box</span>
+        <span class="n">minlat</span><span class="p">,</span> <span class="n">minlon</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">minlat</span><span class="p">,</span> <span class="n">minlatg</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">minlon</span><span class="p">,</span> <span class="n">minlong</span><span class="p">)</span>
+        <span class="n">maxlat</span><span class="p">,</span> <span class="n">maxlon</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">maxlat</span><span class="p">,</span> <span class="n">maxlatg</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">maxlon</span><span class="p">,</span> <span class="n">maxlong</span><span class="p">)</span>
+
+    <span class="c1"># Create a base map using the bounding box</span>
+    <span class="n">sw</span> <span class="o">=</span> <span class="p">[</span><span class="n">minlat</span><span class="p">,</span> <span class="n">minlon</span><span class="p">]</span>  <span class="c1"># South West (bottom left corner)</span>
+    <span class="n">ne</span> <span class="o">=</span> <span class="p">[</span><span class="n">maxlat</span><span class="p">,</span> <span class="n">maxlon</span><span class="p">]</span>  <span class="c1"># North East (top right corner)</span>
+    <span class="n">karta</span> <span class="o">=</span> <span class="n">base_map</span><span class="p">(</span><span class="n">sw</span><span class="p">,</span> <span class="n">ne</span><span class="p">)</span>  <span class="c1"># Initialize folium map with the bounding box</span>
+
+    <span class="c1"># Iterate through each DataFrame or GeoDataFrame in the list to add layers to the map</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">gdf</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gdf_list</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="c1"># i = 0  # index of gdf in gdf_list</span>
+        <span class="c1"># for gdf in gdf_list:</span>
+        <span class="c1">#    i += 1</span>
+        <span class="c1">#    if not isinstance(gdf, gpd.GeoDataFrame):  # if pd.DataFrame</span>
+        <span class="c1">#        geom = None</span>
+        <span class="c1">#    else:</span>
+        <span class="c1">#        geom = gdf.geometry.values[0]</span>
+
+        <span class="c1"># Handle Polygon geometries</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">MultiPolygon</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">centroid</span><span class="p">:</span>  <span class="c1"># Show centroids of polygons if `centroid=True`</span>
+                <span class="n">group_centroid</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">FeatureGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">- Centroid&quot;</span><span class="p">)</span>
+                <span class="n">cdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="n">gdf</span><span class="o">.</span><span class="n">centroid</span><span class="p">},</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>  <span class="c1"># centroid df</span>
+                <span class="n">cdf</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">karta</span><span class="o">=</span><span class="n">group_centroid</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">group_centroid</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+            <span class="c1"># If choropleth columns are provided, visualize as a choropleth map</span>
+            <span class="k">if</span> <span class="n">choropleth_cols</span><span class="p">:</span>
+                <span class="n">group_chor</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">FeatureGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">- Choropleth&quot;</span><span class="p">)</span>
+                <span class="n">choropleth_plp</span><span class="p">(</span>
+                    <span class="n">karta</span><span class="o">=</span><span class="n">group_chor</span><span class="p">,</span>
+                    <span class="n">gdf</span><span class="o">=</span><span class="n">gdf</span><span class="p">,</span>
+                    <span class="n">columns</span><span class="o">=</span><span class="n">choropleth_cols</span><span class="p">,</span>
+                    <span class="n">bins</span><span class="o">=</span><span class="n">choropleth_bins</span><span class="p">,</span>
+                    <span class="n">legend</span><span class="o">=</span><span class="n">choropleth_legend</span><span class="p">,</span>
+                    <span class="n">palette</span><span class="o">=</span><span class="n">choropleth_palette</span><span class="p">,</span>
+                    <span class="n">highlight</span><span class="o">=</span><span class="n">choropleth_highlight</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">group_chor</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># Otherwise, visualise polygons normally</span>
+                <span class="n">group_polygon</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">FeatureGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">- Polygon&quot;</span><span class="p">)</span>
+                <span class="n">gdf</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                    <span class="n">row_polygons</span><span class="p">,</span>
+                    <span class="n">karta</span><span class="o">=</span><span class="n">group_polygon</span><span class="p">,</span>
+                    <span class="n">fill_color</span><span class="o">=</span><span class="n">fill_color</span><span class="p">,</span>
+                    <span class="n">line_width</span><span class="o">=</span><span class="n">line_width</span><span class="p">,</span>
+                    <span class="n">popup_dict</span><span class="o">=</span><span class="n">polygon_popup</span><span class="p">,</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">group_polygon</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+        <span class="c1"># Handle LineString geometries</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">LineString</span><span class="p">):</span>
+            <span class="n">group_line</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">FeatureGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">- Line&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">_index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">gdf</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+                <span class="n">coordinates</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">(</span><span class="n">coord</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">coord</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">coords</span>
+                <span class="p">]</span>  <span class="c1"># Convert LineString geometries to coordinates (lat, lon)</span>
+                <span class="c1"># Use color mapping if line_color is a column</span>
+                <span class="n">color</span> <span class="o">=</span> <span class="n">color_map</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">line_color</span><span class="p">])</span> <span class="k">if</span> <span class="n">line_color</span> <span class="ow">in</span> <span class="n">gdf</span><span class="o">.</span><span class="n">columns</span> <span class="k">else</span> <span class="n">line_color</span>
+
+                <span class="c1"># Create popup content if specified</span>
+                <span class="n">popup</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">: &lt;b&gt;</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="n">line_popup</span><span class="p">[</span><span class="n">item</span><span class="p">]]</span><span class="si">}</span><span class="s2">&lt;/b&gt;&lt;br&gt;&quot;</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">line_popup</span><span class="p">)</span> <span class="k">if</span> <span class="n">line_popup</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="c1"># if line_popup is None:</span>
+                <span class="c1">#    popup = None</span>
+                <span class="c1"># else:</span>
+                <span class="c1">#    popup = &quot;&quot;</span>
+                <span class="c1">#    for item in line_popup:</span>
+                <span class="c1">#        popup += &quot;{}: &lt;b&gt;{}&lt;/b&gt;&lt;br&gt;&quot;.format(item, row[line_popup[item]])</span>
+                <span class="n">group_line</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span>
+                    <span class="n">folium</span><span class="o">.</span><span class="n">PolyLine</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">line_weight</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="n">line_opacity</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="n">popup</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">group_line</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+
+        <span class="c1"># Handle Point geometries or DataFrame inputs with coordinates</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">Point</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">x</span><span class="p">:</span>  <span class="c1"># If DataFrame and no x specified</span>
+                <span class="n">xx</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">gdf</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="s2">&quot;lon&quot;</span> <span class="ow">in</span> <span class="n">col</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;lng&quot;</span> <span class="ow">in</span> <span class="n">col</span><span class="o">.</span><span class="n">lower</span><span class="p">()][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">yy</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">gdf</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="s2">&quot;lat&quot;</span> <span class="ow">in</span> <span class="n">col</span><span class="o">.</span><span class="n">lower</span><span class="p">()][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">xx</span> <span class="o">=</span> <span class="n">yy</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># Create point layers and visualizations</span>
+            <span class="n">group_point</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">FeatureGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">- Point&quot;</span><span class="p">)</span>
+            <span class="n">gdf</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                <span class="n">points</span><span class="p">,</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">xx</span><span class="p">,</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">yy</span><span class="p">,</span>
+                <span class="n">karta</span><span class="o">=</span><span class="n">group_point</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">point_color</span><span class="p">,</span>
+                <span class="n">color_head</span><span class="o">=</span><span class="n">color_head</span><span class="p">,</span>
+                <span class="n">color_tail</span><span class="o">=</span><span class="n">color_tail</span><span class="p">,</span>
+                <span class="n">opacity</span><span class="o">=</span><span class="n">point_opacity</span><span class="p">,</span>
+                <span class="n">radius</span><span class="o">=</span><span class="n">point_radius</span><span class="p">,</span>
+                <span class="n">weight</span><span class="o">=</span><span class="n">point_weight</span><span class="p">,</span>
+                <span class="n">popup_dict</span><span class="o">=</span><span class="n">point_popup</span><span class="p">,</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">group_point</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+
+            <span class="c1"># Add clustering, heatmap, line connections, and buffer/ring visualizations as specified</span>
+
+            <span class="c1"># Create a clustering layer if `cluster=True`</span>
+            <span class="k">if</span> <span class="n">cluster</span><span class="p">:</span>
+                <span class="n">group_cluster</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">FeatureGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">- Cluster&quot;</span><span class="p">)</span>
+                <span class="c1"># If the input is a regular DataFrame, use the latitude and longitude columns</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
+                    <span class="n">group_cluster</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">plugins</span><span class="o">.</span><span class="n">MarkerCluster</span><span class="p">(</span><span class="n">locations</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">lats</span><span class="p">,</span> <span class="n">lons</span><span class="p">))))</span>
+                <span class="c1"># If it&#39;s a GeoDataFrame, use geometry coordinates</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">group_cluster</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">plugins</span><span class="o">.</span><span class="n">MarkerCluster</span><span class="p">(</span><span class="n">locations</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">x</span><span class="p">))))</span>
+                <span class="c1"># Add the clustering layer to the map</span>
+                <span class="n">group_cluster</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+
+            <span class="c1"># Create a heatmap layer if `heatmap=True`</span>
+            <span class="k">if</span> <span class="n">heatmap</span><span class="p">:</span>
+                <span class="n">group_heatmap</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">FeatureGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">- Heatmap&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
+                    <span class="n">group_heatmap</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">plugins</span><span class="o">.</span><span class="n">HeatMap</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">lats</span><span class="p">,</span> <span class="n">lons</span><span class="p">)),</span> <span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">group_heatmap</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">plugins</span><span class="o">.</span><span class="n">HeatMap</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">x</span><span class="p">)),</span> <span class="n">radius</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+                <span class="n">group_heatmap</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+
+            <span class="c1"># Create a line connection layer if `line=True`</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">group_line</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">FeatureGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">- Line&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
+                    <span class="n">group_line</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span>
+                        <span class="n">folium</span><span class="o">.</span><span class="n">PolyLine</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">lats</span><span class="p">,</span> <span class="n">lons</span><span class="p">)),</span> <span class="n">color</span><span class="o">=</span><span class="n">line_color</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">line_weight</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="n">line_opacity</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">group_line</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span>
+                        <span class="n">folium</span><span class="o">.</span><span class="n">PolyLine</span><span class="p">(</span>
+                            <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">x</span><span class="p">)),</span>
+                            <span class="n">color</span><span class="o">=</span><span class="n">line_color</span><span class="p">,</span>
+                            <span class="n">weight</span><span class="o">=</span><span class="n">line_weight</span><span class="p">,</span>
+                            <span class="n">opacity</span><span class="o">=</span><span class="n">line_opacity</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="c1"># Add the line layer to the map</span>
+                <span class="n">group_line</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+
+            <span class="c1"># Create an animated path layer using AntPath if `antpath=True`</span>
+            <span class="k">if</span> <span class="n">antpath</span><span class="p">:</span>
+                <span class="n">group_antpath</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">FeatureGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">- Ant Path&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
+                    <span class="n">group_antpath</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">plugins</span><span class="o">.</span><span class="n">AntPath</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">lats</span><span class="p">,</span> <span class="n">lons</span><span class="p">))))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">group_antpath</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">plugins</span><span class="o">.</span><span class="n">AntPath</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">x</span><span class="p">))))</span>
+                <span class="n">group_antpath</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+
+            <span class="c1"># Create a buffer visualization if `buffer_radius &gt; 0`</span>
+            <span class="k">if</span> <span class="n">buffer_radius</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">group_buffer</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">FeatureGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">- Buffer&quot;</span><span class="p">)</span>
+                <span class="n">bgdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># buffered gdf: Create a copy of the GeoDataFrame to modify geometries</span>
+                <span class="c1"># Apply buffer to geometries using the specified radius in meters</span>
+                <span class="n">bgdf</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">bgdf</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">gutils</span><span class="o">.</span><span class="n">find_proj</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">buffer_radius</span><span class="p">)</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="c1"># Add the buffered geometries to the map as polygons</span>
+                <span class="n">polygons</span><span class="p">(</span>
+                    <span class="n">karta</span><span class="o">=</span><span class="n">group_buffer</span><span class="p">,</span>
+                    <span class="n">mdf</span><span class="o">=</span><span class="n">bgdf</span><span class="p">,</span>
+                    <span class="n">fill_color</span><span class="o">=</span><span class="n">fill_color</span><span class="p">,</span>
+                    <span class="n">highlight_color</span><span class="o">=</span><span class="n">fill_color</span><span class="p">,</span>
+                    <span class="n">line_width</span><span class="o">=</span><span class="n">line_width</span><span class="p">,</span>
+                    <span class="n">popup_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="c1"># Add the buffer layer to the map</span>
+                <span class="n">group_buffer</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+
+            <span class="c1"># Create ring visualization if `ring_outer_radius &gt; 0`</span>
+            <span class="k">if</span> <span class="n">ring_outer_radius</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">group_ring</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">FeatureGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">- Ring&quot;</span><span class="p">)</span>
+                <span class="n">bgdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># buffered gdf: Create a copy of the GeoDataFrame to modify geometries</span>
+                <span class="c1"># Create ring shapes by applying an outer and inner buffer, subtracting the inner from the outer</span>
+                <span class="n">bgdf</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">bgdf</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">gutils</span><span class="o">.</span><span class="n">find_proj</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                    <span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">ring_outer_radius</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">bgdf</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">gutils</span><span class="o">.</span><span class="n">find_proj</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">ring_inner_radius</span><span class="p">))</span>
+                    <span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+                <span class="p">)</span>  <span class="c1"># radius in meters</span>
+                <span class="c1"># Add the ring-shaped geometries to the map as polygons</span>
+                <span class="n">polygons</span><span class="p">(</span>
+                    <span class="n">karta</span><span class="o">=</span><span class="n">group_ring</span><span class="p">,</span>
+                    <span class="n">mdf</span><span class="o">=</span><span class="n">bgdf</span><span class="p">,</span>
+                    <span class="n">fill_color</span><span class="o">=</span><span class="n">fill_color</span><span class="p">,</span>
+                    <span class="n">highlight_color</span><span class="o">=</span><span class="n">fill_color</span><span class="p">,</span>
+                    <span class="n">line_width</span><span class="o">=</span><span class="n">line_width</span><span class="p">,</span>
+                    <span class="n">popup_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="c1"># Add the ring layer to the map</span>
+                <span class="n">group_ring</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+
+    <span class="c1"># Geohash visualization if `geohash_res &gt; 0`</span>
+    <span class="k">if</span> <span class="n">geohash_res</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># inner=False doesn&#39;t work if compact=True</span>
+        <span class="c1"># Create a polygon for bounding box if input is not a polygon</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">MultiPolygon</span><span class="p">):</span>
+            <span class="n">cdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bb</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">([[</span><span class="n">minlon</span><span class="p">,</span> <span class="n">minlat</span><span class="p">],</span> <span class="p">[</span><span class="n">maxlon</span><span class="p">,</span> <span class="n">minlat</span><span class="p">],</span> <span class="p">[</span><span class="n">maxlon</span><span class="p">,</span> <span class="n">maxlat</span><span class="p">],</span> <span class="p">[</span><span class="n">minlon</span><span class="p">,</span> <span class="n">maxlat</span><span class="p">],</span> <span class="p">[</span><span class="n">minlon</span><span class="p">,</span> <span class="n">minlat</span><span class="p">]])</span>
+            <span class="n">cdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">bb</span><span class="p">]},</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>  <span class="c1"># Create a bounding box GeoDataFrame</span>
+
+        <span class="c1"># Convert geometries to geohash cells and their geometries</span>
+        <span class="n">cells</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">sindex</span><span class="o">.</span><span class="n">geom_to_cell_parallel</span><span class="p">(</span><span class="n">cdf</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="s2">&quot;geohash&quot;</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="n">geohash_res</span><span class="p">,</span> <span class="n">compact</span><span class="o">=</span><span class="n">compact</span><span class="p">)</span>
+        <span class="n">res</span><span class="p">,</span> <span class="n">geoms</span> <span class="o">=</span> <span class="n">sindex</span><span class="o">.</span><span class="n">cell_to_geom</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="s2">&quot;geohash&quot;</span><span class="p">)</span>
+        <span class="n">cdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">cells</span><span class="p">,</span> <span class="s2">&quot;res&quot;</span><span class="p">:</span> <span class="n">res</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="n">geoms</span><span class="p">},</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Add geohash cells to the map as a polygon layer</span>
+        <span class="n">group_geohash</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">FeatureGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Geohash&quot;</span><span class="p">)</span>
+        <span class="n">polygons</span><span class="p">(</span>
+            <span class="n">karta</span><span class="o">=</span><span class="n">group_geohash</span><span class="p">,</span>
+            <span class="n">mdf</span><span class="o">=</span><span class="n">cdf</span><span class="p">,</span>
+            <span class="n">fill_color</span><span class="o">=</span><span class="n">fill_color</span><span class="p">,</span>
+            <span class="n">highlight_color</span><span class="o">=</span><span class="n">highlight_color</span><span class="p">,</span>
+            <span class="n">line_width</span><span class="o">=</span><span class="n">line_width</span><span class="p">,</span>
+            <span class="n">popup_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ID&quot;</span><span class="p">:</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;Resolution&quot;</span><span class="p">:</span> <span class="s2">&quot;res&quot;</span><span class="p">},</span>
+        <span class="p">)</span>
+        <span class="n">group_geohash</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+
+    <span class="c1"># S2 cell visualization if `s2_res &gt; -1`</span>
+    <span class="k">if</span> <span class="n">s2_res</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># Create a polygon for bounding box if input is not a polygon</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">MultiPolygon</span><span class="p">):</span>
+            <span class="n">cdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bb</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">([[</span><span class="n">minlon</span><span class="p">,</span> <span class="n">minlat</span><span class="p">],</span> <span class="p">[</span><span class="n">maxlon</span><span class="p">,</span> <span class="n">minlat</span><span class="p">],</span> <span class="p">[</span><span class="n">maxlon</span><span class="p">,</span> <span class="n">maxlat</span><span class="p">],</span> <span class="p">[</span><span class="n">minlon</span><span class="p">,</span> <span class="n">maxlat</span><span class="p">],</span> <span class="p">[</span><span class="n">minlon</span><span class="p">,</span> <span class="n">minlat</span><span class="p">]])</span>
+            <span class="n">cdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">bb</span><span class="p">]},</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>  <span class="c1"># cell df</span>
+
+        <span class="c1"># Convert geometries to S2 cells and their geometries</span>
+        <span class="n">cells</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">sindex</span><span class="o">.</span><span class="n">geom_to_cell_parallel</span><span class="p">(</span><span class="n">cdf</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="s2">&quot;s2&quot;</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="n">s2_res</span><span class="p">,</span> <span class="n">compact</span><span class="o">=</span><span class="n">compact</span><span class="p">)</span>
+        <span class="n">res</span><span class="p">,</span> <span class="n">geoms</span> <span class="o">=</span> <span class="n">sindex</span><span class="o">.</span><span class="n">cell_to_geom</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="s2">&quot;s2&quot;</span><span class="p">)</span>
+        <span class="n">cdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">cells</span><span class="p">,</span> <span class="s2">&quot;res&quot;</span><span class="p">:</span> <span class="n">res</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="n">geoms</span><span class="p">},</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Add S2 cells to the map as a polygon layer</span>
+        <span class="n">group_s2</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">FeatureGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Google S2&quot;</span><span class="p">)</span>
+        <span class="n">polygons</span><span class="p">(</span>
+            <span class="n">karta</span><span class="o">=</span><span class="n">group_s2</span><span class="p">,</span>
+            <span class="n">mdf</span><span class="o">=</span><span class="n">cdf</span><span class="p">,</span>
+            <span class="n">fill_color</span><span class="o">=</span><span class="n">fill_color</span><span class="p">,</span>
+            <span class="n">highlight_color</span><span class="o">=</span><span class="n">highlight_color</span><span class="p">,</span>
+            <span class="n">line_width</span><span class="o">=</span><span class="n">line_width</span><span class="p">,</span>
+            <span class="n">popup_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ID&quot;</span><span class="p">:</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;Resolution&quot;</span><span class="p">:</span> <span class="s2">&quot;res&quot;</span><span class="p">},</span>
+        <span class="p">)</span>
+        <span class="n">group_s2</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+
+    <span class="c1"># H3 cell visualization if `h3_res &gt; -1`</span>
+    <span class="k">if</span> <span class="n">h3_res</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">MultiPolygon</span><span class="p">):</span>
+            <span class="n">cdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="c1"># Create a bounding box GeoDataFrame</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bb</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">([[</span><span class="n">minlon</span><span class="p">,</span> <span class="n">minlat</span><span class="p">],</span> <span class="p">[</span><span class="n">maxlon</span><span class="p">,</span> <span class="n">minlat</span><span class="p">],</span> <span class="p">[</span><span class="n">maxlon</span><span class="p">,</span> <span class="n">maxlat</span><span class="p">],</span> <span class="p">[</span><span class="n">minlon</span><span class="p">,</span> <span class="n">maxlat</span><span class="p">],</span> <span class="p">[</span><span class="n">minlon</span><span class="p">,</span> <span class="n">minlat</span><span class="p">]])</span>
+            <span class="n">cdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">bb</span><span class="p">]},</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>  <span class="c1"># cell df</span>
+
+        <span class="c1"># Convert geometries to H3 cells and their geometries</span>
+        <span class="n">cells</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">sindex</span><span class="o">.</span><span class="n">geom_to_cell_parallel</span><span class="p">(</span><span class="n">cdf</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="s2">&quot;h3&quot;</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="n">h3_res</span><span class="p">,</span> <span class="n">compact</span><span class="o">=</span><span class="n">compact</span><span class="p">)</span>
+        <span class="n">res</span><span class="p">,</span> <span class="n">geoms</span> <span class="o">=</span> <span class="n">sindex</span><span class="o">.</span><span class="n">cell_to_geom</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="s2">&quot;h3&quot;</span><span class="p">)</span>
+        <span class="n">cdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">cells</span><span class="p">,</span> <span class="s2">&quot;res&quot;</span><span class="p">:</span> <span class="n">res</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="n">geoms</span><span class="p">},</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Add H3 cells to the map as a polygon layer</span>
+        <span class="n">group_h3</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">FeatureGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Uber H3&quot;</span><span class="p">)</span>
+        <span class="n">polygons</span><span class="p">(</span>
+            <span class="n">karta</span><span class="o">=</span><span class="n">group_h3</span><span class="p">,</span>
+            <span class="n">mdf</span><span class="o">=</span><span class="n">cdf</span><span class="p">,</span>
+            <span class="n">fill_color</span><span class="o">=</span><span class="n">fill_color</span><span class="p">,</span>
+            <span class="n">highlight_color</span><span class="o">=</span><span class="n">highlight_color</span><span class="p">,</span>
+            <span class="n">line_width</span><span class="o">=</span><span class="n">line_width</span><span class="p">,</span>
+            <span class="n">popup_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ID&quot;</span><span class="p">:</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;Resolution&quot;</span><span class="p">:</span> <span class="s2">&quot;res&quot;</span><span class="p">},</span>
+        <span class="p">)</span>
+        <span class="n">group_h3</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+    <span class="n">folium</span><span class="o">.</span><span class="n">LayerControl</span><span class="p">(</span><span class="n">collapsed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">karta</span></div>
+
+
+
+<div class="viewcode-block" id="choropleth_plp">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.karta.choropleth_plp">[docs]</a>
+<span class="k">def</span> <span class="nf">choropleth_plp</span><span class="p">(</span>
+    <span class="n">karta</span><span class="p">:</span> <span class="n">folium</span><span class="o">.</span><span class="n">Map</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">columns</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">bins</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">legend</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">palette</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">highlight</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a choropleth layer to a Folium map using the specified GeoDataFrame and column properties.</span>
+
+<span class="sd">    This function is used exclusively within the `plp` function to create choropleth maps, visualizing data attributes</span>
+<span class="sd">    over a geographic area using color gradients.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    karta : folium.Map</span>
+<span class="sd">        The Folium map object to which the choropleth layer will be added.</span>
+<span class="sd">    gdf : geopandas.GeoDataFrame</span>
+<span class="sd">        The GeoDataFrame containing multipolygon geometries and the data to be visualized.</span>
+<span class="sd">    columns : list</span>
+<span class="sd">        A list containing two elements:</span>
+<span class="sd">            - columns[0] : str</span>
+<span class="sd">                The column name in `gdf` that contains unique identifiers for each region or geometry.</span>
+<span class="sd">            - columns[1] : str</span>
+<span class="sd">                The column name in `gdf` containing the data values to be visualized on the map.</span>
+<span class="sd">    bins : list</span>
+<span class="sd">        A list of numerical values defining the value intervals to use for the choropleth color categories.</span>
+<span class="sd">    legend : str</span>
+<span class="sd">        A string representing the legend title that describes what is being represented on the map (e.g., &quot;Population Density&quot;).</span>
+<span class="sd">    palette : str</span>
+<span class="sd">        A string defining the color palette to be used for the choropleth (e.g., &quot;YlOrRd&quot;, &quot;BuPu&quot;).</span>
+<span class="sd">    highlight : bool</span>
+<span class="sd">        A boolean flag indicating whether regions should be highlighted when hovered over.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int</span>
+<span class="sd">        Returns 0 upon successful execution, indicating that the choropleth layer was successfully added to the map.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; choropleth_plp(</span>
+<span class="sd">            karta,</span>
+<span class="sd">            gdf,</span>
+<span class="sd">            [&#39;region_id&#39;, &#39;population&#39;],</span>
+<span class="sd">            bins=[0, 100, 500, 1000, 5000],</span>
+<span class="sd">            legend=&quot;Population by Region&quot;,</span>
+<span class="sd">            palette=&quot;YlOrRd&quot;,</span>
+<span class="sd">            highlight=True</span>
+<span class="sd">        )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create a choropleth layer based on the GeoDataFrame, using the specified columns and styling options</span>
+    <span class="n">choropleth</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">Choropleth</span><span class="p">(</span>
+        <span class="n">geo_data</span><span class="o">=</span><span class="n">gdf</span><span class="p">,</span>  <span class="c1"># The GeoDataFrame containing geographic data and properties</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Choropleth&quot;</span><span class="p">,</span>  <span class="c1"># Name of the layer to display in the layer control</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">gdf</span><span class="p">,</span>  <span class="c1"># Data source used to extract the values to be represented</span>
+        <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span>  <span class="c1"># [unique_identifier_column, data_value_column] to match regions with data</span>
+        <span class="n">key_on</span><span class="o">=</span><span class="s2">&quot;feature.properties.&quot;</span> <span class="o">+</span> <span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="c1"># Key to match regions in the GeoDataFrame with those in geo_data</span>
+        <span class="n">legend_name</span><span class="o">=</span><span class="n">legend</span><span class="p">,</span>  <span class="c1"># Description of the data being visualized</span>
+        <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span>  <span class="c1"># Value ranges for choropleth colors</span>
+        <span class="n">fill_color</span><span class="o">=</span><span class="n">palette</span><span class="p">,</span>  <span class="c1"># Color scheme for the choropleth</span>
+        <span class="n">fill_opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>  <span class="c1"># Transparency level of the filled regions</span>
+        <span class="n">line_opacity</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>  <span class="c1"># Transparency level of the borders between regions</span>
+        <span class="n">smooth_factor</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># Level of smoothing applied to the edges of regions</span>
+        <span class="n">highlight</span><span class="o">=</span><span class="n">highlight</span><span class="p">,</span>  <span class="c1"># Enable or disable highlighting of regions on hover</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">geojson</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+
+    <span class="c1"># Add a tooltip to display the attribute values for each region when hovered over</span>
+    <span class="n">folium</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">GeoJsonTooltip</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">choropleth</span><span class="p">)</span>
+
+    <span class="c1"># Return 0 to indicate successful addition of the choropleth layer to the map</span>
+    <span class="k">return</span> <span class="mi">0</span></div>
+
+
+
+<div class="viewcode-block" id="choropleth">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.karta.choropleth">[docs]</a>
+<span class="k">def</span> <span class="nf">choropleth</span><span class="p">(</span>
+    <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">columns</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">bins</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">legend</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">palette</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;YlOrRd&quot;</span><span class="p">,</span> <span class="n">highlight</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">folium</span><span class="o">.</span><span class="n">Map</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a choropleth map using the given GeoDataFrame and specified parameters.</span>
+
+<span class="sd">    This function generates a Folium choropleth map layer by visualizing the data from a GeoDataFrame using color gradients</span>
+<span class="sd">    to represent different data values across geographic areas.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gdf : geopandas.GeoDataFrame</span>
+<span class="sd">        The GeoDataFrame containing multipolygon geometries and data attributes to be visualized.</span>
+<span class="sd">    columns : list</span>
+<span class="sd">        A list of two elements:</span>
+<span class="sd">            - columns[0] : str</span>
+<span class="sd">                The column name in `gdf` that contains unique identifiers for each region.</span>
+<span class="sd">            - columns[1] : str</span>
+<span class="sd">                The column name in `gdf` containing the data values to be visualized.</span>
+<span class="sd">    bins : list</span>
+<span class="sd">        A list of numerical values defining the value intervals for the choropleth color categories.</span>
+<span class="sd">    legend : str</span>
+<span class="sd">        The title for the legend, which describes what is represented on the map.</span>
+<span class="sd">    palette : str, optional</span>
+<span class="sd">        The color palette to be used for the choropleth (default is &quot;YlOrRd&quot;).</span>
+<span class="sd">    highlight : bool, optional</span>
+<span class="sd">        A flag indicating whether regions should be highlighted when hovered over (default is True).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    folium.Map</span>
+<span class="sd">        The Folium map object containing the choropleth layer.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; choropleth(</span>
+<span class="sd">            gdf,</span>
+<span class="sd">            [&#39;region_id&#39;, &#39;population&#39;],</span>
+<span class="sd">            bins=[0, 100, 500, 1000, 5000],</span>
+<span class="sd">            legend=&quot;Population by Region&quot;,</span>
+<span class="sd">            palette=&quot;YlOrRd&quot;,</span>
+<span class="sd">            highlight=True</span>
+<span class="sd">        )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Extract the bounding coordinates of the GeoDataFrame</span>
+    <span class="n">minlon</span><span class="p">,</span> <span class="n">minlat</span><span class="p">,</span> <span class="n">maxlon</span><span class="p">,</span> <span class="n">maxlat</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">total_bounds</span>  <span class="c1"># Get the total bounds of the GeoDataFrame</span>
+    <span class="n">sw</span> <span class="o">=</span> <span class="p">[</span><span class="n">minlat</span><span class="p">,</span> <span class="n">minlon</span><span class="p">]</span>  <span class="c1"># South-west corner</span>
+    <span class="n">ne</span> <span class="o">=</span> <span class="p">[</span><span class="n">maxlat</span><span class="p">,</span> <span class="n">maxlon</span><span class="p">]</span>  <span class="c1"># North-east corner</span>
+    <span class="n">karta</span> <span class="o">=</span> <span class="n">base_map</span><span class="p">(</span><span class="n">sw</span><span class="p">,</span> <span class="n">ne</span><span class="p">)</span>  <span class="c1"># Create a base map using the bounding coordinates</span>
+
+    <span class="c1"># Create a choropleth layer based on the GeoDataFrame</span>
+    <span class="n">choropleth</span> <span class="o">=</span> <span class="n">folium</span><span class="o">.</span><span class="n">Choropleth</span><span class="p">(</span>
+        <span class="n">geo_data</span><span class="o">=</span><span class="n">gdf</span><span class="p">,</span>  <span class="c1"># The GeoDataFrame containing geographic data</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Choropleth&quot;</span><span class="p">,</span>  <span class="c1"># Name of the layer for display in layer control</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">gdf</span><span class="p">,</span>  <span class="c1"># The data source for values to be represented</span>
+        <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span>  <span class="c1"># [unique_identifier_column, data_value_column] for matching regions with data</span>
+        <span class="n">key_on</span><span class="o">=</span><span class="s2">&quot;feature.properties.&quot;</span> <span class="o">+</span> <span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="c1"># Key to match GeoDataFrame regions with the data</span>
+        <span class="n">legend_name</span><span class="o">=</span><span class="n">legend</span><span class="p">,</span>  <span class="c1"># Description of the data being visualized</span>
+        <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span>  <span class="c1"># Value ranges for choropleth colors</span>
+        <span class="n">fill_color</span><span class="o">=</span><span class="n">palette</span><span class="p">,</span>  <span class="c1"># Color scheme for the choropleth</span>
+        <span class="n">fill_opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>  <span class="c1"># Transparency level of filled regions</span>
+        <span class="n">line_opacity</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>  <span class="c1"># Transparency level of borders between regions</span>
+        <span class="n">smooth_factor</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># Level of smoothing applied to the edges of regions</span>
+        <span class="n">highlight</span><span class="o">=</span><span class="n">highlight</span><span class="p">,</span>  <span class="c1"># Enable or disable highlighting of regions on hover</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>  <span class="c1"># Add the choropleth layer to the map</span>
+
+    <span class="c1"># Add a tooltip to display the attribute values for each region when hovered over</span>
+    <span class="n">folium</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">GeoJsonTooltip</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">choropleth</span><span class="o">.</span><span class="n">geojson</span><span class="p">)</span>
+
+    <span class="c1"># Add layer control to the map</span>
+    <span class="n">folium</span><span class="o">.</span><span class="n">LayerControl</span><span class="p">(</span><span class="n">collapsed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">add_to</span><span class="p">(</span><span class="n">karta</span><span class="p">)</span>
+
+    <span class="c1"># Return the Folium map object containing the choropleth layer</span>
+    <span class="k">return</span> <span class="n">karta</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Abbas Kiasari.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
