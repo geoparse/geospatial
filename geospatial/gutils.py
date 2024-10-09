@@ -365,7 +365,7 @@ def flatten_3d(geom: gpd.GeoSeries) -> List[Union[Polygon, MultiPolygon]]:
     return new_geom
 
 
-def explode_line_to_points(row: gpd.GeoSeries) -> gpd.GeoDataFrame:
+def line_to_points(row: gpd.GeoSeries) -> gpd.GeoDataFrame:
     """
     Splits a LineString geometry into individual Point geometries while preserving original attributes.
 
@@ -388,7 +388,7 @@ def explode_line_to_points(row: gpd.GeoSeries) -> gpd.GeoDataFrame:
     Examples
     --------
     >>> line_gdf = gpd.GeoDataFrame({"geometry": [LineString([(0, 0), (1, 1), (2, 2)])]})
-    >>> point_gdf = split_linestring_to_points(line_gdf.iloc[0])
+    >>> point_gdf = line_to_points(line_gdf.iloc[0])
     >>> print(point_gdf)
        geometry
     0  POINT (0 0)
