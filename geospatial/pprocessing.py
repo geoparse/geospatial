@@ -1,8 +1,8 @@
 from typing import Callable
 
 import pandas as pd
-import tqdm
 from multiprocess import Pool, cpu_count
+from tqdm import tqdm
 
 
 def parallelize(function: Callable[[pd.DataFrame], pd.DataFrame], df: pd.DataFrame) -> pd.DataFrame:
@@ -67,6 +67,6 @@ def parallelize(function: Callable[[pd.DataFrame], pd.DataFrame], df: pd.DataFra
 
     # Create a multiprocessing pool and apply the function to each chunk in parallel
     with Pool(ncores) as pool:
-        df = pd.concat(tqdm.tqdm(pool.imap(function, chunks), total=ncores))
+        df = pd.concat(tqdm(pool.imap(function, chunks), total=ncores))
         # df = pd.concat(pool.map(function, chunks))
     return df
