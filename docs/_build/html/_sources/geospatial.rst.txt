@@ -4,6 +4,14 @@ geospatial package
 Submodules
 ----------
 
+geospatial.gindex module
+------------------------
+
+.. automodule:: geospatial.gindex
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 geospatial.gutils module
 ----------------------------
 
@@ -32,14 +40,6 @@ geospatial.pprocessing module
 -----------------------------
 
 .. automodule:: geospatial.pprocessing
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-geospatial.sindex module
-------------------------
-
-.. automodule:: geospatial.sindex
    :members:
    :undoc-members:
    :show-inheritance:

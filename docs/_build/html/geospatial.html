@@ -44,6 +44,16 @@
               <div class="local-toc"><ul>
 <li><a class="reference internal" href="#">geospatial package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-geospatial.gindex">geospatial.gindex module</a><ul>
+<li><a class="reference internal" href="#geospatial.gindex.cell_to_geom"><code class="docutils literal notranslate"><span class="pre">cell_to_geom()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.gindex.compact_cells"><code class="docutils literal notranslate"><span class="pre">compact_cells()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.gindex.geom_to_cell"><code class="docutils literal notranslate"><span class="pre">geom_to_cell()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.gindex.geom_to_cell_parallel"><code class="docutils literal notranslate"><span class="pre">geom_to_cell_parallel()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.gindex.geom_to_cell_parallel_2"><code class="docutils literal notranslate"><span class="pre">geom_to_cell_parallel_2()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.gindex.h3_stats"><code class="docutils literal notranslate"><span class="pre">h3_stats()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.gindex.uncompact_s2"><code class="docutils literal notranslate"><span class="pre">uncompact_s2()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-geospatial.gutils">geospatial.gutils module</a><ul>
 <li><a class="reference internal" href="#geospatial.gutils.explode_line_to_points"><code class="docutils literal notranslate"><span class="pre">explode_line_to_points()</span></code></a></li>
 <li><a class="reference internal" href="#geospatial.gutils.find_proj"><code class="docutils literal notranslate"><span class="pre">find_proj()</span></code></a></li>
@@ -78,16 +88,6 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#geospatial-pprocessing-module">geospatial.pprocessing module</a></li>
-<li><a class="reference internal" href="#module-geospatial.sindex">geospatial.sindex module</a><ul>
-<li><a class="reference internal" href="#geospatial.sindex.cell_to_geom"><code class="docutils literal notranslate"><span class="pre">cell_to_geom()</span></code></a></li>
-<li><a class="reference internal" href="#geospatial.sindex.compact_cells"><code class="docutils literal notranslate"><span class="pre">compact_cells()</span></code></a></li>
-<li><a class="reference internal" href="#geospatial.sindex.geom_to_cell"><code class="docutils literal notranslate"><span class="pre">geom_to_cell()</span></code></a></li>
-<li><a class="reference internal" href="#geospatial.sindex.geom_to_cell_parallel"><code class="docutils literal notranslate"><span class="pre">geom_to_cell_parallel()</span></code></a></li>
-<li><a class="reference internal" href="#geospatial.sindex.geom_to_cell_parallel_2"><code class="docutils literal notranslate"><span class="pre">geom_to_cell_parallel_2()</span></code></a></li>
-<li><a class="reference internal" href="#geospatial.sindex.h3_stats"><code class="docutils literal notranslate"><span class="pre">h3_stats()</span></code></a></li>
-<li><a class="reference internal" href="#geospatial.sindex.uncompact_s2"><code class="docutils literal notranslate"><span class="pre">uncompact_s2()</span></code></a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#module-geospatial">Module contents</a></li>
 </ul>
 </li>
@@ -121,6 +121,246 @@
 <h1>geospatial package<a class="headerlink" href="#geospatial-package" title="Link to this heading"></a></h1>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-geospatial.gindex">
+<span id="geospatial-gindex-module"></span><h2>geospatial.gindex module<a class="headerlink" href="#module-geospatial.gindex" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.gindex.cell_to_geom">
+<span class="sig-prename descclassname"><span class="pre">geospatial.gindex.</span></span><span class="sig-name descname"><span class="pre">cell_to_geom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cells</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="_modules/geospatial/gindex.html#cell_to_geom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.gindex.cell_to_geom" title="Link to this definition"></a></dt>
+<dd><p>Converts a list of spatial cells to their corresponding geometries and resolution levels.</p>
+<p>The function takes a list of spatial cells (e.g., Geohash, H3, or S2) and converts each cell
+into a geometry object (Polygon) based on the specified cell type. It also calculates the resolution
+level for each cell.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cells</strong> (<em>list</em>) – A list of spatial cells represented as strings. Each cell corresponds to a spatial area
+in a specific grid system (e.g., Geohash, H3, or S2).</p></li>
+<li><p><strong>cell_type</strong> (<em>str</em>) – The type of spatial cell system used. Accepted values are:
+- “geohash” : Geohash spatial indexing system.
+- “h3”      : H3 hexagonal spatial indexing system.
+- “s2”      : S2 spherical spatial indexing system.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A tuple containing:
+- <cite>res</cite> : list of int</p>
+<blockquote>
+<div><p>A list of resolution levels corresponding to each cell in the input.</p>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt><cite>geoms</cite><span class="classifier">list of shapely.geometry.Polygon</span></dt><dd><p>A list of Polygon geometries representing the spatial boundaries of the input cells.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <cite>cell_type</cite> is not one of “geohash”, “h3”, or “s2”.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.gindex.compact_cells">
+<span class="sig-prename descclassname"><span class="pre">geospatial.gindex.</span></span><span class="sig-name descname"><span class="pre">compact_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cells</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/geospatial/gindex.html#compact_cells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.gindex.compact_cells" title="Link to this definition"></a></dt>
+<dd><p>Compacts a list of spatial cells (e.g., Geohash, S2, or H3) by merging adjacent cells into parent cells.</p>
+<p>The function takes a list of spatial cells and compacts them into larger cells if possible, reducing the total number
+of cells by merging adjacent cells into their parent cell at a coarser resolution. The compaction process differs based
+on the specified <cite>cell_type</cite> and its respective hierarchy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cells</strong> (<em>list</em>) – A list of spatial cells represented as strings. Each cell corresponds to a spatial area in a specific grid system
+(e.g., Geohash, H3, or S2).</p></li>
+<li><p><strong>cell_type</strong> (<em>str</em>) – The type of spatial cell system used. Accepted values are:
+- “geohash” : Geohash spatial indexing system.
+- “h3”      : H3 hexagonal spatial indexing system.
+- “s2”      : S2 spherical spatial indexing system.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of compacted spatial cells. Each cell is represented as a string and is at the coarsest resolution possible
+based on the input cells.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <cite>cell_type</cite> is not one of “geohash”, “h3”, or “s2”.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>For <cite>h3</cite>, the function uses the built-in <cite>h3.compact()</cite> method.</p></li>
+<li><p>For <cite>s2</cite>, the compaction merges cells up to their parent cells by considering the S2 hierarchy.</p></li>
+<li><p>For <cite>geohash</cite>, cells are merged based on shared prefixes.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.gindex.geom_to_cell">
+<span class="sig-prename descclassname"><span class="pre">geospatial.gindex.</span></span><span class="sig-name descname"><span class="pre">geom_to_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">BaseGeometry</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/geospatial/gindex.html#geom_to_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.gindex.geom_to_cell" title="Link to this definition"></a></dt>
+<dd><p>Converts a list of geometries into a set of unique spatial cells based on the specified cell type and resolution.</p>
+<p>This function takes a list of Shapely geometries (e.g., Polygon, MultiPolygon) and converts them into spatial cells
+using one of the supported cell systems: Geohash, S2, or H3. The resulting cells are returned as a list of unique
+cell IDs. If <cite>dump</cite> is set to True, the cells are saved to a file instead of being returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geoms</strong> (<em>list</em><em> of </em><em>shapely.geometry.base.BaseGeometry</em>) – A list of Shapely geometry objects (Polygon or MultiPolygon).</p></li>
+<li><p><strong>cell_type</strong> (<em>str</em>) – The type of spatial cell system to use. Supported values are “geohash”, “s2”, or “h3”.</p></li>
+<li><p><strong>res</strong> (<em>int</em>) – The resolution level for the spatial cells. The resolution parameter determines the granularity of the cells.</p></li>
+<li><p><strong>dump</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the cells are saved to a file on the desktop in a folder named after <cite>cell_type</cite>.
+If False, the function returns a list of cell IDs. Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If <cite>dump</cite> is False, a list of unique cell IDs is returned.
+If <cite>dump</cite> is True, None is returned after saving the cells to a file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of str or None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <cite>cell_type</cite> is not one of the supported values (“geohash”, “s2”, “h3”).</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">MultiPolygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">geometries</span> <span class="o">=</span> <span class="p">[</span><span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span> <span class="n">MultiPolygon</span><span class="p">([</span><span class="o">...</span><span class="p">])]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Convert geometries to H3 cells at resolution 9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h3_cells</span> <span class="o">=</span> <span class="n">geom_to_cell</span><span class="p">(</span><span class="n">geometries</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="s2">&quot;h3&quot;</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.gindex.geom_to_cell_parallel">
+<span class="sig-prename descclassname"><span class="pre">geospatial.gindex.</span></span><span class="sig-name descname"><span class="pre">geom_to_cell_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compact</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geospatial/gindex.html#geom_to_cell_parallel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.gindex.geom_to_cell_parallel" title="Link to this definition"></a></dt>
+<dd><p>Performs a parallelised conversion of geometries in a GeoDataFrame to cell identifiers of a specified type
+(e.g., Geohash, S2, or H3), optionally compacting the result to reduce the number of cells.</p>
+<p>This function first divides the bounding box of the input GeoDataFrame into smaller grid cells, then calculates
+the intersection between these grid cells and the input geometries. The resulting geometries are processed in
+parallel to generate cell identifiers according to the specified <cite>cell_type</cite> and <cite>res</cite> (resolution). The result
+can be compacted to reduce the number of cells.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mdf</strong> (<em>gpd.GeoDataFrame</em>) – A GeoDataFrame containing geometries that need to be converted to cell identifiers.</p></li>
+<li><p><strong>cell_type</strong> (<em>str</em>) – The type of cell identifier to use. Options are:
+- “geohash”: Converts geometries to Geohash identifiers.
+- “s2”: Converts geometries to S2 cell tokens.
+- “h3”: Converts geometries to H3 cell tokens.</p></li>
+<li><p><strong>res</strong> (<em>int</em>) – The resolution or precision level of the cell identifiers. Higher values indicate finer precision.</p></li>
+<li><p><strong>compact</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default=False</em>) – If True, compact the resulting cells to reduce their number. This is typically applicable for S2 and H3 cells.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default=False</em>) – If True, print timing and progress information to the console.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>A list of cell identifiers as strings, corresponding to the geometries in the input GeoDataFrame.</p></li>
+<li><p>The total number of unique cell identifiers.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[List[str], int]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If an invalid <cite>cell_type</cite> is provided. Supported types are “geohash”, “s2”, and “h3”.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Assuming `mdf` is a GeoDataFrame with geometries:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cells</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">geom_to_cell_parallel</span><span class="p">(</span><span class="n">mdf</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="s2">&quot;s2&quot;</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">compact</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2"> cells: </span><span class="si">{</span><span class="n">cells</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.gindex.geom_to_cell_parallel_2">
+<span class="sig-prename descclassname"><span class="pre">geospatial.gindex.</span></span><span class="sig-name descname"><span class="pre">geom_to_cell_parallel_2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compact</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geospatial/gindex.html#geom_to_cell_parallel_2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.gindex.geom_to_cell_parallel_2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.gindex.h3_stats">
+<span class="sig-prename descclassname"><span class="pre">geospatial.gindex.</span></span><span class="sig-name descname"><span class="pre">h3_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BaseGeometry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h3_res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compact</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geospatial/gindex.html#h3_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.gindex.h3_stats" title="Link to this definition"></a></dt>
+<dd><p>Computes H3 cell statistics for a given geometry at a specified resolution.</p>
+<p>This function takes a Shapely geometry object and computes the number of H3 cells covering the geometry at a
+specified resolution. It also calculates the area of each H3 cell at the given resolution. Optionally, the function
+can return the compacted set of H3 cells, reducing the number of cells required to represent the geometry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geom</strong> (<em>shapely.geometry.base.BaseGeometry</em>) – A Shapely geometry object (e.g., Polygon or MultiPolygon) representing the area of interest.</p></li>
+<li><p><strong>h3_res</strong> (<em>int</em>) – The H3 resolution level for generating spatial cells. The resolution level controls the granularity of the cells.</p></li>
+<li><p><strong>compact</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the function returns a compacted set of H3 cells, reducing the number of cells needed to represent the geometry.
+Default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing:
+- int: Number of H3 cells covering the given geometry.
+- float: Area of each H3 cell at the specified resolution, in square kilometers.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">geom</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="mf">122.0</span><span class="p">,</span> <span class="mf">37.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">122.0</span><span class="p">,</span> <span class="mf">38.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">121.0</span><span class="p">,</span> <span class="mf">38.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">121.0</span><span class="p">,</span> <span class="mf">37.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">122.0</span><span class="p">,</span> <span class="mf">37.0</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h3_stats</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">h3_res</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">compact</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">(512, 0.001)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>The function utilizes the H3 library for generating and compacting H3 cells and for calculating cell area. The area
+is always returned in square kilometers (“km^2”).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.gindex.uncompact_s2">
+<span class="sig-prename descclassname"><span class="pre">geospatial.gindex.</span></span><span class="sig-name descname"><span class="pre">uncompact_s2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compact_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/geospatial/gindex.html#uncompact_s2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.gindex.uncompact_s2" title="Link to this definition"></a></dt>
+<dd><p>Expands a list of compacted S2 cell tokens to a specified resolution level.</p>
+<p>This function takes a list of compact S2 cell tokens and generates their child cells up to the desired
+resolution level. It is used to “uncompact” S2 cells that have been previously compacted, producing a
+more detailed representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>compact_tokens</strong> (<em>list</em>) – A list of S2 cell tokens represented as strings. These tokens are at a coarser resolution level and
+will be expanded into their child cells.</p></li>
+<li><p><strong>level</strong> (<em>int</em>) – The target S2 cell resolution level to which the input tokens should be expanded. The resolution level
+determines the size of the child cells. A higher level corresponds to finer granularity (smaller cells).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of S2 cell tokens represented as strings. Each token corresponds to a child cell of the input
+compact tokens, expanded to the specified resolution level.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the provided <cite>level</cite> is less than or equal to the resolution level of the input <cite>compact_tokens</cite>.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">compact_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;89c2847c&quot;</span><span class="p">,</span> <span class="s2">&quot;89c2847d&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uncompact_s2</span><span class="p">(</span><span class="n">compact_tokens</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="go">[&quot;89c2847c1&quot;, &quot;89c2847c2&quot;, &quot;89c2847c3&quot;, ..., &quot;89c2847d1&quot;, &quot;89c2847d2&quot;, ...]</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </section>
 <section id="module-geospatial.gutils">
 <span id="geospatial-gutils-module"></span><h2>geospatial.gutils module<a class="headerlink" href="#module-geospatial.gutils" title="Link to this heading"></a></h2>
@@ -1097,246 +1337,6 @@ the “geometry” attribute to contain the coordinates.</p></li>
 </section>
 <section id="geospatial-pprocessing-module">
 <h2>geospatial.pprocessing module<a class="headerlink" href="#geospatial-pprocessing-module" title="Link to this heading"></a></h2>
-</section>
-<section id="module-geospatial.sindex">
-<span id="geospatial-sindex-module"></span><h2>geospatial.sindex module<a class="headerlink" href="#module-geospatial.sindex" title="Link to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="geospatial.sindex.cell_to_geom">
-<span class="sig-prename descclassname"><span class="pre">geospatial.sindex.</span></span><span class="sig-name descname"><span class="pre">cell_to_geom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cells</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="_modules/geospatial/sindex.html#cell_to_geom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.sindex.cell_to_geom" title="Link to this definition"></a></dt>
-<dd><p>Converts a list of spatial cells to their corresponding geometries and resolution levels.</p>
-<p>The function takes a list of spatial cells (e.g., Geohash, H3, or S2) and converts each cell
-into a geometry object (Polygon) based on the specified cell type. It also calculates the resolution
-level for each cell.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cells</strong> (<em>list</em>) – A list of spatial cells represented as strings. Each cell corresponds to a spatial area
-in a specific grid system (e.g., Geohash, H3, or S2).</p></li>
-<li><p><strong>cell_type</strong> (<em>str</em>) – The type of spatial cell system used. Accepted values are:
-- “geohash” : Geohash spatial indexing system.
-- “h3”      : H3 hexagonal spatial indexing system.
-- “s2”      : S2 spherical spatial indexing system.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><p>A tuple containing:
-- <cite>res</cite> : list of int</p>
-<blockquote>
-<div><p>A list of resolution levels corresponding to each cell in the input.</p>
-</div></blockquote>
-<ul class="simple">
-<li><dl class="simple">
-<dt><cite>geoms</cite><span class="classifier">list of shapely.geometry.Polygon</span></dt><dd><p>A list of Polygon geometries representing the spatial boundaries of the input cells.</p>
-</dd>
-</dl>
-</li>
-</ul>
-</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>tuple</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If <cite>cell_type</cite> is not one of “geohash”, “h3”, or “s2”.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geospatial.sindex.compact_cells">
-<span class="sig-prename descclassname"><span class="pre">geospatial.sindex.</span></span><span class="sig-name descname"><span class="pre">compact_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cells</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/geospatial/sindex.html#compact_cells"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.sindex.compact_cells" title="Link to this definition"></a></dt>
-<dd><p>Compacts a list of spatial cells (e.g., Geohash, S2, or H3) by merging adjacent cells into parent cells.</p>
-<p>The function takes a list of spatial cells and compacts them into larger cells if possible, reducing the total number
-of cells by merging adjacent cells into their parent cell at a coarser resolution. The compaction process differs based
-on the specified <cite>cell_type</cite> and its respective hierarchy.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cells</strong> (<em>list</em>) – A list of spatial cells represented as strings. Each cell corresponds to a spatial area in a specific grid system
-(e.g., Geohash, H3, or S2).</p></li>
-<li><p><strong>cell_type</strong> (<em>str</em>) – The type of spatial cell system used. Accepted values are:
-- “geohash” : Geohash spatial indexing system.
-- “h3”      : H3 hexagonal spatial indexing system.
-- “s2”      : S2 spherical spatial indexing system.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A list of compacted spatial cells. Each cell is represented as a string and is at the coarsest resolution possible
-based on the input cells.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If <cite>cell_type</cite> is not one of “geohash”, “h3”, or “s2”.</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<ul class="simple">
-<li><p>For <cite>h3</cite>, the function uses the built-in <cite>h3.compact()</cite> method.</p></li>
-<li><p>For <cite>s2</cite>, the compaction merges cells up to their parent cells by considering the S2 hierarchy.</p></li>
-<li><p>For <cite>geohash</cite>, cells are merged based on shared prefixes.</p></li>
-</ul>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geospatial.sindex.geom_to_cell">
-<span class="sig-prename descclassname"><span class="pre">geospatial.sindex.</span></span><span class="sig-name descname"><span class="pre">geom_to_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">BaseGeometry</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/geospatial/sindex.html#geom_to_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.sindex.geom_to_cell" title="Link to this definition"></a></dt>
-<dd><p>Converts a list of geometries into a set of unique spatial cells based on the specified cell type and resolution.</p>
-<p>This function takes a list of Shapely geometries (e.g., Polygon, MultiPolygon) and converts them into spatial cells
-using one of the supported cell systems: Geohash, S2, or H3. The resulting cells are returned as a list of unique
-cell IDs. If <cite>dump</cite> is set to True, the cells are saved to a file instead of being returned.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>geoms</strong> (<em>list</em><em> of </em><em>shapely.geometry.base.BaseGeometry</em>) – A list of Shapely geometry objects (Polygon or MultiPolygon).</p></li>
-<li><p><strong>cell_type</strong> (<em>str</em>) – The type of spatial cell system to use. Supported values are “geohash”, “s2”, or “h3”.</p></li>
-<li><p><strong>res</strong> (<em>int</em>) – The resolution level for the spatial cells. The resolution parameter determines the granularity of the cells.</p></li>
-<li><p><strong>dump</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the cells are saved to a file on the desktop in a folder named after <cite>cell_type</cite>.
-If False, the function returns a list of cell IDs. Default is False.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>If <cite>dump</cite> is False, a list of unique cell IDs is returned.
-If <cite>dump</cite> is True, None is returned after saving the cells to a file.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list of str or None</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If <cite>cell_type</cite> is not one of the supported values (“geohash”, “s2”, “h3”).</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">MultiPolygon</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">geometries</span> <span class="o">=</span> <span class="p">[</span><span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span> <span class="n">MultiPolygon</span><span class="p">([</span><span class="o">...</span><span class="p">])]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Convert geometries to H3 cells at resolution 9</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">h3_cells</span> <span class="o">=</span> <span class="n">geom_to_cell</span><span class="p">(</span><span class="n">geometries</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="s2">&quot;h3&quot;</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geospatial.sindex.geom_to_cell_parallel">
-<span class="sig-prename descclassname"><span class="pre">geospatial.sindex.</span></span><span class="sig-name descname"><span class="pre">geom_to_cell_parallel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compact</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geospatial/sindex.html#geom_to_cell_parallel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.sindex.geom_to_cell_parallel" title="Link to this definition"></a></dt>
-<dd><p>Performs a parallelised conversion of geometries in a GeoDataFrame to cell identifiers of a specified type
-(e.g., Geohash, S2, or H3), optionally compacting the result to reduce the number of cells.</p>
-<p>This function first divides the bounding box of the input GeoDataFrame into smaller grid cells, then calculates
-the intersection between these grid cells and the input geometries. The resulting geometries are processed in
-parallel to generate cell identifiers according to the specified <cite>cell_type</cite> and <cite>res</cite> (resolution). The result
-can be compacted to reduce the number of cells.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>mdf</strong> (<em>gpd.GeoDataFrame</em>) – A GeoDataFrame containing geometries that need to be converted to cell identifiers.</p></li>
-<li><p><strong>cell_type</strong> (<em>str</em>) – The type of cell identifier to use. Options are:
-- “geohash”: Converts geometries to Geohash identifiers.
-- “s2”: Converts geometries to S2 cell tokens.
-- “h3”: Converts geometries to H3 cell tokens.</p></li>
-<li><p><strong>res</strong> (<em>int</em>) – The resolution or precision level of the cell identifiers. Higher values indicate finer precision.</p></li>
-<li><p><strong>compact</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default=False</em>) – If True, compact the resulting cells to reduce their number. This is typically applicable for S2 and H3 cells.</p></li>
-<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default=False</em>) – If True, print timing and progress information to the console.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p>A list of cell identifiers as strings, corresponding to the geometries in the input GeoDataFrame.</p></li>
-<li><p>The total number of unique cell identifiers.</p></li>
-</ul>
-</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Tuple[List[str], int]</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If an invalid <cite>cell_type</cite> is provided. Supported types are “geohash”, “s2”, and “h3”.</p>
-</dd>
-</dl>
-<p class="rubric">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Assuming `mdf` is a GeoDataFrame with geometries:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cells</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">geom_to_cell_parallel</span><span class="p">(</span><span class="n">mdf</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="s2">&quot;s2&quot;</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">compact</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2"> cells: </span><span class="si">{</span><span class="n">cells</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geospatial.sindex.geom_to_cell_parallel_2">
-<span class="sig-prename descclassname"><span class="pre">geospatial.sindex.</span></span><span class="sig-name descname"><span class="pre">geom_to_cell_parallel_2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compact</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geospatial/sindex.html#geom_to_cell_parallel_2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.sindex.geom_to_cell_parallel_2" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geospatial.sindex.h3_stats">
-<span class="sig-prename descclassname"><span class="pre">geospatial.sindex.</span></span><span class="sig-name descname"><span class="pre">h3_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BaseGeometry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h3_res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compact</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geospatial/sindex.html#h3_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.sindex.h3_stats" title="Link to this definition"></a></dt>
-<dd><p>Computes H3 cell statistics for a given geometry at a specified resolution.</p>
-<p>This function takes a Shapely geometry object and computes the number of H3 cells covering the geometry at a
-specified resolution. It also calculates the area of each H3 cell at the given resolution. Optionally, the function
-can return the compacted set of H3 cells, reducing the number of cells required to represent the geometry.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>geom</strong> (<em>shapely.geometry.base.BaseGeometry</em>) – A Shapely geometry object (e.g., Polygon or MultiPolygon) representing the area of interest.</p></li>
-<li><p><strong>h3_res</strong> (<em>int</em>) – The H3 resolution level for generating spatial cells. The resolution level controls the granularity of the cells.</p></li>
-<li><p><strong>compact</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the function returns a compacted set of H3 cells, reducing the number of cells needed to represent the geometry.
-Default is False.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing:
-- int: Number of H3 cells covering the given geometry.
-- float: Area of each H3 cell at the specified resolution, in square kilometers.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>tuple</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">geom</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">([(</span><span class="o">-</span><span class="mf">122.0</span><span class="p">,</span> <span class="mf">37.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">122.0</span><span class="p">,</span> <span class="mf">38.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">121.0</span><span class="p">,</span> <span class="mf">38.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">121.0</span><span class="p">,</span> <span class="mf">37.0</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">122.0</span><span class="p">,</span> <span class="mf">37.0</span><span class="p">)])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">h3_stats</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">h3_res</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">compact</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="go">(512, 0.001)</span>
-</pre></div>
-</div>
-<p class="rubric">Notes</p>
-<p>The function utilizes the H3 library for generating and compacting H3 cells and for calculating cell area. The area
-is always returned in square kilometers (“km^2”).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geospatial.sindex.uncompact_s2">
-<span class="sig-prename descclassname"><span class="pre">geospatial.sindex.</span></span><span class="sig-name descname"><span class="pre">uncompact_s2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compact_tokens</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/geospatial/sindex.html#uncompact_s2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.sindex.uncompact_s2" title="Link to this definition"></a></dt>
-<dd><p>Expands a list of compacted S2 cell tokens to a specified resolution level.</p>
-<p>This function takes a list of compact S2 cell tokens and generates their child cells up to the desired
-resolution level. It is used to “uncompact” S2 cells that have been previously compacted, producing a
-more detailed representation.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>compact_tokens</strong> (<em>list</em>) – A list of S2 cell tokens represented as strings. These tokens are at a coarser resolution level and
-will be expanded into their child cells.</p></li>
-<li><p><strong>level</strong> (<em>int</em>) – The target S2 cell resolution level to which the input tokens should be expanded. The resolution level
-determines the size of the child cells. A higher level corresponds to finer granularity (smaller cells).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A list of S2 cell tokens represented as strings. Each token corresponds to a child cell of the input
-compact tokens, expanded to the specified resolution level.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If the provided <cite>level</cite> is less than or equal to the resolution level of the input <cite>compact_tokens</cite>.</p>
-</dd>
-</dl>
-<p class="rubric">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">compact_tokens</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;89c2847c&quot;</span><span class="p">,</span> <span class="s2">&quot;89c2847d&quot;</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">uncompact_s2</span><span class="p">(</span><span class="n">compact_tokens</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="go">[&quot;89c2847c1&quot;, &quot;89c2847c2&quot;, &quot;89c2847c3&quot;, ..., &quot;89c2847d1&quot;, &quot;89c2847d2&quot;, ...]</span>
-</pre></div>
-</div>
-</dd></dl>
-
 </section>
 <section id="module-geospatial">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-geospatial" title="Link to this heading"></a></h2>
