@@ -451,9 +451,9 @@
 
 
 
-<div class="viewcode-block" id="explode_line_to_points">
-<a class="viewcode-back" href="../../geospatial.html#geospatial.gutils.explode_line_to_points">[docs]</a>
-<span class="k">def</span> <span class="nf">explode_line_to_points</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="line_to_points">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.gutils.line_to_points">[docs]</a>
+<span class="k">def</span> <span class="nf">line_to_points</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Splits a LineString geometry into individual Point geometries while preserving original attributes.</span>
 
@@ -476,7 +476,7 @@
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; line_gdf = gpd.GeoDataFrame({&quot;geometry&quot;: [LineString([(0, 0), (1, 1), (2, 2)])]})</span>
-<span class="sd">    &gt;&gt;&gt; point_gdf = split_linestring_to_points(line_gdf.iloc[0])</span>
+<span class="sd">    &gt;&gt;&gt; point_gdf = line_to_points(line_gdf.iloc[0])</span>
 <span class="sd">    &gt;&gt;&gt; print(point_gdf)</span>
 <span class="sd">       geometry</span>
 <span class="sd">    0  POINT (0 0)</span>

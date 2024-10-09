@@ -55,13 +55,13 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#module-geospatial.gutils">geospatial.gutils module</a><ul>
-<li><a class="reference internal" href="#geospatial.gutils.explode_line_to_points"><code class="docutils literal notranslate"><span class="pre">explode_line_to_points()</span></code></a></li>
 <li><a class="reference internal" href="#geospatial.gutils.find_proj"><code class="docutils literal notranslate"><span class="pre">find_proj()</span></code></a></li>
 <li><a class="reference internal" href="#geospatial.gutils.flatten_3d"><code class="docutils literal notranslate"><span class="pre">flatten_3d()</span></code></a></li>
 <li><a class="reference internal" href="#geospatial.gutils.geocoding_google"><code class="docutils literal notranslate"><span class="pre">geocoding_google()</span></code></a></li>
 <li><a class="reference internal" href="#geospatial.gutils.geom_stats"><code class="docutils literal notranslate"><span class="pre">geom_stats()</span></code></a></li>
 <li><a class="reference internal" href="#geospatial.gutils.haversine"><code class="docutils literal notranslate"><span class="pre">haversine()</span></code></a></li>
 <li><a class="reference internal" href="#geospatial.gutils.intersection"><code class="docutils literal notranslate"><span class="pre">intersection()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.gutils.line_to_points"><code class="docutils literal notranslate"><span class="pre">line_to_points()</span></code></a></li>
 <li><a class="reference internal" href="#geospatial.gutils.poverlay"><code class="docutils literal notranslate"><span class="pre">poverlay()</span></code></a></li>
 <li><a class="reference internal" href="#geospatial.gutils.quick_intersection"><code class="docutils literal notranslate"><span class="pre">quick_intersection()</span></code></a></li>
 <li><a class="reference internal" href="#geospatial.gutils.reverse_geocoding_google"><code class="docutils literal notranslate"><span class="pre">reverse_geocoding_google()</span></code></a></li>
@@ -365,38 +365,6 @@ compact tokens, expanded to the specified resolution level.</p>
 <section id="module-geospatial.gutils">
 <span id="geospatial-gutils-module"></span><h2>geospatial.gutils module<a class="headerlink" href="#module-geospatial.gutils" title="Link to this heading"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="geospatial.gutils.explode_line_to_points">
-<span class="sig-prename descclassname"><span class="pre">geospatial.gutils.</span></span><span class="sig-name descname"><span class="pre">explode_line_to_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoSeries</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="_modules/geospatial/gutils.html#explode_line_to_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.gutils.explode_line_to_points" title="Link to this definition"></a></dt>
-<dd><p>Splits a LineString geometry into individual Point geometries while preserving original attributes.</p>
-<p>This function takes a GeoSeries representing a single row of a GeoDataFrame, extracts the coordinates
-from a LineString geometry, and creates a new GeoDataFrame with each Point as a separate row. All original
-attributes from the input row are preserved in the new GeoDataFrame.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>row</strong> (<em>gpd.GeoSeries</em>) – A GeoSeries representing a single row of a GeoDataFrame. It must include a ‘geometry’ column
-containing a LineString geometry.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A new GeoDataFrame where each row corresponds to a Point geometry derived from the coordinates of the LineString.
-All other columns from the original row are preserved.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>gpd.GeoDataFrame</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">line_gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)])]})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">point_gdf</span> <span class="o">=</span> <span class="n">split_linestring_to_points</span><span class="p">(</span><span class="n">line_gdf</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">point_gdf</span><span class="p">)</span>
-<span class="go">   geometry</span>
-<span class="go">0  POINT (0 0)</span>
-<span class="go">1  POINT (1 1)</span>
-<span class="go">2  POINT (2 2)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="geospatial.gutils.find_proj">
 <span class="sig-prename descclassname"><span class="pre">geospatial.gutils.</span></span><span class="sig-name descname"><span class="pre">find_proj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Point</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Polygon</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">MultiPolygon</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/geospatial/gutils.html#find_proj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.gutils.find_proj" title="Link to this definition"></a></dt>
 <dd><p>Determines the appropriate UTM zone projection for a given geometry.</p>
@@ -621,6 +589,38 @@ If <cite>poly_id</cite> is provided, the intersected GeoDataFrame will also incl
 <p class="rubric">Notes</p>
 <p>The function modifies <cite>gdf2</cite> in place by adding a <cite>counts</cite> column, which reflects the number of geometries
 in <cite>gdf1</cite> that intersect with each geometry in <cite>gdf2</cite>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geospatial.gutils.line_to_points">
+<span class="sig-prename descclassname"><span class="pre">geospatial.gutils.</span></span><span class="sig-name descname"><span class="pre">line_to_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoSeries</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="_modules/geospatial/gutils.html#line_to_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.gutils.line_to_points" title="Link to this definition"></a></dt>
+<dd><p>Splits a LineString geometry into individual Point geometries while preserving original attributes.</p>
+<p>This function takes a GeoSeries representing a single row of a GeoDataFrame, extracts the coordinates
+from a LineString geometry, and creates a new GeoDataFrame with each Point as a separate row. All original
+attributes from the input row are preserved in the new GeoDataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>row</strong> (<em>gpd.GeoSeries</em>) – A GeoSeries representing a single row of a GeoDataFrame. It must include a ‘geometry’ column
+containing a LineString geometry.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new GeoDataFrame where each row corresponds to a Point geometry derived from the coordinates of the LineString.
+All other columns from the original row are preserved.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">line_gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)])]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">point_gdf</span> <span class="o">=</span> <span class="n">line_to_points</span><span class="p">(</span><span class="n">line_gdf</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">point_gdf</span><span class="p">)</span>
+<span class="go">   geometry</span>
+<span class="go">0  POINT (0 0)</span>
+<span class="go">1  POINT (1 1)</span>
+<span class="go">2  POINT (2 2)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
