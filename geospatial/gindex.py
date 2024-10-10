@@ -14,7 +14,6 @@ from s2 import s2
 from shapely.geometry import Polygon
 from shapely.geometry.base import BaseGeometry
 
-# pd.options.mode.chained_assignment = None  # default='warn'
 
 
 # s2.polyfill() function covers the hole in a polygon too (which is not correct).

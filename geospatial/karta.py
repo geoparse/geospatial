@@ -9,7 +9,6 @@ from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 
 from geospatial import gindex, gutils, osm
 
-# pd.options.mode.chained_assignment = None  # default='warn'
 
 
 def color_map(col: int or str, head: int = None, tail: int = None) -> str:
