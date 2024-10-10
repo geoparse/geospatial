@@ -14,8 +14,6 @@ from s2 import s2
 from shapely.geometry import Polygon
 from shapely.geometry.base import BaseGeometry
 
-
-
 # s2.polyfill() function covers the hole in a polygon too (which is not correct).
 # geom_to_cell_parallel() function splits a polygon to smaller polygons without holes
 

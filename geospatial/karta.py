@@ -10,7 +10,6 @@ from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 from geospatial import gindex, gutils, osm
 
 
-
 def color_map(col: int or str, head: int = None, tail: int = None) -> str:
     """
     Generates a consistent color based on the input column value by mapping it to a predefined color palette.
