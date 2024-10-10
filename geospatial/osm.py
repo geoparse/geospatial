@@ -5,7 +5,6 @@ import requests
 from shapely.geometry import LineString, Polygon
 
 
-
 def way_to_geom(way_id: int, url: str):
     """
     Converts an OSM way ID into a Shapely Polygon or LineString object.
