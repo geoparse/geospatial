@@ -34,8 +34,13 @@ A Python library for geospatial data processing, map matching, and OSM-based geo
    ```bash
    git clone https://github.com/geoparse/geospatial.git
 
+# gutils.py - Geospatial Utility Functions
 
-# Geospatial Indexing Tools
+gutils.py is a collection of geospatial utility functions designed to simplify common geospatial data processing tasks. These functions provide capabilities for geometry statistics, coordinate transformations, spatial intersections, geocoding, and more.
+
+
+
+# gindex.py - Geospatial Indexing Tools
 
 This repository provides a set of tools for efficient geospatial indexing and spatial analysis using widely adopted spatial indexing systems such as **Geohash**, **S2**, and **H3**. These tools allow converting geometries into spatial cells, compacting/uncompacting cells, and performing various spatial operations, optimized for performance with parallel processing capabilities.
 
