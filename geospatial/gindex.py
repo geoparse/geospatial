@@ -1,23 +1,3 @@
-import collections
-import json
-from datetime import datetime
-from math import sqrt
-from multiprocessing import Pool, cpu_count
-from time import time
-from typing import List, Tuple, Union
-
-import geopandas as gpd
-import numpy as np
-from h3 import h3
-from polygon_geohasher.polygon_geohasher import geohash_to_polygon, polygon_to_geohashes
-from s2 import s2
-from shapely.geometry import Polygon
-from shapely.geometry.base import BaseGeometry
-
-# s2.polyfill() function covers the hole in a polygon too (which is not correct).
-# geom_to_cell_parallel() function splits a polygon to smaller polygons without holes
-
-
 def geom_to_cell(geoms: List[BaseGeometry], cell_type: str, res: int, dump: bool = False) -> Union[List[str], None]:
     """
     Converts a list of geometries into a set of unique spatial cells based on the specified cell type and resolution.
@@ -43,52 +23,7 @@ def geom_to_cell(geoms: List[BaseGeometry], cell_type: str, res: int, dump: bool
     list of str or None
         If `dump` is False, a list of unique cell IDs is returned.
         If `dump` is True, None is returned after saving the cells to a file.
-
-    Raises
-    ------
-    ValueError
-        If `cell_type` is not one of the supported values ("geohash", "s2", "h3").
-
-    Examples
-    --------
-    >>> from shapely.geometry import Polygon, MultiPolygon
-    >>> geometries = [Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), MultiPolygon([...])]
-    >>> # Convert geometries to H3 cells at resolution 9
-    >>> h3_cells = geom_to_cell(geometries, cell_type="h3", res=9)
     """
-    polys = []
-    for geom in geoms:
-        if geom.geom_type == "Polygon":
-            polys += [geom.__geo_interface__]
-        elif geom.geom_type == "MultiPolygon":  # If MultiPolygon, extract each Polygon separately
-            polys += [g.__geo_interface__ for g in geom.geoms]
-
-    cells = []
-    if cell_type == "geohash":
-        cells = set()
-        for geom in geoms:
-            cells |= polygon_to_geohashes(geom, precision=res, inner=False)  # Collect Geohashes for each Polygon
-        cells = list(cells)
-
-    elif cell_type == "s2":
-        for poly in polys:
-            cells += s2.polyfill(poly, res, geo_json_conformant=True, with_id=True)  # Use S2 to fill each Polygon
-        cells = [item["id"] for item in cells]  # Keep only the cell IDs
-        cells = list(set(cells))  # Remove duplicates
-
-    elif cell_type == "h3":
-        for poly in polys:
-            cells += h3.polyfill(poly, res, geo_json_conformant=True)  # Use H3 to fill each Polygon
-
-    else:
-        raise ValueError(f"Unsupported cell type: {cell_type}. Choose 'geohash', 's2', or 'h3'.")
-
-    if dump:
-        with open(f"~/Desktop/{cell_type}/{datetime.now()}.txt", "w") as json_file:
-            json.dump(cells, json_file)
-        return None
-    else:
-        return cells
 
 
 def geom_to_cell_parallel(
@@ -129,146 +64,7 @@ def geom_to_cell_parallel(
         - A list of cell identifiers as strings, corresponding to the geometries in the input GeoDataFrame.
         - The total number of unique cell identifiers.
 
-    Raises
-    ------
-    ValueError
-        If an invalid `cell_type` is provided. Supported types are "geohash", "s2", and "h3".
-
-    Example
-    -------
-    >>> # Assuming `mdf` is a GeoDataFrame with geometries:
-    >>> cells, count = geom_to_cell_parallel(mdf, cell_type="s2", res=10, compact=True, verbose=True)
-    >>> print(f"Generated {count} cells: {cells}")
     """
-    if verbose:
-        print(datetime.now())
-        print("Slicing the bounding box of the GeoDataFrame ... ", end="")
-        start_time = time()
-
-    # Determine the number of slices and grid cells based on CPU cores
-    n_cores = cpu_count()
-    slices = 128 * n_cores
-
-    # Calculate the bounding box dimensions
-    minlon, minlat, maxlon, maxlat = mdf.total_bounds
-    dlon = maxlon - minlon
-    dlat = maxlat - minlat
-    ratio = dlon / dlat
-
-    # Calculate the number of grid cells in x and y directions
-    x_cells = round(sqrt(slices) * ratio)
-    y_cells = round(sqrt(slices) / ratio)
-
-    # Calculate step size for grid cells
-    steplon = dlon / x_cells
-    steplat = dlat / y_cells
-
-    # Create grid polygons based on bounding box slices
-    grid_polygons = []
-    for lat in np.arange(minlat, maxlat, steplat):
-        for lon in np.arange(minlon, maxlon, steplon):
-            llon, llat, ulon, ulat = (lon, lat, lon + steplon, lat + steplat)  # lower lat, upper lat
-            polygon = Polygon([(llon, llat), (ulon, llat), (ulon, ulat), (llon, ulat)])
-            grid_polygons.append(polygon)
-
-    gmdf = gpd.GeoDataFrame(geometry=grid_polygons, crs=mdf.crs)  # Create a GeoDataFrame with grid polygons
-
-    if verbose:
-        elapsed_time = round(time() - start_time)
-        print(f"{elapsed_time} seconds.   {slices} slices created.")
-        start_time = time()
-        print("Performing intersection between grid and input GeoDataFrame geometries ... ", end="")
-
-    # Perform intersection between input geometries and grid cells
-    gmdf = gpd.overlay(mdf, gmdf, how="intersection")  # grid mdf
-
-    if verbose:
-        elapsed_time = round(time() - start_time)
-        print(f"{elapsed_time} seconds.   {len(gmdf)} intersected slices.")
-        start_time = time()
-        print("Calculating cell identifiers in parallel ... ", end="")
-
-    # Shuffle geometries for even load distribution across chunks
-    gmdf = gmdf.sample(frac=1)
-    geom_chunks = np.array_split(list(gmdf.geometry), 4 * n_cores)
-    inputs = zip(geom_chunks, [cell_type] * 4 * n_cores, [res] * 4 * n_cores)
-
-    # Parallel processing to generate cells
-    with Pool(n_cores) as pool:
-        cells = pool.starmap(geom_to_cell, inputs)
-    cells = [item for sublist in cells for item in sublist]  # Flatten the list of cells
-
-    # Remove duplicates based on cell type
-    if cell_type in {"geohash", "s2"}:
-        if verbose:
-            elapsed_time = round(time() - start_time)
-            print(f"{elapsed_time} seconds. Removing duplicate cells ... ", end="")
-        cells = list(set(cells))  # Remove duplicate cells
-
-    cell_counts = len(cells)  # Total unique cell count
-
-    # Compact the cells if needed
-    if compact:
-        if verbose:
-            elapsed_time = round(time() - start_time)
-            print(f"{elapsed_time} seconds. Compacting cells ... ", end="")
-        cells = compact_cells(cells, cell_type)
-        if verbose:
-            elapsed_time = round(time() - start_time)
-            print(f"{elapsed_time} seconds.")
-
-    return cells, cell_counts
-
-
-def geom_to_cell_parallel_2(mdf, cell_type, res, compact=False, verbose=False, dump=True):
-    if verbose:
-        print(datetime.now())
-        print("Slicing the bbox of mdf ... ", end="")
-        start_time = time()
-    n_cores = cpu_count()
-    slices = 128 * n_cores
-
-    minlon, minlat, maxlon, maxlat = mdf.total_bounds
-    dlon = maxlon - minlon
-    dlat = maxlat - minlat
-    ratio = dlon / dlat
-
-    x_cells = round(sqrt(slices) * ratio)
-    y_cells = round(sqrt(slices) / ratio)
-
-    steplon = dlon / x_cells
-    steplat = dlat / y_cells
-
-    grid_polygons = []
-    for lat in np.arange(minlat, maxlat, steplat):  # Iterate over the rows and columns to create the grid
-        for lon in np.arange(minlon, maxlon, steplon):  # Calculate the coordinates of the current grid cell
-            llon, llat, ulon, ulat = (lon, lat, lon + steplon, lat + steplat)  # lower lat, upper lat
-            polygon = Polygon([(llon, llat), (ulon, llat), (ulon, ulat), (llon, ulat)])
-            grid_polygons.append(polygon)  # Add the polygon to the list
-    gmdf = gpd.GeoDataFrame(geometry=grid_polygons, crs=mdf.crs)  # Create a GeoDataFrame for the grid polygons
-
-    if verbose:
-        elapsed_time = round(time() - start_time)
-        print(f"{elapsed_time} seconds.   {slices} slices")
-        start_time = time()
-        print("Performing the intersection between the gridded bbox and mdf ... ", end="")
-    gmdf = gpd.overlay(mdf, gmdf, how="intersection")  # grid mdf
-
-    if verbose:
-        elapsed_time = round(time() - start_time)
-        print(f"{elapsed_time} seconds.   {len(gmdf)} slices")
-        start_time = time()
-        print("Calculating the cells for all geometries of the gridded mdf in parallel ... ", end="")
-    gmdf = gmdf.sample(
-        frac=1
-    )  # Shuffle the rows of gmdf to have a good balance of small (incomplete squares) and big (full squares) in all chunks
-    geom_chunks = np.array_split(list(gmdf.geometry), 4 * n_cores)
-    inputs = zip(geom_chunks, [cell_type] * 4 * n_cores, [res] * 4 * n_cores, [dump] * 4 * n_cores)
-
-    # Create a multiprocessing pool and apply the overlay function in parallel on each chunk
-    with Pool(n_cores) as pool:
-        pool.starmap(geom_to_cell, inputs)
-    return
 
 
 def cell_to_geom(cells: list, cell_type: str) -> tuple:
@@ -300,37 +96,7 @@ def cell_to_geom(cells: list, cell_type: str) -> tuple:
         - `geoms` : list of shapely.geometry.Polygon
             A list of Polygon geometries representing the spatial boundaries of the input cells.
 
-    Raises
-    ------
-    ValueError
-        If `cell_type` is not one of "geohash", "h3", or "s2".
     """
-    # Check for valid cell_type
-    if cell_type not in {"geohash", "h3", "s2"}:
-        raise ValueError(f"Invalid cell_type '{cell_type}'. Accepted values are: 'geohash', 'h3', 's2'.")
-
-    # Determine resolution level based on cell type
-    res = [
-        len(cell)
-        if cell_type == "geohash"
-        else cell[1]
-        if cell_type == "h3"
-        else s2.CellId.from_token(cell).level()  # cell = token
-        for cell in cells
-    ]
-
-    # Create geometry objects based on cell type
-    geoms = [
-        geohash_to_polygon(cell)
-        if cell_type == "geohash"
-        else Polygon(s2.s2_to_geo_boundary(cell, geo_json_conformant=True))
-        if cell_type == "s2"
-        else Polygon(h3.h3_to_geo_boundary(cell, geo_json=True))
-        for cell in cells
-    ]
-
-    return res, geoms
-
 
 def compact_cells(cells: list, cell_type: str) -> list:
     """
@@ -357,59 +123,7 @@ def compact_cells(cells: list, cell_type: str) -> list:
     list
         A list of compacted spatial cells. Each cell is represented as a string and is at the coarsest resolution possible
         based on the input cells.
-
-    Raises
-    ------
-    ValueError
-        If `cell_type` is not one of "geohash", "h3", or "s2".
-
-    Notes
-    -----
-    - For `h3`, the function uses the built-in `h3.compact()` method.
-    - For `s2`, the compaction merges cells up to their parent cells by considering the S2 hierarchy.
-    - For `geohash`, cells are merged based on shared prefixes.
     """
-    if cell_type == "h3":
-        return list(h3.compact(cells))
-    elif cell_type == "s2":
-        # Convert S2 cell IDs from tokens
-        cells = [s2.CellId.from_token(item) for item in cells]
-        res = cells[0].level()  # Assuming all S2 cells have the same resolution
-        num_children = 4
-    elif cell_type == "geohash":
-        res = len(cells[0])  # Resolution is based on the length of Geohash strings
-        num_children = 32
-    else:
-        raise ValueError(f"Invalid cell_type '{cell_type}'. Accepted values are: 'geohash', 'h3', 's2'.")
-
-    # Initialize list to store compacted cells
-    compact_cells = []
-    for i in range(res, 0, -1):
-        # Get parent cell IDs based on the type
-        parent_ids = [cell.parent() if cell_type == "s2" else cell[: i - 1] for cell in cells]
-        count_dict = collections.Counter(parent_ids)  # Count occurrences of each parent cell
-
-        # Get indices of parent cells with the required number of children
-        idx = [i for i, item in enumerate(parent_ids) if count_dict.get(item, 0) == num_children]
-
-        # Create a mask to exclude compacted cells
-        mask = [True] * len(cells)
-        for ix in idx:
-            mask[ix] = False
-        cells = [item for i, item in enumerate(cells) if mask[i]]
-
-        # Append compacted cells to the result
-        compact_cells += cells
-        cells = list(set([item for item in parent_ids if count_dict.get(item, 0) == num_children]))
-
-    # Include any remaining cells in the compacted list
-    compact_cells += cells
-
-    if cell_type == "geohash":
-        return compact_cells
-    else:  # Convert S2 cells back to tokens
-        return [item.to_token() for item in compact_cells]
-
 
 def uncompact_s2(compact_tokens: list, level: int) -> list:
     """
@@ -434,26 +148,7 @@ def uncompact_s2(compact_tokens: list, level: int) -> list:
     list
         A list of S2 cell tokens represented as strings. Each token corresponds to a child cell of the input
         compact tokens, expanded to the specified resolution level.
-
-    Raises
-    ------
-    ValueError
-        If the provided `level` is less than or equal to the resolution level of the input `compact_tokens`.
-
-    Example
-    -------
-    >>> compact_tokens = ["89c2847c", "89c2847d"]
-    >>> uncompact_s2(compact_tokens, level=10)
-    ["89c2847c1", "89c2847c2", "89c2847c3", ..., "89c2847d1", "89c2847d2", ...]
     """
-    uncompact_tokens = []
-    for token in compact_tokens:
-        cell_id = s2.CellId.from_token(token)  # Convert each token to an S2 CellId object
-        uncompact_tokens += list(cell_id.children(level))  # Generate child cells at the specified level
-    # Convert each CellId object back to a token and remove duplicates
-    uncompact_tokens = [item.to_token() for item in uncompact_tokens]
-    return list(set(uncompact_tokens))
-
 
 def h3_stats(geom: BaseGeometry, h3_res: int, compact: bool = False) -> Tuple[int, float]:
     """
@@ -479,21 +174,4 @@ def h3_stats(geom: BaseGeometry, h3_res: int, compact: bool = False) -> Tuple[in
         A tuple containing:
         - int: Number of H3 cells covering the given geometry.
         - float: Area of each H3 cell at the specified resolution, in square kilometers.
-
-    Examples
-    --------
-    >>> from shapely.geometry import Polygon
-    >>> geom = Polygon([(-122.0, 37.0), (-122.0, 38.0), (-121.0, 38.0), (-121.0, 37.0), (-122.0, 37.0)])
-    >>> h3_stats(geom, h3_res=9, compact=True)
-    (512, 0.001)
-
-    Notes
-    -----
-    The function utilizes the H3 library for generating and compacting H3 cells and for calculating cell area. The area
-    is always returned in square kilometers ("km^2").
     """
-    cells = geom_to_cell(geom, cell="h3", res=h3_res)
-    area = h3.hex_area(h3_res, unit="km^2")
-    if compact:
-        cells = h3.compact(cells)
-    return len(cells), area
