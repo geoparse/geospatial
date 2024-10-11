@@ -57,3 +57,15 @@ This repository provides a set of tools for efficient geospatial indexing and sp
 - **Geohash**: Divides the Earth's surface into a grid of hierarchical geohashes.
 - **S2**: A spherical geometry system that partitions the globe into hierarchical cells.
 - **H3**: A hexagonal grid system used for efficient spatial operations.
+
+# karta.py - Visualization Tools
+
+Karta means map in Swedish and `karta.py` module generates visual representations of spatial data to assist in analysis and interpretation.
+
+## Usage
+
+To use the functions in `karta.py`, you can import the module into your Python script or interactive environment. Here’s a brief example of how to get started:
+
+# Example of a visualisation
+result = some_function(parameters)  # Call the function with appropriate parameters
+
