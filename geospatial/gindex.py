@@ -15,10 +15,10 @@ from shapely.geometry import Polygon
 from shapely.geometry.base import BaseGeometry
 
 # s2.polyfill() function covers the hole in a polygon too (which is not correct).
-# geom_to_cell_parallel() function splits a polygon to smaller polygons without holes
+# poly_to_cell_parallel() function splits a polygon to smaller polygons without holes
 
 
-def geom_to_cell(geoms: List[BaseGeometry], cell_type: str, res: int, dump: bool = False) -> Union[List[str], None]:
+def poly_to_cell(geoms: List[BaseGeometry], cell_type: str, res: int, dump: bool = False) -> Union[List[str], None]:
     """
     Converts a list of geometries into a set of unique spatial cells based on the specified cell type and resolution.
 
@@ -54,7 +54,7 @@ def geom_to_cell(geoms: List[BaseGeometry], cell_type: str, res: int, dump: bool
     >>> from shapely.geometry import Polygon, MultiPolygon
     >>> geometries = [Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), MultiPolygon([...])]
     >>> # Convert geometries to H3 cells at resolution 9
-    >>> h3_cells = geom_to_cell(geometries, cell_type="h3", res=9)
+    >>> h3_cells = poly_to_cell(geometries, cell_type="h3", res=9)
     """
     polys = []
     for geom in geoms:
