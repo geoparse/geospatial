@@ -95,7 +95,7 @@ def poly_cell(
 
 
 def ppoly_cell(
-    mdf: gpd.GeoDataFrame, cell_type: str, res: int, compact: bool = False, verbose: bool = False
+    mdf: gpd.GeoDataFrame, cell_type: str, res: int, compact: bool = False, dump: bool = False, verbose: bool = False
 ) -> Tuple[List[str], int]:
     """
     Performs a parallelised conversion of geometries in a GeoDataFrame to cell identifiers of a specified type
@@ -196,40 +196,48 @@ def ppoly_cell(
     # Shuffle geometries for even load distribution across chunks
     gmdf = gmdf.sample(frac=1)
     geom_chunks = np.array_split(list(gmdf.geometry), 4 * n_cores)
-    inputs = zip(geom_chunks, [cell_type] * 4 * n_cores, [res] * 4 * n_cores)
+    inputs = zip(geom_chunks, [cell_type] * 4 * n_cores, [res] * 4 * n_cores, [dump] * 4 * n_cores)
 
     # Parallel processing to generate cells
-    with Pool(n_cores) as pool:
-        cells = pool.starmap(poly_cell, inputs)
-    cells = [item for sublist in cells for item in sublist]  # Flatten the list of cells
-
-    if verbose:
-        elapsed_time = round(time() - start_time)
-        print(f"{elapsed_time} seconds.")
-
-    # Remove duplicates based on cell type
-    if cell_type in {"geohash", "s2"}:
+    if dump:
+        with Pool(n_cores) as pool:
+            pool.starmap(poly_cell, inputs)
         if verbose:
-            print("Removing duplicate cells ... ", end="")
-            start_time = time()
-        cells = list(set(cells))  # Remove duplicate cells
+            elapsed_time = round(time() - start_time)
+            print(f"{elapsed_time} seconds.")
+        return
+    else:
+        with Pool(n_cores) as pool:
+            cells = pool.starmap(poly_cell, inputs)
+        cells = [item for sublist in cells for item in sublist]  # Flatten the list of cells
+
         if verbose:
             elapsed_time = round(time() - start_time)
             print(f"{elapsed_time} seconds.")
 
-    cell_counts = len(cells)  # Total unique cell count
+        # Remove duplicates based on cell type
+        if cell_type in {"geohash", "s2"}:
+            if verbose:
+                print("Removing duplicate cells ... ", end="")
+                start_time = time()
+            cells = list(set(cells))  # Remove duplicate cells
+            if verbose:
+                elapsed_time = round(time() - start_time)
+                print(f"{elapsed_time} seconds.")
 
-    # Compact the cells if needed
-    if compact:
-        if verbose:
-            print("Compacting cells ... ", end="")
-            start_time = time()
-        cells = compact_cells(cells, cell_type)
-        if verbose:
-            elapsed_time = round(time() - start_time)
-            print(f"{elapsed_time} seconds.")
+        cell_counts = len(cells)  # Total unique cell count
 
-    return cells, cell_counts
+        # Compact the cells if needed
+        if compact:
+            if verbose:
+                print("Compacting cells ... ", end="")
+                start_time = time()
+            cells = compact_cells(cells, cell_type)
+            if verbose:
+                elapsed_time = round(time() - start_time)
+                print(f"{elapsed_time} seconds.")
+
+        return cells, cell_counts
 
 
 def poly_cell_parallel_2(mdf, cell_type, res, compact=False, verbose=False, dump=True):
