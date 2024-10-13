@@ -142,7 +142,7 @@ def poly_to_cell_parallel(
     """
     if verbose:
         print(datetime.now())
-        print("Slicing the bounding box of the GeoDataFrame ... ", end="")
+        print("Slicing the bounding box of polygons ... ", end="")
         start_time = time()
 
     # Determine the number of slices and grid cells based on CPU cores
@@ -177,7 +177,7 @@ def poly_to_cell_parallel(
         elapsed_time = round(time() - start_time)
         print(f"{elapsed_time} seconds.   {slices} slices created.")
         start_time = time()
-        print("Performing intersection between grid and input GeoDataFrame geometries ... ", end="")
+        print("Performing intersection between grid and polygons ... ", end="")
 
     # Perform intersection between input geometries and grid cells
     gmdf = gpd.overlay(mdf, gmdf, how="intersection")  # grid mdf
@@ -186,7 +186,7 @@ def poly_to_cell_parallel(
         elapsed_time = round(time() - start_time)
         print(f"{elapsed_time} seconds.   {len(gmdf)} intersected slices.")
         start_time = time()
-        print("Calculating cell identifiers in parallel ... ", end="")
+        print("Calculating cell IDs in parallel ... ", end="")
 
     # Shuffle geometries for even load distribution across chunks
     gmdf = gmdf.sample(frac=1)
