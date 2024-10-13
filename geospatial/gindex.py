@@ -1,5 +1,6 @@
 import collections
 import json
+import os
 from datetime import datetime
 from math import sqrt
 from multiprocessing import Pool, cpu_count
@@ -86,7 +87,7 @@ def poly_cell(
         raise ValueError(f"Unsupported cell type: {cell_type}. Choose 'geohash', 's2', or 'h3'.")
 
     if dump:
-        with open(f"~/Desktop/{cell_type}/{datetime.now()}.txt", "w") as json_file:
+        with open(os.path.expanduser(f"~/Desktop/{cell_type}/{datetime.now()}.txt"), "w") as json_file:
             json.dump(cells, json_file)
         return None
     else:
