@@ -87,6 +87,8 @@ def poly_cell(
         raise ValueError(f"Unsupported cell type: {cell_type}. Choose 'geohash', 's2', or 'h3'.")
 
     if dump:
+        # Create the directories if they don't exist
+        os.makedirs(os.path.dirname(f"{dump}/{cell_type}/{res}"), exist_ok=True)
         with open(os.path.expanduser(f"{dump}/{cell_type}/{res}/{datetime.now()}.txt"), "w") as json_file:
             json.dump(cells, json_file)
         return None
