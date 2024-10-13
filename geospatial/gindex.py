@@ -15,7 +15,7 @@ from shapely.geometry import Polygon
 from shapely.geometry.base import BaseGeometry
 
 # s2.polyfill() function covers the hole in a polygon too (which is not correct).
-# poly_to_cell_parallel() function splits a polygon to smaller polygons without holes
+# ppoly_to_cell() function splits a polygon to smaller polygons without holes
 
 
 def poly_to_cell(geoms: List[BaseGeometry], cell_type: str, res: int, dump: bool = False) -> Union[List[str], None]:
@@ -91,7 +91,7 @@ def poly_to_cell(geoms: List[BaseGeometry], cell_type: str, res: int, dump: bool
         return cells
 
 
-def poly_to_cell_parallel(
+def ppoly_to_cell(
     mdf: gpd.GeoDataFrame, cell_type: str, res: int, compact: bool = False, verbose: bool = False
 ) -> Tuple[List[str], int]:
     """
@@ -137,12 +137,12 @@ def poly_to_cell_parallel(
     Example
     -------
     >>> # Assuming `mdf` is a GeoDataFrame with geometries:
-    >>> cells, count = poly_to_cell_parallel(mdf, cell_type="s2", res=10, compact=True, verbose=True)
+    >>> cells, count = ppoly_to_cell(mdf, cell_type="s2", res=10, compact=True, verbose=True)
     >>> print(f"Generated {count} cells: {cells}")
     """
     if verbose:
         print(datetime.now())
-        print("Slicing the bounding box of polygons ... ", end="")
+        print("\nSlicing the bounding box of polygons ... ", end="")
         start_time = time()
 
     # Determine the number of slices and grid cells based on CPU cores
