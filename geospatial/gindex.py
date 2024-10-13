@@ -19,9 +19,7 @@ from shapely.geometry.base import BaseGeometry
 # ppoly_cell() function splits a polygon to smaller polygons without holes
 
 
-def poly_cell(
-    geoms: List[Union[Polygon, MultiPolygon]], cell_type: str, res: int, dump: str = None
-) -> Union[List[str], None]:
+def poly_cell(geoms: List[Union[Polygon, MultiPolygon]], cell_type: str, res: int, dump: str = None) -> Union[List[str], None]:
     """
     Converts a list of geometries into a set of unique spatial cells based on the specified cell type and resolution.
 
