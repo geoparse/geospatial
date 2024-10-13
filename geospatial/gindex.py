@@ -15,10 +15,10 @@ from shapely.geometry import Polygon
 from shapely.geometry.base import BaseGeometry
 
 # s2.polyfill() function covers the hole in a polygon too (which is not correct).
-# ppoly_to_cell() function splits a polygon to smaller polygons without holes
+# ppoly_cell() function splits a polygon to smaller polygons without holes
 
 
-def poly_to_cell(geoms: List[BaseGeometry], cell_type: str, res: int, dump: bool = False) -> Union[List[str], None]:
+def poly_cell(geoms: List[Union[Polygon, MultiPolygon]], cell_type: str, res: int, dump: bool = False) -> Union[List[str], None]:
     """
     Converts a list of geometries into a set of unique spatial cells based on the specified cell type and resolution.
 
@@ -28,7 +28,7 @@ def poly_to_cell(geoms: List[BaseGeometry], cell_type: str, res: int, dump: bool
 
     Parameters
     ----------
-    geoms : list of shapely.geometry.base.BaseGeometry
+    geoms : list of shapely.geometry.Polygon or shapely.geometry.MultiPolygon
         A list of Shapely geometry objects (Polygon or MultiPolygon).
     cell_type : str
         The type of spatial cell system to use. Supported values are "geohash", "s2", or "h3".
@@ -54,7 +54,7 @@ def poly_to_cell(geoms: List[BaseGeometry], cell_type: str, res: int, dump: bool
     >>> from shapely.geometry import Polygon, MultiPolygon
     >>> geometries = [Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), MultiPolygon([...])]
     >>> # Convert geometries to H3 cells at resolution 9
-    >>> h3_cells = poly_to_cell(geometries, cell_type="h3", res=9)
+    >>> h3_cells = poly_cell(geometries, cell_type="h3", res=9)
     """
     polys = []
     for geom in geoms:
@@ -91,7 +91,7 @@ def poly_to_cell(geoms: List[BaseGeometry], cell_type: str, res: int, dump: bool
         return cells
 
 
-def ppoly_to_cell(
+def ppoly_cell(
     mdf: gpd.GeoDataFrame, cell_type: str, res: int, compact: bool = False, verbose: bool = False
 ) -> Tuple[List[str], int]:
     """
@@ -137,7 +137,7 @@ def ppoly_to_cell(
     Example
     -------
     >>> # Assuming `mdf` is a GeoDataFrame with geometries:
-    >>> cells, count = ppoly_to_cell(mdf, cell_type="s2", res=10, compact=True, verbose=True)
+    >>> cells, count = ppoly_cell(mdf, cell_type="s2", res=10, compact=True, verbose=True)
     >>> print(f"Generated {count} cells: {cells}")
     """
     if verbose:
@@ -197,7 +197,7 @@ def ppoly_to_cell(
 
     # Parallel processing to generate cells
     with Pool(n_cores) as pool:
-        cells = pool.starmap(poly_to_cell, inputs)
+        cells = pool.starmap(poly_cell, inputs)
     cells = [item for sublist in cells for item in sublist]  # Flatten the list of cells
 
     if verbose:
@@ -229,7 +229,7 @@ def ppoly_to_cell(
     return cells, cell_counts
 
 
-def poly_to_cell_parallel_2(mdf, cell_type, res, compact=False, verbose=False, dump=True):
+def poly_cell_parallel_2(mdf, cell_type, res, compact=False, verbose=False, dump=True):
     if verbose:
         print(datetime.now())
         print("Slicing the bbox of mdf ... ", end="")
@@ -276,7 +276,7 @@ def poly_to_cell_parallel_2(mdf, cell_type, res, compact=False, verbose=False, d
 
     # Create a multiprocessing pool and apply the overlay function in parallel on each chunk
     with Pool(n_cores) as pool:
-        pool.starmap(poly_to_cell, inputs)
+        pool.starmap(poly_cell, inputs)
     return
 
 
@@ -501,7 +501,7 @@ def h3_stats(geom: BaseGeometry, h3_res: int, compact: bool = False) -> Tuple[in
     The function utilizes the H3 library for generating and compacting H3 cells and for calculating cell area. The area
     is always returned in square kilometers ("km^2").
     """
-    cells = poly_to_cell(geom, cell="h3", res=h3_res)
+    cells = poly_cell(geom, cell="h3", res=h3_res)
     area = h3.hex_area(h3_res, unit="km^2")
     if compact:
         cells = h3.compact(cells)
