@@ -855,7 +855,7 @@ def plp(  # plp: points, lines, polygons
             cdf = gpd.GeoDataFrame({"geometry": [bb]}, crs="EPSG:4326")  # Create a bounding box GeoDataFrame
 
         # Convert geometries to geohash cells and their geometries
-        cells, _ = gindex.geom_to_cell_parallel(cdf, cell_type="geohash", res=geohash_res, compact=compact)
+        cells, _ = gindex.ppoly_to_cell(cdf, cell_type="geohash", res=geohash_res, compact=compact)
         res, geoms = gindex.cell_to_geom(cells, cell_type="geohash")
         cdf = gpd.GeoDataFrame({"id": cells, "res": res, "geometry": geoms}, crs="EPSG:4326")
 
@@ -881,7 +881,7 @@ def plp(  # plp: points, lines, polygons
             cdf = gpd.GeoDataFrame({"geometry": [bb]}, crs="EPSG:4326")  # cell df
 
         # Convert geometries to S2 cells and their geometries
-        cells, _ = gindex.geom_to_cell_parallel(cdf, cell_type="s2", res=s2_res, compact=compact)
+        cells, _ = gindex.ppoly_to_cell(cdf, cell_type="s2", res=s2_res, compact=compact)
         res, geoms = gindex.cell_to_geom(cells, cell_type="s2")
         cdf = gpd.GeoDataFrame({"id": cells, "res": res, "geometry": geoms}, crs="EPSG:4326")
 
@@ -907,7 +907,7 @@ def plp(  # plp: points, lines, polygons
             cdf = gpd.GeoDataFrame({"geometry": [bb]}, crs="EPSG:4326")  # cell df
 
         # Convert geometries to H3 cells and their geometries
-        cells, _ = gindex.geom_to_cell_parallel(cdf, cell_type="h3", res=h3_res, compact=compact)
+        cells, _ = gindex.ppoly_to_cell(cdf, cell_type="h3", res=h3_res, compact=compact)
         res, geoms = gindex.cell_to_geom(cells, cell_type="h3")
         cdf = gpd.GeoDataFrame({"id": cells, "res": res, "geometry": geoms}, crs="EPSG:4326")
 
