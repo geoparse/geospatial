@@ -20,7 +20,7 @@ from shapely.geometry.base import BaseGeometry
 
 
 def poly_cell(
-    geoms: List[Union[Polygon, MultiPolygon]], cell_type: str, res: int, dump: bool = False
+    geoms: List[Union[Polygon, MultiPolygon]], cell_type: str, res: int, dump: str = None
 ) -> Union[List[str], None]:
     """
     Converts a list of geometries into a set of unique spatial cells based on the specified cell type and resolution.
@@ -86,16 +86,19 @@ def poly_cell(
     else:
         raise ValueError(f"Unsupported cell type: {cell_type}. Choose 'geohash', 's2', or 'h3'.")
 
-    if dump:
-        with open(os.path.expanduser(f"~/Desktop/{cell_type}/{datetime.now()}.txt"), "w") as json_file:
+    if not dump:
+        return cells
+    else:
+        # Create the directories if they don't exist
+        cells_path = os.path.expanduser(f"{dump}/{cell_type}/{res}")
+        os.makedirs(cells_path, exist_ok=True)
+        with open(f"{cells_path}/{datetime.now()}.txt", "w") as json_file:
             json.dump(cells, json_file)
         return None
-    else:
-        return cells
 
 
 def ppoly_cell(
-    mdf: gpd.GeoDataFrame, cell_type: str, res: int, compact: bool = False, dump: bool = False, verbose: bool = False
+    mdf: gpd.GeoDataFrame, cell_type: str, res: int, compact: bool = False, dump: str = None, verbose: bool = False
 ) -> Tuple[List[str], int]:
     """
     Performs a parallelised conversion of geometries in a GeoDataFrame to cell identifiers of a specified type
