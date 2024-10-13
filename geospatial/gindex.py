@@ -280,7 +280,7 @@ def poly_cell_parallel_2(mdf, cell_type, res, compact=False, verbose=False, dump
     return
 
 
-def cell_to_geom(cells: list, cell_type: str) -> tuple:
+def cell_poly(cells: list, cell_type: str) -> tuple:
     """
     Converts a list of spatial cells to their corresponding geometries and resolution levels.
 
@@ -313,6 +313,25 @@ def cell_to_geom(cells: list, cell_type: str) -> tuple:
     ------
     ValueError
         If `cell_type` is not one of "geohash", "h3", or "s2".
+
+    Example
+    -------
+    >>> from shapely.geometry import Polygon
+    >>> cells = ['ezs42', 'ezs43']  # Geohash cells
+    >>> cell_type = 'geohash'
+    >>> res, geoms = cell_poly(cells, cell_type)
+    >>> print(res)
+    [5, 5]  # Resolution levels of the input cells
+    >>> print(geoms)
+    [<shapely.geometry.polygon.Polygon object at 0x...>, <shapely.geometry.polygon.Polygon object at 0x...>]
+    # Polygon geometries representing the spatial boundaries of the cells
+
+    Notes
+    -----
+    The function supports three spatial indexing systems:
+    - Geohash: Uses rectangular bounding boxes to represent cells.
+    - H3: Uses hexagonal grid cells.
+    - S2: Uses spherical grid cells.
     """
     # Check for valid cell_type
     if cell_type not in {"geohash", "h3", "s2"}:
