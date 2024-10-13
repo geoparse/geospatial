@@ -91,7 +91,7 @@ def poly_to_cell(geoms: List[BaseGeometry], cell_type: str, res: int, dump: bool
         return cells
 
 
-def geom_to_cell_parallel(
+def poly_to_cell_parallel(
     mdf: gpd.GeoDataFrame, cell_type: str, res: int, compact: bool = False, verbose: bool = False
 ) -> Tuple[List[str], int]:
     """
@@ -137,7 +137,7 @@ def geom_to_cell_parallel(
     Example
     -------
     >>> # Assuming `mdf` is a GeoDataFrame with geometries:
-    >>> cells, count = geom_to_cell_parallel(mdf, cell_type="s2", res=10, compact=True, verbose=True)
+    >>> cells, count = poly_to_cell_parallel(mdf, cell_type="s2", res=10, compact=True, verbose=True)
     >>> print(f"Generated {count} cells: {cells}")
     """
     if verbose:
@@ -195,7 +195,7 @@ def geom_to_cell_parallel(
 
     # Parallel processing to generate cells
     with Pool(n_cores) as pool:
-        cells = pool.starmap(geom_to_cell, inputs)
+        cells = pool.starmap(poly_to_cell, inputs)
     cells = [item for sublist in cells for item in sublist]  # Flatten the list of cells
 
     # Remove duplicates based on cell type
@@ -220,7 +220,7 @@ def geom_to_cell_parallel(
     return cells, cell_counts
 
 
-def geom_to_cell_parallel_2(mdf, cell_type, res, compact=False, verbose=False, dump=True):
+def poly_to_cell_parallel_2(mdf, cell_type, res, compact=False, verbose=False, dump=True):
     if verbose:
         print(datetime.now())
         print("Slicing the bbox of mdf ... ", end="")
@@ -267,7 +267,7 @@ def geom_to_cell_parallel_2(mdf, cell_type, res, compact=False, verbose=False, d
 
     # Create a multiprocessing pool and apply the overlay function in parallel on each chunk
     with Pool(n_cores) as pool:
-        pool.starmap(geom_to_cell, inputs)
+        pool.starmap(poly_to_cell, inputs)
     return
 
 
@@ -492,7 +492,7 @@ def h3_stats(geom: BaseGeometry, h3_res: int, compact: bool = False) -> Tuple[in
     The function utilizes the H3 library for generating and compacting H3 cells and for calculating cell area. The area
     is always returned in square kilometers ("km^2").
     """
-    cells = geom_to_cell(geom, cell="h3", res=h3_res)
+    cells = poly_to_cell(geom, cell="h3", res=h3_res)
     area = h3.hex_area(h3_res, unit="km^2")
     if compact:
         cells = h3.compact(cells)
