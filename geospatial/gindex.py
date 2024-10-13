@@ -176,8 +176,9 @@ def poly_to_cell_parallel(
     if verbose:
         elapsed_time = round(time() - start_time)
         print(f"{elapsed_time} seconds.   {slices} slices created.")
-        start_time = time()
+
         print("Performing intersection between grid and polygons ... ", end="")
+        start_time = time()
 
     # Perform intersection between input geometries and grid cells
     gmdf = gpd.overlay(mdf, gmdf, how="intersection")  # grid mdf
@@ -185,8 +186,9 @@ def poly_to_cell_parallel(
     if verbose:
         elapsed_time = round(time() - start_time)
         print(f"{elapsed_time} seconds.   {len(gmdf)} intersected slices.")
-        start_time = time()
+
         print("Calculating cell IDs in parallel ... ", end="")
+        start_time = time()
 
     # Shuffle geometries for even load distribution across chunks
     gmdf = gmdf.sample(frac=1)
@@ -198,20 +200,27 @@ def poly_to_cell_parallel(
         cells = pool.starmap(poly_to_cell, inputs)
     cells = [item for sublist in cells for item in sublist]  # Flatten the list of cells
 
+    if verbose:
+        elapsed_time = round(time() - start_time)
+        print(f"{elapsed_time} seconds.")
+
     # Remove duplicates based on cell type
     if cell_type in {"geohash", "s2"}:
         if verbose:
-            elapsed_time = round(time() - start_time)
-            print(f"{elapsed_time} seconds. Removing duplicate cells ... ", end="")
+            print("Removing duplicate cells ... ", end="")
+            start_time = time()
         cells = list(set(cells))  # Remove duplicate cells
+        if verbose:
+            elapsed_time = round(time() - start_time)
+            print(f"{elapsed_time} seconds.")
 
     cell_counts = len(cells)  # Total unique cell count
 
     # Compact the cells if needed
     if compact:
         if verbose:
-            elapsed_time = round(time() - start_time)
-            print(f"{elapsed_time} seconds. Compacting cells ... ", end="")
+            print("Compacting cells ... ", end="")
+            start_time = time()
         cells = compact_cells(cells, cell_type)
         if verbose:
             elapsed_time = round(time() - start_time)
