@@ -11,14 +11,16 @@ import numpy as np
 from h3 import h3
 from polygon_geohasher.polygon_geohasher import geohash_to_polygon, polygon_to_geohashes
 from s2 import s2
-from shapely.geometry import Polygon
+from shapely.geometry import MultiPolygon, Polygon
 from shapely.geometry.base import BaseGeometry
 
 # s2.polyfill() function covers the hole in a polygon too (which is not correct).
 # ppoly_cell() function splits a polygon to smaller polygons without holes
 
 
-def poly_cell(geoms: List[Union[Polygon, MultiPolygon]], cell_type: str, res: int, dump: bool = False) -> Union[List[str], None]:
+def poly_cell(
+    geoms: List[Union[Polygon, MultiPolygon]], cell_type: str, res: int, dump: bool = False
+) -> Union[List[str], None]:
     """
     Converts a list of geometries into a set of unique spatial cells based on the specified cell type and resolution.
 
@@ -317,8 +319,8 @@ def cell_poly(cells: list, cell_type: str) -> tuple:
     Example
     -------
     >>> from shapely.geometry import Polygon
-    >>> cells = ['ezs42', 'ezs43']  # Geohash cells
-    >>> cell_type = 'geohash'
+    >>> cells = ["ezs42", "ezs43"]  # Geohash cells
+    >>> cell_type = "geohash"
     >>> res, geoms = cell_poly(cells, cell_type)
     >>> print(res)
     [5, 5]  # Resolution levels of the input cells
