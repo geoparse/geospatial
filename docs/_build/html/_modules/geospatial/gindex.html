@@ -68,6 +68,7 @@
   <h1>Source code for geospatial.gindex</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sqrt</span>
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Pool</span><span class="p">,</span> <span class="n">cpu_count</span>
@@ -79,16 +80,16 @@
 <span class="kn">from</span> <span class="nn">h3</span> <span class="kn">import</span> <span class="n">h3</span>
 <span class="kn">from</span> <span class="nn">polygon_geohasher.polygon_geohasher</span> <span class="kn">import</span> <span class="n">geohash_to_polygon</span><span class="p">,</span> <span class="n">polygon_to_geohashes</span>
 <span class="kn">from</span> <span class="nn">s2</span> <span class="kn">import</span> <span class="n">s2</span>
-<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">MultiPolygon</span><span class="p">,</span> <span class="n">Polygon</span>
 <span class="kn">from</span> <span class="nn">shapely.geometry.base</span> <span class="kn">import</span> <span class="n">BaseGeometry</span>
 
 <span class="c1"># s2.polyfill() function covers the hole in a polygon too (which is not correct).</span>
-<span class="c1"># ppoly_to_cell() function splits a polygon to smaller polygons without holes</span>
+<span class="c1"># ppoly_cell() function splits a polygon to smaller polygons without holes</span>
 
 
-<div class="viewcode-block" id="poly_to_cell">
-<a class="viewcode-back" href="../../geospatial.html#geospatial.gindex.poly_to_cell">[docs]</a>
-<span class="k">def</span> <span class="nf">poly_to_cell</span><span class="p">(</span><span class="n">geoms</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseGeometry</span><span class="p">],</span> <span class="n">cell_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dump</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]:</span>
+<div class="viewcode-block" id="poly_cell">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.gindex.poly_cell">[docs]</a>
+<span class="k">def</span> <span class="nf">poly_cell</span><span class="p">(</span><span class="n">geoms</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Polygon</span><span class="p">,</span> <span class="n">MultiPolygon</span><span class="p">]],</span> <span class="n">cell_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dump</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a list of geometries into a set of unique spatial cells based on the specified cell type and resolution.</span>
 
@@ -98,7 +99,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    geoms : list of shapely.geometry.base.BaseGeometry</span>
+<span class="sd">    geoms : list of shapely.geometry.Polygon or shapely.geometry.MultiPolygon</span>
 <span class="sd">        A list of Shapely geometry objects (Polygon or MultiPolygon).</span>
 <span class="sd">    cell_type : str</span>
 <span class="sd">        The type of spatial cell system to use. Supported values are &quot;geohash&quot;, &quot;s2&quot;, or &quot;h3&quot;.</span>
@@ -124,7 +125,7 @@
 <span class="sd">    &gt;&gt;&gt; from shapely.geometry import Polygon, MultiPolygon</span>
 <span class="sd">    &gt;&gt;&gt; geometries = [Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), MultiPolygon([...])]</span>
 <span class="sd">    &gt;&gt;&gt; # Convert geometries to H3 cells at resolution 9</span>
-<span class="sd">    &gt;&gt;&gt; h3_cells = poly_to_cell(geometries, cell_type=&quot;h3&quot;, res=9)</span>
+<span class="sd">    &gt;&gt;&gt; h3_cells = poly_cell(geometries, cell_type=&quot;h3&quot;, res=9)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">polys</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">geom</span> <span class="ow">in</span> <span class="n">geoms</span><span class="p">:</span>
@@ -153,19 +154,22 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported cell type: </span><span class="si">{</span><span class="n">cell_type</span><span class="si">}</span><span class="s2">. Choose &#39;geohash&#39;, &#39;s2&#39;, or &#39;h3&#39;.&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">dump</span><span class="p">:</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;~/Desktop/</span><span class="si">{</span><span class="n">cell_type</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="si">}</span><span class="s2">.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
-            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="n">json_file</span><span class="p">)</span>
-        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">dump</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cells</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">cells</span></div>
+        <span class="c1"># Create the directories if they don&#39;t exist</span>
+        <span class="n">cells_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dump</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">cell_type</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">res</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">cells_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cells_path</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="si">}</span><span class="s2">.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="n">json_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
 
 
 
-<div class="viewcode-block" id="ppoly_to_cell">
-<a class="viewcode-back" href="../../geospatial.html#geospatial.gindex.ppoly_to_cell">[docs]</a>
-<span class="k">def</span> <span class="nf">ppoly_to_cell</span><span class="p">(</span>
-    <span class="n">mdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">cell_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">compact</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<div class="viewcode-block" id="ppoly_cell">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.gindex.ppoly_cell">[docs]</a>
+<span class="k">def</span> <span class="nf">ppoly_cell</span><span class="p">(</span>
+    <span class="n">mdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">cell_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">compact</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">dump</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Performs a parallelised conversion of geometries in a GeoDataFrame to cell identifiers of a specified type</span>
@@ -210,7 +214,7 @@
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
 <span class="sd">    &gt;&gt;&gt; # Assuming `mdf` is a GeoDataFrame with geometries:</span>
-<span class="sd">    &gt;&gt;&gt; cells, count = ppoly_to_cell(mdf, cell_type=&quot;s2&quot;, res=10, compact=True, verbose=True)</span>
+<span class="sd">    &gt;&gt;&gt; cells, count = ppoly_cell(mdf, cell_type=&quot;s2&quot;, res=10, compact=True, verbose=True)</span>
 <span class="sd">    &gt;&gt;&gt; print(f&quot;Generated {count} cells: {cells}&quot;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
@@ -266,100 +270,54 @@
     <span class="c1"># Shuffle geometries for even load distribution across chunks</span>
     <span class="n">gmdf</span> <span class="o">=</span> <span class="n">gmdf</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">geom_chunks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">gmdf</span><span class="o">.</span><span class="n">geometry</span><span class="p">),</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">n_cores</span><span class="p">)</span>
-    <span class="n">inputs</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">geom_chunks</span><span class="p">,</span> <span class="p">[</span><span class="n">cell_type</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">n_cores</span><span class="p">,</span> <span class="p">[</span><span class="n">res</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">n_cores</span><span class="p">)</span>
-
-    <span class="c1"># Parallel processing to generate cells</span>
-    <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="n">n_cores</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
-        <span class="n">cells</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">poly_to_cell</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
-    <span class="n">cells</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">cells</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>  <span class="c1"># Flatten the list of cells</span>
-
-    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="n">elapsed_time</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elapsed_time</span><span class="si">}</span><span class="s2"> seconds.&quot;</span><span class="p">)</span>
-
-    <span class="c1"># Remove duplicates based on cell type</span>
-    <span class="k">if</span> <span class="n">cell_type</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;geohash&quot;</span><span class="p">,</span> <span class="s2">&quot;s2&quot;</span><span class="p">}:</span>
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Removing duplicate cells ... &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-            <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-        <span class="n">cells</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cells</span><span class="p">))</span>  <span class="c1"># Remove duplicate cells</span>
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="n">elapsed_time</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elapsed_time</span><span class="si">}</span><span class="s2"> seconds.&quot;</span><span class="p">)</span>
-
-    <span class="n">cell_counts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span>  <span class="c1"># Total unique cell count</span>
-
-    <span class="c1"># Compact the cells if needed</span>
-    <span class="k">if</span> <span class="n">compact</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Compacting cells ... &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-            <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-        <span class="n">cells</span> <span class="o">=</span> <span class="n">compact_cells</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="n">cell_type</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="n">elapsed_time</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elapsed_time</span><span class="si">}</span><span class="s2"> seconds.&quot;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">cells</span><span class="p">,</span> <span class="n">cell_counts</span></div>
-
-
-
-<div class="viewcode-block" id="poly_to_cell_parallel_2">
-<a class="viewcode-back" href="../../geospatial.html#geospatial.gindex.poly_to_cell_parallel_2">[docs]</a>
-<span class="k">def</span> <span class="nf">poly_to_cell_parallel_2</span><span class="p">(</span><span class="n">mdf</span><span class="p">,</span> <span class="n">cell_type</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">compact</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dump</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Slicing the bbox of mdf ... &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-    <span class="n">n_cores</span> <span class="o">=</span> <span class="n">cpu_count</span><span class="p">()</span>
-    <span class="n">slices</span> <span class="o">=</span> <span class="mi">128</span> <span class="o">*</span> <span class="n">n_cores</span>
-
-    <span class="n">minlon</span><span class="p">,</span> <span class="n">minlat</span><span class="p">,</span> <span class="n">maxlon</span><span class="p">,</span> <span class="n">maxlat</span> <span class="o">=</span> <span class="n">mdf</span><span class="o">.</span><span class="n">total_bounds</span>
-    <span class="n">dlon</span> <span class="o">=</span> <span class="n">maxlon</span> <span class="o">-</span> <span class="n">minlon</span>
-    <span class="n">dlat</span> <span class="o">=</span> <span class="n">maxlat</span> <span class="o">-</span> <span class="n">minlat</span>
-    <span class="n">ratio</span> <span class="o">=</span> <span class="n">dlon</span> <span class="o">/</span> <span class="n">dlat</span>
-
-    <span class="n">x_cells</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">slices</span><span class="p">)</span> <span class="o">*</span> <span class="n">ratio</span><span class="p">)</span>
-    <span class="n">y_cells</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">slices</span><span class="p">)</span> <span class="o">/</span> <span class="n">ratio</span><span class="p">)</span>
-
-    <span class="n">steplon</span> <span class="o">=</span> <span class="n">dlon</span> <span class="o">/</span> <span class="n">x_cells</span>
-    <span class="n">steplat</span> <span class="o">=</span> <span class="n">dlat</span> <span class="o">/</span> <span class="n">y_cells</span>
-
-    <span class="n">grid_polygons</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">lat</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">minlat</span><span class="p">,</span> <span class="n">maxlat</span><span class="p">,</span> <span class="n">steplat</span><span class="p">):</span>  <span class="c1"># Iterate over the rows and columns to create the grid</span>
-        <span class="k">for</span> <span class="n">lon</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">minlon</span><span class="p">,</span> <span class="n">maxlon</span><span class="p">,</span> <span class="n">steplon</span><span class="p">):</span>  <span class="c1"># Calculate the coordinates of the current grid cell</span>
-            <span class="n">llon</span><span class="p">,</span> <span class="n">llat</span><span class="p">,</span> <span class="n">ulon</span><span class="p">,</span> <span class="n">ulat</span> <span class="o">=</span> <span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="o">+</span> <span class="n">steplon</span><span class="p">,</span> <span class="n">lat</span> <span class="o">+</span> <span class="n">steplat</span><span class="p">)</span>  <span class="c1"># lower lat, upper lat</span>
-            <span class="n">polygon</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">([(</span><span class="n">llon</span><span class="p">,</span> <span class="n">llat</span><span class="p">),</span> <span class="p">(</span><span class="n">ulon</span><span class="p">,</span> <span class="n">llat</span><span class="p">),</span> <span class="p">(</span><span class="n">ulon</span><span class="p">,</span> <span class="n">ulat</span><span class="p">),</span> <span class="p">(</span><span class="n">llon</span><span class="p">,</span> <span class="n">ulat</span><span class="p">)])</span>
-            <span class="n">grid_polygons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">polygon</span><span class="p">)</span>  <span class="c1"># Add the polygon to the list</span>
-    <span class="n">gmdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">grid_polygons</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">mdf</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>  <span class="c1"># Create a GeoDataFrame for the grid polygons</span>
-
-    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="n">elapsed_time</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elapsed_time</span><span class="si">}</span><span class="s2"> seconds.   </span><span class="si">{</span><span class="n">slices</span><span class="si">}</span><span class="s2"> slices&quot;</span><span class="p">)</span>
-        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Performing the intersection between the gridded bbox and mdf ... &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="n">gmdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">overlay</span><span class="p">(</span><span class="n">mdf</span><span class="p">,</span> <span class="n">gmdf</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;intersection&quot;</span><span class="p">)</span>  <span class="c1"># grid mdf</span>
-
-    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="n">elapsed_time</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elapsed_time</span><span class="si">}</span><span class="s2"> seconds.   </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">gmdf</span><span class="p">)</span><span class="si">}</span><span class="s2"> slices&quot;</span><span class="p">)</span>
-        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Calculating the cells for all geometries of the gridded mdf in parallel ... &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="n">gmdf</span> <span class="o">=</span> <span class="n">gmdf</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
-        <span class="n">frac</span><span class="o">=</span><span class="mi">1</span>
-    <span class="p">)</span>  <span class="c1"># Shuffle the rows of gmdf to have a good balance of small (incomplete squares) and big (full squares) in all chunks</span>
-    <span class="n">geom_chunks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">gmdf</span><span class="o">.</span><span class="n">geometry</span><span class="p">),</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">n_cores</span><span class="p">)</span>
     <span class="n">inputs</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">geom_chunks</span><span class="p">,</span> <span class="p">[</span><span class="n">cell_type</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">n_cores</span><span class="p">,</span> <span class="p">[</span><span class="n">res</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">n_cores</span><span class="p">,</span> <span class="p">[</span><span class="n">dump</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">n_cores</span><span class="p">)</span>
 
-    <span class="c1"># Create a multiprocessing pool and apply the overlay function in parallel on each chunk</span>
-    <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="n">n_cores</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
-        <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">poly_to_cell</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
-    <span class="k">return</span></div>
+    <span class="c1"># Parallel processing to generate cells</span>
+    <span class="k">if</span> <span class="n">dump</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="n">n_cores</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+            <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">poly_cell</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="n">elapsed_time</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elapsed_time</span><span class="si">}</span><span class="s2"> seconds.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="n">n_cores</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+            <span class="n">cells</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">poly_cell</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+        <span class="n">cells</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">cells</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>  <span class="c1"># Flatten the list of cells</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="n">elapsed_time</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elapsed_time</span><span class="si">}</span><span class="s2"> seconds.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Remove duplicates based on cell type</span>
+        <span class="k">if</span> <span class="n">cell_type</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;geohash&quot;</span><span class="p">,</span> <span class="s2">&quot;s2&quot;</span><span class="p">}:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Removing duplicate cells ... &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="n">cells</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cells</span><span class="p">))</span>  <span class="c1"># Remove duplicate cells</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="n">elapsed_time</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elapsed_time</span><span class="si">}</span><span class="s2"> seconds.&quot;</span><span class="p">)</span>
+
+        <span class="n">cell_counts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span>  <span class="c1"># Total unique cell count</span>
+
+        <span class="c1"># Compact the cells if needed</span>
+        <span class="k">if</span> <span class="n">compact</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Compacting cells ... &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="n">cells</span> <span class="o">=</span> <span class="n">compact_cells</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="n">cell_type</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="n">elapsed_time</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elapsed_time</span><span class="si">}</span><span class="s2"> seconds.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cells</span><span class="p">,</span> <span class="n">cell_counts</span></div>
 
 
 
-<div class="viewcode-block" id="cell_to_geom">
-<a class="viewcode-back" href="../../geospatial.html#geospatial.gindex.cell_to_geom">[docs]</a>
-<span class="k">def</span> <span class="nf">cell_to_geom</span><span class="p">(</span><span class="n">cells</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">cell_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<div class="viewcode-block" id="cell_poly">
+<a class="viewcode-back" href="../../geospatial.html#geospatial.gindex.cell_poly">[docs]</a>
+<span class="k">def</span> <span class="nf">cell_poly</span><span class="p">(</span><span class="n">cells</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">cell_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts a list of spatial cells to their corresponding geometries and resolution levels.</span>
 
@@ -392,6 +350,25 @@
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
 <span class="sd">        If `cell_type` is not one of &quot;geohash&quot;, &quot;h3&quot;, or &quot;s2&quot;.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from shapely.geometry import Polygon</span>
+<span class="sd">    &gt;&gt;&gt; cells = [&quot;ezs42&quot;, &quot;ezs43&quot;]  # Geohash cells</span>
+<span class="sd">    &gt;&gt;&gt; cell_type = &quot;geohash&quot;</span>
+<span class="sd">    &gt;&gt;&gt; res, geoms = cell_poly(cells, cell_type)</span>
+<span class="sd">    &gt;&gt;&gt; print(res)</span>
+<span class="sd">    [5, 5]  # Resolution levels of the input cells</span>
+<span class="sd">    &gt;&gt;&gt; print(geoms)</span>
+<span class="sd">    [&lt;shapely.geometry.polygon.Polygon object at 0x...&gt;, &lt;shapely.geometry.polygon.Polygon object at 0x...&gt;]</span>
+<span class="sd">    # Polygon geometries representing the spatial boundaries of the cells</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The function supports three spatial indexing systems:</span>
+<span class="sd">    - Geohash: Uses rectangular bounding boxes to represent cells.</span>
+<span class="sd">    - H3: Uses hexagonal grid cells.</span>
+<span class="sd">    - S2: Uses spherical grid cells.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check for valid cell_type</span>
     <span class="k">if</span> <span class="n">cell_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;geohash&quot;</span><span class="p">,</span> <span class="s2">&quot;h3&quot;</span><span class="p">,</span> <span class="s2">&quot;s2&quot;</span><span class="p">}:</span>
@@ -589,7 +566,7 @@
 <span class="sd">    The function utilizes the H3 library for generating and compacting H3 cells and for calculating cell area. The area</span>
 <span class="sd">    is always returned in square kilometers (&quot;km^2&quot;).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">cells</span> <span class="o">=</span> <span class="n">poly_to_cell</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="s2">&quot;h3&quot;</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="n">h3_res</span><span class="p">)</span>
+    <span class="n">cells</span> <span class="o">=</span> <span class="n">poly_cell</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="s2">&quot;h3&quot;</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="n">h3_res</span><span class="p">)</span>
     <span class="n">area</span> <span class="o">=</span> <span class="n">h3</span><span class="o">.</span><span class="n">hex_area</span><span class="p">(</span><span class="n">h3_res</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;km^2&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">compact</span><span class="p">:</span>
         <span class="n">cells</span> <span class="o">=</span> <span class="n">h3</span><span class="o">.</span><span class="n">compact</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span>
