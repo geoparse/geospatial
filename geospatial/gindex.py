@@ -88,8 +88,9 @@ def poly_cell(
 
     if dump:
         # Create the directories if they don't exist
-        os.makedirs(os.path.dirname(f"{dump}/{cell_type}/{res}"), exist_ok=True)
-        with open(os.path.expanduser(f"{dump}/{cell_type}/{res}/{datetime.now()}.txt"), "w") as json_file:
+        cells_path = os.path.expanduser(f"{dump}/{cell_type}/{res}")
+        os.makedirs(cells_path, exist_ok=True)
+        with open(cells_path, "w") as json_file:
             json.dump(cells, json_file)
         return None
     else:
