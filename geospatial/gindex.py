@@ -1,5 +1,6 @@
 import collections
 import json
+import os
 from datetime import datetime
 from math import sqrt
 from multiprocessing import Pool, cpu_count
@@ -86,7 +87,7 @@ def poly_cell(
         raise ValueError(f"Unsupported cell type: {cell_type}. Choose 'geohash', 's2', or 'h3'.")
 
     if dump:
-        with open(f"~/Desktop/{cell_type}/{datetime.now()}.txt", "w") as json_file:
+        with open(os.path.expanduser(f"~/Desktop/{cell_type}/{datetime.now()}.txt"), "w") as json_file:
             json.dump(cells, json_file)
         return None
     else:
@@ -94,7 +95,7 @@ def poly_cell(
 
 
 def ppoly_cell(
-    mdf: gpd.GeoDataFrame, cell_type: str, res: int, compact: bool = False, verbose: bool = False
+    mdf: gpd.GeoDataFrame, cell_type: str, res: int, compact: bool = False, dump: bool = False, verbose: bool = False
 ) -> Tuple[List[str], int]:
     """
     Performs a parallelised conversion of geometries in a GeoDataFrame to cell identifiers of a specified type
@@ -195,91 +196,48 @@ def ppoly_cell(
     # Shuffle geometries for even load distribution across chunks
     gmdf = gmdf.sample(frac=1)
     geom_chunks = np.array_split(list(gmdf.geometry), 4 * n_cores)
-    inputs = zip(geom_chunks, [cell_type] * 4 * n_cores, [res] * 4 * n_cores)
-
-    # Parallel processing to generate cells
-    with Pool(n_cores) as pool:
-        cells = pool.starmap(poly_cell, inputs)
-    cells = [item for sublist in cells for item in sublist]  # Flatten the list of cells
-
-    if verbose:
-        elapsed_time = round(time() - start_time)
-        print(f"{elapsed_time} seconds.")
-
-    # Remove duplicates based on cell type
-    if cell_type in {"geohash", "s2"}:
-        if verbose:
-            print("Removing duplicate cells ... ", end="")
-            start_time = time()
-        cells = list(set(cells))  # Remove duplicate cells
-        if verbose:
-            elapsed_time = round(time() - start_time)
-            print(f"{elapsed_time} seconds.")
-
-    cell_counts = len(cells)  # Total unique cell count
-
-    # Compact the cells if needed
-    if compact:
-        if verbose:
-            print("Compacting cells ... ", end="")
-            start_time = time()
-        cells = compact_cells(cells, cell_type)
-        if verbose:
-            elapsed_time = round(time() - start_time)
-            print(f"{elapsed_time} seconds.")
-
-    return cells, cell_counts
-
-
-def poly_cell_parallel_2(mdf, cell_type, res, compact=False, verbose=False, dump=True):
-    if verbose:
-        print(datetime.now())
-        print("Slicing the bbox of mdf ... ", end="")
-        start_time = time()
-    n_cores = cpu_count()
-    slices = 128 * n_cores
-
-    minlon, minlat, maxlon, maxlat = mdf.total_bounds
-    dlon = maxlon - minlon
-    dlat = maxlat - minlat
-    ratio = dlon / dlat
-
-    x_cells = round(sqrt(slices) * ratio)
-    y_cells = round(sqrt(slices) / ratio)
-
-    steplon = dlon / x_cells
-    steplat = dlat / y_cells
-
-    grid_polygons = []
-    for lat in np.arange(minlat, maxlat, steplat):  # Iterate over the rows and columns to create the grid
-        for lon in np.arange(minlon, maxlon, steplon):  # Calculate the coordinates of the current grid cell
-            llon, llat, ulon, ulat = (lon, lat, lon + steplon, lat + steplat)  # lower lat, upper lat
-            polygon = Polygon([(llon, llat), (ulon, llat), (ulon, ulat), (llon, ulat)])
-            grid_polygons.append(polygon)  # Add the polygon to the list
-    gmdf = gpd.GeoDataFrame(geometry=grid_polygons, crs=mdf.crs)  # Create a GeoDataFrame for the grid polygons
-
-    if verbose:
-        elapsed_time = round(time() - start_time)
-        print(f"{elapsed_time} seconds.   {slices} slices")
-        start_time = time()
-        print("Performing the intersection between the gridded bbox and mdf ... ", end="")
-    gmdf = gpd.overlay(mdf, gmdf, how="intersection")  # grid mdf
-
-    if verbose:
-        elapsed_time = round(time() - start_time)
-        print(f"{elapsed_time} seconds.   {len(gmdf)} slices")
-        start_time = time()
-        print("Calculating the cells for all geometries of the gridded mdf in parallel ... ", end="")
-    gmdf = gmdf.sample(
-        frac=1
-    )  # Shuffle the rows of gmdf to have a good balance of small (incomplete squares) and big (full squares) in all chunks
-    geom_chunks = np.array_split(list(gmdf.geometry), 4 * n_cores)
     inputs = zip(geom_chunks, [cell_type] * 4 * n_cores, [res] * 4 * n_cores, [dump] * 4 * n_cores)
 
-    # Create a multiprocessing pool and apply the overlay function in parallel on each chunk
-    with Pool(n_cores) as pool:
-        pool.starmap(poly_cell, inputs)
-    return
+    # Parallel processing to generate cells
+    if dump:
+        with Pool(n_cores) as pool:
+            pool.starmap(poly_cell, inputs)
+        if verbose:
+            elapsed_time = round(time() - start_time)
+            print(f"{elapsed_time} seconds.")
+        return
+    else:
+        with Pool(n_cores) as pool:
+            cells = pool.starmap(poly_cell, inputs)
+        cells = [item for sublist in cells for item in sublist]  # Flatten the list of cells
+
+        if verbose:
+            elapsed_time = round(time() - start_time)
+            print(f"{elapsed_time} seconds.")
+
+        # Remove duplicates based on cell type
+        if cell_type in {"geohash", "s2"}:
+            if verbose:
+                print("Removing duplicate cells ... ", end="")
+                start_time = time()
+            cells = list(set(cells))  # Remove duplicate cells
+            if verbose:
+                elapsed_time = round(time() - start_time)
+                print(f"{elapsed_time} seconds.")
+
+        cell_counts = len(cells)  # Total unique cell count
+
+        # Compact the cells if needed
+        if compact:
+            if verbose:
+                print("Compacting cells ... ", end="")
+                start_time = time()
+            cells = compact_cells(cells, cell_type)
+            if verbose:
+                elapsed_time = round(time() - start_time)
+                print(f"{elapsed_time} seconds.")
+
+        return cells, cell_counts
 
 
 def cell_poly(cells: list, cell_type: str) -> tuple:
