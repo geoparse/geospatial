@@ -240,57 +240,6 @@ def ppoly_cell(
         return cells, cell_counts
 
 
-def poly_cell_parallel_2(mdf, cell_type, res, compact=False, verbose=False, dump=True):
-    if verbose:
-        print(datetime.now())
-        print("Slicing the bbox of mdf ... ", end="")
-        start_time = time()
-    n_cores = cpu_count()
-    slices = 128 * n_cores
-
-    minlon, minlat, maxlon, maxlat = mdf.total_bounds
-    dlon = maxlon - minlon
-    dlat = maxlat - minlat
-    ratio = dlon / dlat
-
-    x_cells = round(sqrt(slices) * ratio)
-    y_cells = round(sqrt(slices) / ratio)
-
-    steplon = dlon / x_cells
-    steplat = dlat / y_cells
-
-    grid_polygons = []
-    for lat in np.arange(minlat, maxlat, steplat):  # Iterate over the rows and columns to create the grid
-        for lon in np.arange(minlon, maxlon, steplon):  # Calculate the coordinates of the current grid cell
-            llon, llat, ulon, ulat = (lon, lat, lon + steplon, lat + steplat)  # lower lat, upper lat
-            polygon = Polygon([(llon, llat), (ulon, llat), (ulon, ulat), (llon, ulat)])
-            grid_polygons.append(polygon)  # Add the polygon to the list
-    gmdf = gpd.GeoDataFrame(geometry=grid_polygons, crs=mdf.crs)  # Create a GeoDataFrame for the grid polygons
-
-    if verbose:
-        elapsed_time = round(time() - start_time)
-        print(f"{elapsed_time} seconds.   {slices} slices")
-        start_time = time()
-        print("Performing the intersection between the gridded bbox and mdf ... ", end="")
-    gmdf = gpd.overlay(mdf, gmdf, how="intersection")  # grid mdf
-
-    if verbose:
-        elapsed_time = round(time() - start_time)
-        print(f"{elapsed_time} seconds.   {len(gmdf)} slices")
-        start_time = time()
-        print("Calculating the cells for all geometries of the gridded mdf in parallel ... ", end="")
-    gmdf = gmdf.sample(
-        frac=1
-    )  # Shuffle the rows of gmdf to have a good balance of small (incomplete squares) and big (full squares) in all chunks
-    geom_chunks = np.array_split(list(gmdf.geometry), 4 * n_cores)
-    inputs = zip(geom_chunks, [cell_type] * 4 * n_cores, [res] * 4 * n_cores, [dump] * 4 * n_cores)
-
-    # Create a multiprocessing pool and apply the overlay function in parallel on each chunk
-    with Pool(n_cores) as pool:
-        pool.starmap(poly_cell, inputs)
-    return
-
-
 def cell_poly(cells: list, cell_type: str) -> tuple:
     """
     Converts a list of spatial cells to their corresponding geometries and resolution levels.
