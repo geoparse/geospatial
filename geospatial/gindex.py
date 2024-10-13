@@ -319,7 +319,7 @@ def cell_poly(cells: list, cell_type: str) -> tuple:
     >>> from shapely.geometry import Polygon
     >>> cells = ['ezs42', 'ezs43']  # Geohash cells
     >>> cell_type = 'geohash'
-    >>> res, geoms = cell_to_geom(cells, cell_type)
+    >>> res, geoms = cell_poly(cells, cell_type)
     >>> print(res)
     [5, 5]  # Resolution levels of the input cells
     >>> print(geoms)
