@@ -109,7 +109,8 @@ def ppolycell(
     This function first divides the bounding box of the input GeoDataFrame into smaller grid cells, then calculates
     the intersection between these grid cells and the input geometries. The resulting geometries are processed in
     parallel to generate cell identifiers according to the specified `cell_type` and `res` (resolution). The result
-    can be compacted to reduce the number of cells.
+    can be compacted to reduce the number of cells. Optionally, if `dump` is provided, the results are saved in multiple
+    files, where the number of files is 4 times the number of CPU cores available in the system.
 
     Parameters
     ----------
@@ -128,6 +129,12 @@ def ppolycell(
     compact : bool, optional, default=False
         If True, compact the resulting cells to reduce their number. This is typically applicable for S2 and H3 cells.
 
+    dump : str, optional
+        A string representing a valid directory path. If provided, the cells are saved in multiple files
+        within the directory `/path/to/dir/cell_type/res/`. The number of output files will be 4 times the number
+        of CPU cores available in the system. If not provided, the function returns the list of cell identifiers
+        instead of saving them to files. Default is None.
+
     verbose : bool, optional, default=False
         If True, print timing and progress information to the console.
 
@@ -142,10 +149,10 @@ def ppolycell(
     ValueError
         If an invalid `cell_type` is provided. Supported types are "geohash", "s2", and "h3".
 
-    Example
+    Example:
     -------
     >>> # Assuming `mdf` is a GeoDataFrame with geometries:
-    >>> cells, count = ppolycell(mdf, cell_type="s2", res=10, compact=True, verbose=True)
+    >>> cells, count = ppolycell(mdf, cell_type="s2", res=10, compact=True, dump="~/Desktop/cells", verbose=True)
     >>> print(f"Generated {count} cells: {cells}")
     """
     if verbose:
