@@ -16,10 +16,10 @@ from shapely.geometry import MultiPolygon, Polygon
 from shapely.geometry.base import BaseGeometry
 
 # s2.polyfill() function covers the hole in a polygon too (which is not correct).
-# ppoly_cell() function splits a polygon to smaller polygons without holes
+# ppolycell() function splits a polygon to smaller polygons without holes
 
 
-def poly_cell(geoms: List[Union[Polygon, MultiPolygon]], cell_type: str, res: int, dump: str = None) -> Union[List[str], None]:
+def polycell(geoms: List[Union[Polygon, MultiPolygon]], cell_type: str, res: int, dump: str = None) -> Union[List[str], None]:
     """
     Converts a list of geometries into a set of unique spatial cells based on the specified cell type and resolution.
 
@@ -55,7 +55,7 @@ def poly_cell(geoms: List[Union[Polygon, MultiPolygon]], cell_type: str, res: in
     >>> from shapely.geometry import Polygon, MultiPolygon
     >>> geometries = [Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), MultiPolygon([...])]
     >>> # Convert geometries to H3 cells at resolution 9
-    >>> h3_cells = poly_cell(geometries, cell_type="h3", res=9)
+    >>> h3_cells = polycell(geometries, cell_type="h3", res=9)
     """
     polys = []
     for geom in geoms:
@@ -95,7 +95,7 @@ def poly_cell(geoms: List[Union[Polygon, MultiPolygon]], cell_type: str, res: in
         return None
 
 
-def ppoly_cell(
+def ppolycell(
     mdf: gpd.GeoDataFrame, cell_type: str, res: int, compact: bool = False, dump: str = None, verbose: bool = False
 ) -> Tuple[List[str], int]:
     """
@@ -141,7 +141,7 @@ def ppoly_cell(
     Example
     -------
     >>> # Assuming `mdf` is a GeoDataFrame with geometries:
-    >>> cells, count = ppoly_cell(mdf, cell_type="s2", res=10, compact=True, verbose=True)
+    >>> cells, count = ppolycell(mdf, cell_type="s2", res=10, compact=True, verbose=True)
     >>> print(f"Generated {count} cells: {cells}")
     """
     if verbose:
@@ -202,14 +202,14 @@ def ppoly_cell(
     # Parallel processing to generate cells
     if dump:
         with Pool(n_cores) as pool:
-            pool.starmap(poly_cell, inputs)
+            pool.starmap(polycell, inputs)
         if verbose:
             elapsed_time = round(time() - start_time)
             print(f"{elapsed_time} seconds.")
         return
     else:
         with Pool(n_cores) as pool:
-            cells = pool.starmap(poly_cell, inputs)
+            cells = pool.starmap(polycell, inputs)
         cells = [item for sublist in cells for item in sublist]  # Flatten the list of cells
 
         if verbose:
@@ -241,7 +241,7 @@ def ppoly_cell(
         return cells, cell_counts
 
 
-def cell_poly(cells: list, cell_type: str) -> tuple:
+def cellpoly(cells: list, cell_type: str) -> tuple:
     """
     Converts a list of spatial cells to their corresponding geometries and resolution levels.
 
@@ -280,7 +280,7 @@ def cell_poly(cells: list, cell_type: str) -> tuple:
     >>> from shapely.geometry import Polygon
     >>> cells = ["ezs42", "ezs43"]  # Geohash cells
     >>> cell_type = "geohash"
-    >>> res, geoms = cell_poly(cells, cell_type)
+    >>> res, geoms = cellpoly(cells, cell_type)
     >>> print(res)
     [5, 5]  # Resolution levels of the input cells
     >>> print(geoms)
@@ -481,7 +481,7 @@ def h3_stats(geom: BaseGeometry, h3_res: int, compact: bool = False) -> Tuple[in
     The function utilizes the H3 library for generating and compacting H3 cells and for calculating cell area. The area
     is always returned in square kilometers ("km^2").
     """
-    cells = poly_cell(geom, cell="h3", res=h3_res)
+    cells = polycell(geom, cell="h3", res=h3_res)
     area = h3.hex_area(h3_res, unit="km^2")
     if compact:
         cells = h3.compact(cells)

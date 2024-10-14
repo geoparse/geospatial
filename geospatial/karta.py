@@ -619,7 +619,7 @@ def plp(  # plp: points, lines, polygons
 
     # Handle `cells` input by converting cell IDs to geometries
     if cells:
-        res, geoms = gindex.cell_poly(cells, cell_type=cell_type)
+        res, geoms = gindex.cellpoly(cells, cell_type=cell_type)
         gdf = gpd.GeoDataFrame({"id": cells, "res": res, "geometry": geoms}, crs="EPSG:4326")
         karta = plp(gdf, polygon_popup={"ID": "id", "Resolution": "res"})
         return karta
@@ -855,8 +855,8 @@ def plp(  # plp: points, lines, polygons
             cdf = gpd.GeoDataFrame({"geometry": [bb]}, crs="EPSG:4326")  # Create a bounding box GeoDataFrame
 
         # Convert geometries to geohash cells and their geometries
-        cells, _ = gindex.ppoly_cell(cdf, cell_type="geohash", res=geohash_res, compact=compact)
-        res, geoms = gindex.cell_poly(cells, cell_type="geohash")
+        cells, _ = gindex.ppolycell(cdf, cell_type="geohash", res=geohash_res, compact=compact)
+        res, geoms = gindex.cellpoly(cells, cell_type="geohash")
         cdf = gpd.GeoDataFrame({"id": cells, "res": res, "geometry": geoms}, crs="EPSG:4326")
 
         # Add geohash cells to the map as a polygon layer
@@ -881,8 +881,8 @@ def plp(  # plp: points, lines, polygons
             cdf = gpd.GeoDataFrame({"geometry": [bb]}, crs="EPSG:4326")  # cell df
 
         # Convert geometries to S2 cells and their geometries
-        cells, _ = gindex.ppoly_cell(cdf, cell_type="s2", res=s2_res, compact=compact)
-        res, geoms = gindex.cell_poly(cells, cell_type="s2")
+        cells, _ = gindex.ppolycell(cdf, cell_type="s2", res=s2_res, compact=compact)
+        res, geoms = gindex.cellpoly(cells, cell_type="s2")
         cdf = gpd.GeoDataFrame({"id": cells, "res": res, "geometry": geoms}, crs="EPSG:4326")
 
         # Add S2 cells to the map as a polygon layer
@@ -907,8 +907,8 @@ def plp(  # plp: points, lines, polygons
             cdf = gpd.GeoDataFrame({"geometry": [bb]}, crs="EPSG:4326")  # cell df
 
         # Convert geometries to H3 cells and their geometries
-        cells, _ = gindex.ppoly_cell(cdf, cell_type="h3", res=h3_res, compact=compact)
-        res, geoms = gindex.cell_poly(cells, cell_type="h3")
+        cells, _ = gindex.ppolycell(cdf, cell_type="h3", res=h3_res, compact=compact)
+        res, geoms = gindex.cellpoly(cells, cell_type="h3")
         cdf = gpd.GeoDataFrame({"id": cells, "res": res, "geometry": geoms}, crs="EPSG:4326")
 
         # Add H3 cells to the map as a polygon layer
