@@ -25,7 +25,7 @@ def polycell(geoms: List[Union[Polygon, MultiPolygon]], cell_type: str, res: int
 
     This function takes a list of Shapely geometries (e.g., Polygon, MultiPolygon) and converts them into spatial cells
     using one of the supported cell systems: Geohash, S2, or H3. The resulting cells are returned as a list of unique
-    cell IDs. If `dump` is set to True, the cells are saved to a file instead of being returned.
+    cell IDs. If `dump` is set to a valid directory path, the cells are saved to a file in that directory, instead of being returned.
 
     Parameters
     ----------
@@ -35,15 +35,16 @@ def polycell(geoms: List[Union[Polygon, MultiPolygon]], cell_type: str, res: int
         The type of spatial cell system to use. Supported values are "geohash", "s2", or "h3".
     res : int
         The resolution level for the spatial cells. The resolution parameter determines the granularity of the cells.
-    dump : bool, optional
-        If True, the cells are saved to a file on the desktop in a folder named after `cell_type`.
-        If False, the function returns a list of cell IDs. Default is False.
+    dump : str, optional
+        If set to a valid directory path (string), the cells are saved to a file in the specified folder.
+        The file will be saved in a subdirectory structure following the pattern: `/path/to/dir/cell_type/res/`.
+        If `dump` is None, the function returns the list of cell IDs. Default is None.
 
     Returns
     -------
     list of str or None
-        If `dump` is False, a list of unique cell IDs is returned.
-        If `dump` is True, None is returned after saving the cells to a file.
+        If `dump` is None, a list of unique cell IDs is returned.
+        If `dump` is provided, None is returned after saving the cells to a file.
 
     Raises
     ------
@@ -56,6 +57,9 @@ def polycell(geoms: List[Union[Polygon, MultiPolygon]], cell_type: str, res: int
     >>> geometries = [Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), MultiPolygon([...])]
     >>> # Convert geometries to H3 cells at resolution 9
     >>> h3_cells = polycell(geometries, cell_type="h3", res=9)
+
+    >>> # Convert geometries to S2 cells and save to a directory
+    >>> polycell(geometries, cell_type="s2", res=10, dump="~/Desktop/spatial_cells")
     """
     polys = []
     for geom in geoms:
@@ -105,7 +109,8 @@ def ppolycell(
     This function first divides the bounding box of the input GeoDataFrame into smaller grid cells, then calculates
     the intersection between these grid cells and the input geometries. The resulting geometries are processed in
     parallel to generate cell identifiers according to the specified `cell_type` and `res` (resolution). The result
-    can be compacted to reduce the number of cells.
+    can be compacted to reduce the number of cells. Optionally, if `dump` is provided, the results are saved in multiple
+    files, where the number of files is 4 times the number of CPU cores available in the system.
 
     Parameters
     ----------
@@ -124,6 +129,12 @@ def ppolycell(
     compact : bool, optional, default=False
         If True, compact the resulting cells to reduce their number. This is typically applicable for S2 and H3 cells.
 
+    dump : str, optional
+        A string representing a valid directory path. If provided, the cells are saved in multiple files
+        within the directory `/path/to/dir/cell_type/res/`. The number of output files will be 4 times the number
+        of CPU cores available in the system. If not provided, the function returns the list of cell identifiers
+        instead of saving them to files. Default is None.
+
     verbose : bool, optional, default=False
         If True, print timing and progress information to the console.
 
@@ -141,7 +152,7 @@ def ppolycell(
     Example
     -------
     >>> # Assuming `mdf` is a GeoDataFrame with geometries:
-    >>> cells, count = ppolycell(mdf, cell_type="s2", res=10, compact=True, verbose=True)
+    >>> cells, count = ppolycell(mdf, cell_type="s2", res=10, compact=True, dump="~/Desktop/cells", verbose=True)
     >>> print(f"Generated {count} cells: {cells}")
     """
     if verbose:

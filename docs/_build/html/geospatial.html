@@ -45,11 +45,11 @@
 <li><a class="reference internal" href="#">geospatial package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-geospatial.gindex">geospatial.gindex module</a><ul>
-<li><a class="reference internal" href="#geospatial.gindex.cell_poly"><code class="docutils literal notranslate"><span class="pre">cell_poly()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.gindex.cellpoly"><code class="docutils literal notranslate"><span class="pre">cellpoly()</span></code></a></li>
 <li><a class="reference internal" href="#geospatial.gindex.compact_cells"><code class="docutils literal notranslate"><span class="pre">compact_cells()</span></code></a></li>
 <li><a class="reference internal" href="#geospatial.gindex.h3_stats"><code class="docutils literal notranslate"><span class="pre">h3_stats()</span></code></a></li>
-<li><a class="reference internal" href="#geospatial.gindex.poly_cell"><code class="docutils literal notranslate"><span class="pre">poly_cell()</span></code></a></li>
-<li><a class="reference internal" href="#geospatial.gindex.ppoly_cell"><code class="docutils literal notranslate"><span class="pre">ppoly_cell()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.gindex.polycell"><code class="docutils literal notranslate"><span class="pre">polycell()</span></code></a></li>
+<li><a class="reference internal" href="#geospatial.gindex.ppolycell"><code class="docutils literal notranslate"><span class="pre">ppolycell()</span></code></a></li>
 <li><a class="reference internal" href="#geospatial.gindex.uncompact_s2"><code class="docutils literal notranslate"><span class="pre">uncompact_s2()</span></code></a></li>
 </ul>
 </li>
@@ -124,8 +124,8 @@
 <section id="module-geospatial.gindex">
 <span id="geospatial-gindex-module"></span><h2>geospatial.gindex module<a class="headerlink" href="#module-geospatial.gindex" title="Link to this heading"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="geospatial.gindex.cell_poly">
-<span class="sig-prename descclassname"><span class="pre">geospatial.gindex.</span></span><span class="sig-name descname"><span class="pre">cell_poly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cells</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="_modules/geospatial/gindex.html#cell_poly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.gindex.cell_poly" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="geospatial.gindex.cellpoly">
+<span class="sig-prename descclassname"><span class="pre">geospatial.gindex.</span></span><span class="sig-name descname"><span class="pre">cellpoly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cells</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="_modules/geospatial/gindex.html#cellpoly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.gindex.cellpoly" title="Link to this definition"></a></dt>
 <dd><p>Converts a list of spatial cells to their corresponding geometries and resolution levels.</p>
 <p>The function takes a list of spatial cells (e.g., Geohash, H3, or S2) and converts each cell
 into a geometry object (Polygon) based on the specified cell type. It also calculates the resolution
@@ -167,7 +167,7 @@ in a specific grid system (e.g., Geohash, H3, or S2).</p></li>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cells</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ezs42&quot;</span><span class="p">,</span> <span class="s2">&quot;ezs43&quot;</span><span class="p">]</span>  <span class="c1"># Geohash cells</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cell_type</span> <span class="o">=</span> <span class="s2">&quot;geohash&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">,</span> <span class="n">geoms</span> <span class="o">=</span> <span class="n">cell_poly</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="n">cell_type</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">,</span> <span class="n">geoms</span> <span class="o">=</span> <span class="n">cellpoly</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="n">cell_type</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
 <span class="go">[5, 5]  # Resolution levels of the input cells</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">geoms</span><span class="p">)</span>
@@ -257,25 +257,26 @@ is always returned in square kilometers (“km^2”).</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="geospatial.gindex.poly_cell">
-<span class="sig-prename descclassname"><span class="pre">geospatial.gindex.</span></span><span class="sig-name descname"><span class="pre">poly_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Polygon</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">MultiPolygon</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/geospatial/gindex.html#poly_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.gindex.poly_cell" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="geospatial.gindex.polycell">
+<span class="sig-prename descclassname"><span class="pre">geospatial.gindex.</span></span><span class="sig-name descname"><span class="pre">polycell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Polygon</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">MultiPolygon</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/geospatial/gindex.html#polycell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.gindex.polycell" title="Link to this definition"></a></dt>
 <dd><p>Converts a list of geometries into a set of unique spatial cells based on the specified cell type and resolution.</p>
 <p>This function takes a list of Shapely geometries (e.g., Polygon, MultiPolygon) and converts them into spatial cells
 using one of the supported cell systems: Geohash, S2, or H3. The resulting cells are returned as a list of unique
-cell IDs. If <cite>dump</cite> is set to True, the cells are saved to a file instead of being returned.</p>
+cell IDs. If <cite>dump</cite> is set to a valid directory path, the cells are saved to a file in that directory, instead of being returned.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>geoms</strong> (<em>list</em><em> of </em><em>shapely.geometry.Polygon</em><em> or </em><em>shapely.geometry.MultiPolygon</em>) – A list of Shapely geometry objects (Polygon or MultiPolygon).</p></li>
 <li><p><strong>cell_type</strong> (<em>str</em>) – The type of spatial cell system to use. Supported values are “geohash”, “s2”, or “h3”.</p></li>
 <li><p><strong>res</strong> (<em>int</em>) – The resolution level for the spatial cells. The resolution parameter determines the granularity of the cells.</p></li>
-<li><p><strong>dump</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the cells are saved to a file on the desktop in a folder named after <cite>cell_type</cite>.
-If False, the function returns a list of cell IDs. Default is False.</p></li>
+<li><p><strong>dump</strong> (<em>str</em><em>, </em><em>optional</em>) – If set to a valid directory path (string), the cells are saved to a file in the specified folder.
+The file will be saved in a subdirectory structure following the pattern: <cite>/path/to/dir/cell_type/res/</cite>.
+If <cite>dump</cite> is None, the function returns the list of cell IDs. Default is None.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>If <cite>dump</cite> is False, a list of unique cell IDs is returned.
-If <cite>dump</cite> is True, None is returned after saving the cells to a file.</p>
+<dd class="field-even"><p>If <cite>dump</cite> is None, a list of unique cell IDs is returned.
+If <cite>dump</cite> is provided, None is returned after saving the cells to a file.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list of str or None</p>
@@ -288,20 +289,25 @@ If <cite>dump</cite> is True, None is returned after saving the cells to a file.
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">MultiPolygon</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">geometries</span> <span class="o">=</span> <span class="p">[</span><span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span> <span class="n">MultiPolygon</span><span class="p">([</span><span class="o">...</span><span class="p">])]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Convert geometries to H3 cells at resolution 9</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">h3_cells</span> <span class="o">=</span> <span class="n">poly_cell</span><span class="p">(</span><span class="n">geometries</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="s2">&quot;h3&quot;</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h3_cells</span> <span class="o">=</span> <span class="n">polycell</span><span class="p">(</span><span class="n">geometries</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="s2">&quot;h3&quot;</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Convert geometries to S2 cells and save to a directory</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">polycell</span><span class="p">(</span><span class="n">geometries</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="s2">&quot;s2&quot;</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">dump</span><span class="o">=</span><span class="s2">&quot;~/Desktop/spatial_cells&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="geospatial.gindex.ppoly_cell">
-<span class="sig-prename descclassname"><span class="pre">geospatial.gindex.</span></span><span class="sig-name descname"><span class="pre">ppoly_cell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compact</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geospatial/gindex.html#ppoly_cell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.gindex.ppoly_cell" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="geospatial.gindex.ppolycell">
+<span class="sig-prename descclassname"><span class="pre">geospatial.gindex.</span></span><span class="sig-name descname"><span class="pre">ppolycell</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compact</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geospatial/gindex.html#ppolycell"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geospatial.gindex.ppolycell" title="Link to this definition"></a></dt>
 <dd><p>Performs a parallelised conversion of geometries in a GeoDataFrame to cell identifiers of a specified type
 (e.g., Geohash, S2, or H3), optionally compacting the result to reduce the number of cells.</p>
 <p>This function first divides the bounding box of the input GeoDataFrame into smaller grid cells, then calculates
 the intersection between these grid cells and the input geometries. The resulting geometries are processed in
 parallel to generate cell identifiers according to the specified <cite>cell_type</cite> and <cite>res</cite> (resolution). The result
-can be compacted to reduce the number of cells.</p>
+can be compacted to reduce the number of cells. Optionally, if <cite>dump</cite> is provided, the results are saved in multiple
+files, where the number of files is 4 times the number of CPU cores available in the system.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -312,6 +318,10 @@ can be compacted to reduce the number of cells.</p>
 - “h3”: Converts geometries to H3 cell tokens.</p></li>
 <li><p><strong>res</strong> (<em>int</em>) – The resolution or precision level of the cell identifiers. Higher values indicate finer precision.</p></li>
 <li><p><strong>compact</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default=False</em>) – If True, compact the resulting cells to reduce their number. This is typically applicable for S2 and H3 cells.</p></li>
+<li><p><strong>dump</strong> (<em>str</em><em>, </em><em>optional</em>) – A string representing a valid directory path. If provided, the cells are saved in multiple files
+within the directory <cite>/path/to/dir/cell_type/res/</cite>. The number of output files will be 4 times the number
+of CPU cores available in the system. If not provided, the function returns the list of cell identifiers
+instead of saving them to files. Default is None.</p></li>
 <li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default=False</em>) – If True, print timing and progress information to the console.</p></li>
 </ul>
 </dd>
@@ -326,15 +336,16 @@ can be compacted to reduce the number of cells.</p>
 <dd class="field-odd"><p>Tuple[List[str], int]</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If an invalid <cite>cell_type</cite> is provided. Supported types are “geohash”, “s2”, and “h3”.</p>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If an invalid <cite>cell_type</cite> is provided. Supported types are “geohash”, “s2”, and “h3”.</p></li>
+<li><p><strong>Example:</strong> – </p></li>
+<li><p><strong>-------</strong> – </p></li>
+<li><p><strong>&gt;&gt;&gt; # Assuming mdf is a GeoDataFrame with geometries:</strong> – </p></li>
+<li><p><strong>&gt;&gt;&gt; cells</strong><strong>, </strong><strong>count = ppolycell</strong><strong>(</strong><strong>mdf</strong><strong>, </strong><strong>cell_type=&quot;s2&quot;</strong><strong>, </strong><strong>res=10</strong><strong>, </strong><strong>compact=True</strong><strong>, </strong><strong>dump=&quot;~/Desktop/cells&quot;</strong><strong>, </strong><strong>verbose=True</strong><strong>)</strong> – </p></li>
+<li><p><strong>&gt;&gt;&gt; print</strong><strong>(</strong><strong>f&quot;Generated {count} cells</strong> – {cells}”):</p></li>
+</ul>
 </dd>
 </dl>
-<p class="rubric">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Assuming `mdf` is a GeoDataFrame with geometries:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cells</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">ppoly_cell</span><span class="p">(</span><span class="n">mdf</span><span class="p">,</span> <span class="n">cell_type</span><span class="o">=</span><span class="s2">&quot;s2&quot;</span><span class="p">,</span> <span class="n">res</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">compact</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2"> cells: </span><span class="si">{</span><span class="n">cells</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py function">
