@@ -149,7 +149,7 @@ def ppolycell(
     ValueError
         If an invalid `cell_type` is provided. Supported types are "geohash", "s2", and "h3".
 
-    Example:
+    Example
     -------
     >>> # Assuming `mdf` is a GeoDataFrame with geometries:
     >>> cells, count = ppolycell(mdf, cell_type="s2", res=10, compact=True, dump="~/Desktop/cells", verbose=True)
