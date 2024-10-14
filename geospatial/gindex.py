@@ -25,7 +25,7 @@ def polycell(geoms: List[Union[Polygon, MultiPolygon]], cell_type: str, res: int
 
     This function takes a list of Shapely geometries (e.g., Polygon, MultiPolygon) and converts them into spatial cells
     using one of the supported cell systems: Geohash, S2, or H3. The resulting cells are returned as a list of unique
-    cell IDs. If `dump` is set to True, the cells are saved to a file instead of being returned.
+    cell IDs. If `dump` is set to a valid directory path, the cells are saved to a file in that directory, instead of being returned.
 
     Parameters
     ----------
@@ -35,15 +35,16 @@ def polycell(geoms: List[Union[Polygon, MultiPolygon]], cell_type: str, res: int
         The type of spatial cell system to use. Supported values are "geohash", "s2", or "h3".
     res : int
         The resolution level for the spatial cells. The resolution parameter determines the granularity of the cells.
-    dump : bool, optional
-        If True, the cells are saved to a file on the desktop in a folder named after `cell_type`.
-        If False, the function returns a list of cell IDs. Default is False.
+    dump : str, optional
+        If set to a valid directory path (string), the cells are saved to a file in the specified folder.
+        The file will be saved in a subdirectory structure following the pattern: `/path/to/dir/cell_type/res/`.
+        If `dump` is None, the function returns the list of cell IDs. Default is None.
 
     Returns
     -------
     list of str or None
-        If `dump` is False, a list of unique cell IDs is returned.
-        If `dump` is True, None is returned after saving the cells to a file.
+        If `dump` is None, a list of unique cell IDs is returned.
+        If `dump` is provided, None is returned after saving the cells to a file.
 
     Raises
     ------
@@ -56,6 +57,9 @@ def polycell(geoms: List[Union[Polygon, MultiPolygon]], cell_type: str, res: int
     >>> geometries = [Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]), MultiPolygon([...])]
     >>> # Convert geometries to H3 cells at resolution 9
     >>> h3_cells = polycell(geometries, cell_type="h3", res=9)
+
+    >>> # Convert geometries to S2 cells and save to a directory
+    >>> polycell(geometries, cell_type="s2", res=10, dump="~/Desktop/spatial_cells")
     """
     polys = []
     for geom in geoms:
