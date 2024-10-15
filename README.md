@@ -10,29 +10,27 @@ GeoParse is a Python library designed for geospatial data analysis and visualiza
 
 
 ### Key Features
-
-    Efficient geospatial indexing using grid-based systems (Geohash, H3, S2)
-    Geometry manipulations and conversions between formats
-    Utilities for working with OpenStreetMap (OSM) data
-    Data visualization using Folium maps
+---
+* Efficient geospatial indexing using grid-based systems (Geohash, H3, S2)
+* Geometry manipulations and conversions between formats
+* Utilities for working with OpenStreetMap (OSM) data
+* Data visualization using Folium maps
 
 Visit the official GeoParse homepage for more details.
 
 ### Quick Start
-
+---
 You can run Geoparse examples directly in your browser—no installation required! 
 Use the following links to access interactive Jupyter Notebooks hosted on MyBinder:
 
-    Latest Stable Version: Binder
-    Development Version (Cutting-Edge): Binder Dev
+Latest Stable Version: Binder
 
 ### Documentation
-
-    For a quick introduction, we recommend starting with the tutorial notebooks available on the Geoparse homepage.
-    The official API documentation is hosted on ReadTheDocs: Geoparse API Docs.
+---
+For a quick introduction, we recommend starting with the tutorial notebooks available on the Geoparse homepage. The official API documentation is hosted on ReadTheDocs: Geoparse API Docs.
 
 ### Installation
-
+---
 To install Geoparse locally:
 
 `pip install git+https://github.com/geoparse/geospatial.git`
