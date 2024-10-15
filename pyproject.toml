@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "geospatial"
+name = "geoparse"
 version = "0.2.0"
 description = "A collection of Python functions for performing geospatial analysis and creating visualisations. "
 authors = ["Abbas Kiasari <kiasari@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/geoparse/geospatial/"
+repository = "https://github.com/geoparse/geoparse/"
 keywords = [
     "Geospatial",
     "GIS",
