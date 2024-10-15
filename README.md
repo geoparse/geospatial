@@ -1,12 +1,49 @@
-# Geospatial Tools
+# GeoParse
 
 [![License](https://img.shields.io/github/license/geoparse/geospatial)](https://github.com/geoparse/geospatial/blob/main/LICENSE)
 [![Python](https://img.shields.io/badge/python-3.x-blue.svg)](https://www.python.org/)
 [![Contributors](https://img.shields.io/github/contributors/geoparse/geospatial)](https://github.com/geoparse/geospatial/graphs/contributors)
 
-A collection of Python functions for performing geospatial analysis and creating visualisations.
 
-A Python library for geospatial data processing, map matching, and OSM-based geometry handling. This library provides efficient geospatial indexing, geometry manipulations, and various utilities to work with OpenStreetMap data.
+GeoParse is a Python library designed for geospatial data analysis and visualization. It builds on top of popular libraries like GeoPandas and Folium, providing a powerful toolkit for working with geospatial data. GeoParse focuses on efficient geospatial indexing, geometry manipulations, and utilities to handle OpenStreetMap data with ease.
+
+
+
+### Key Features
+
+    Efficient geospatial indexing using grid-based systems (Geohash, H3, S2)
+    Geometry manipulations and conversions between formats
+    Utilities for working with OpenStreetMap (OSM) data
+    Data visualization using Folium maps
+
+Visit the official GeoParse homepage for more details.
+
+### Quick Start
+
+You can run Geoparse examples directly in your browser—no installation required! 
+Use the following links to access interactive Jupyter Notebooks hosted on MyBinder:
+
+    Latest Stable Version: Binder
+    Development Version (Cutting-Edge): Binder Dev
+
+### Documentation
+
+    For a quick introduction, we recommend starting with the tutorial notebooks available on the Geoparse homepage.
+    The official API documentation is hosted on ReadTheDocs: Geoparse API Docs.
+
+### Installation
+
+To install Geoparse locally:
+
+`pip install git+https://github.com/geoparse/geospatial.git`
+
+Feel free to explore the tutorial notebooks and dive into the official documentation to get started with GeoParse!
+
+
+
+
+
+
 
 ## Features
 
@@ -29,15 +66,26 @@ A Python library for geospatial data processing, map matching, and OSM-based geo
 
 ## Installation
 
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/geoparse/geospatial.git
 
 # gutils.py - Geospatial Utility Functions
 
 gutils.py is a collection of geospatial utility functions designed to simplify common geospatial data processing tasks. These functions provide capabilities for geometry statistics, coordinate transformations, spatial intersections, geocoding, and more.
 
+
+
+
+# GIndex: Spatial Cell Indexing for Geospatial Data
+
+GIndex is a Python library for efficiently converting and manipulating geospatial geometries into spatial cell systems like Geohash, S2, and H3. The library provides utilities for parallelized processing, compacting/uncompacting cells, and performing intersection-based slicing to improve performance on large geospatial datasets.
+Features
+
+    Spatial cell conversion: Convert geospatial polygons into Geohash, S2, or H3 cells at custom resolution levels.
+    Parallelized processing: Utilize multiple CPU cores to handle large GeoDataFrames in parallel.
+    Cell compaction: Reduce the number of spatial cells by merging adjacent cells into parent cells, based on supported hierarchies (S2, H3).
+    Save to disk: Optionally save generated spatial cells to disk for long-term storage and retrieval.
+
+
+    
 
 
 # gindex.py - Geospatial Indexing Tools
