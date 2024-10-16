@@ -29,11 +29,30 @@ Latest Stable Version: Binder
 ---
 For a quick introduction, we recommend starting with the tutorial notebooks available on the Geoparse homepage. The official API documentation is hosted on ReadTheDocs: Geoparse API Docs.
 
-### Installation
----
-To install Geoparse locally:
+
+
+# Dependencies used by **scikit-eo**
+
+All dependencies used by ```geoparse``` are as follows:
+
+```numpy```, ```pandas```, ```geopandas```, ```matplotlib```. By installing ```geoparse``` all these packages will be installed!.
+
+# Installation
+
+There are two options to install Geoparse locally.
+
+## 1. From PyPI
+
+**geoparse** is available on [PyPI](https://pypi.org/project/geo-parse/), so to install it, run this command in your terminal:
+
+`pip install geo-parse`
+
+## 2. Installing from source
+
+It is also possible to install the latest development version directly from the GitHub repository with:
 
 `pip install git+https://github.com/geoparse/geospatial.git`
+
 
 Feel free to explore the tutorial notebooks and dive into the official documentation to get started with GeoParse!
 
