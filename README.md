@@ -1,8 +1,10 @@
 # GeoParse
 
+[![Google Colab](https://colab.research.google.com/assets/colab-badge.svg)]()
 [![License](https://img.shields.io/github/license/geoparse/geospatial)](https://github.com/geoparse/geospatial/blob/main/LICENSE)
-[![Python](https://img.shields.io/badge/python-3.x-blue.svg)](https://www.python.org/)
+[![PythonVersion]( https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org/)
 [![Contributors](https://img.shields.io/github/contributors/geoparse/geospatial)](https://github.com/geoparse/geospatial/graphs/contributors)
+
 
 
 GeoParse is a Python library designed for geospatial data analysis and visualization. It builds on top of popular libraries like GeoPandas and Folium, providing a powerful toolkit for working with geospatial data. GeoParse focuses on efficient geospatial indexing, geometry manipulations, and utilities to handle OpenStreetMap data with ease.
@@ -31,7 +33,7 @@ For a quick introduction, we recommend starting with the tutorial notebooks avai
 
 
 
-# Dependencies used by **scikit-eo**
+# Dependencies used by **geoparse**
 
 All dependencies used by ```geoparse``` are as follows:
 
