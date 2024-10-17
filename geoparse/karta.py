@@ -471,7 +471,7 @@ def plp(  # plp: points, lines, polygons
     cells: Optional[List[str]] = None,
     cell_type: Optional[str] = None,  # list of geohash, S2 or H3 cell IDs
     ways: Optional[List[int]] = None,  # list of OSM way IDs (lines or polygons) and Overpass API URL to query from
-    url: Optional[str] = None,  # OpenStreetMap server URL
+    url: Optional[str] = "https://overpass-api.de/api/interpreter",  # OpenStreetMap server URL
 ) -> folium.Map:
     """
     Creates a Folium map with points, lines, or polygons based on the input geospatial data.
