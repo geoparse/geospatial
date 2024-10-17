@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 import pandas as pd
 import requests
@@ -51,7 +51,7 @@ def way_to_geom(way_id: int, url: str = "https://overpass-api.de/api/interpreter
         return LineString(coords)
 
 
-def ways_to_geom(ids, url):
+def ways_to_geom(ids: List[int], url: str = "https://overpass-api.de/api/interpreter") -> List[LineString or Polygon]:
     """
     Converts an array of OpenStreetMap (OSM) way IDs into Shapely geometries.
 
