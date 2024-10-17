@@ -7,7 +7,7 @@ import pandas as pd
 from folium import plugins
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 
-from geospatial import gindex, gutils, osm
+from geoparse import gindex, gutils, osm
 
 
 def color_map(col: int or str, head: int = None, tail: int = None) -> str:
